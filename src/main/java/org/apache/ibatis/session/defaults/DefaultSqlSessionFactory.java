@@ -36,7 +36,7 @@ import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
-  private final Configuration configuration;
+  private final Configuration configuration; // 我们的配置相关信息
 
   public DefaultSqlSessionFactory(Configuration configuration) {
     this.configuration = configuration;
@@ -44,7 +44,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
   @Override
   public SqlSession openSession() {
-    return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
+    return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false); // 这里会创建我们的执行器，然后最后用于获得我们的Transaction得到链接
   }
 
   @Override
@@ -96,10 +96,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     Transaction tx = null;
     try {
       final Environment environment = configuration.getEnvironment();
-      final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
-      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment); // TransactionFactory事务的工厂，用来创建Transaction,而Transaction接口封装针对jdbc的基本操作
+      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit); // 根据数据源得到我们的Transaction，这个类中封装了针对数据源的操作 ，事务的自动提交标志会被设置到tx中
       final Executor executor = configuration.newExecutor(tx, execType);
-      return createSqlSession(configuration, executor, autoCommit);
+      return createSqlSession(configuration, executor, autoCommit); // 执行器中存在tx, 创建我们的sqlSession
     } catch (Exception e) {
       closeTransaction(tx); // may have fetched a connection so lets call close()
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);

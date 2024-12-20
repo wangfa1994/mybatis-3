@@ -28,7 +28,7 @@ import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/**
+/** 配置文件的最基本建造者
  * @author Clinton Begin
  */
 public abstract class BaseBuilder {
@@ -37,9 +37,9 @@ public abstract class BaseBuilder {
   protected final TypeHandlerRegistry typeHandlerRegistry;
 
   public BaseBuilder(Configuration configuration) {
-    this.configuration = configuration;
-    this.typeAliasRegistry = this.configuration.getTypeAliasRegistry();
-    this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry();
+    this.configuration = configuration; //全局配置信息
+    this.typeAliasRegistry = this.configuration.getTypeAliasRegistry(); //类型的别名注册器
+    this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry(); //类型解析注册器
   }
 
   public Configuration getConfiguration() {

@@ -97,7 +97,7 @@ import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/**
+/** mybatis的配置文件会被封装成 此类 Configuration
  * @author Clinton Begin
  */
 public class Configuration {
@@ -111,7 +111,7 @@ public class Configuration {
   protected boolean multipleResultSetsEnabled = true;
   protected boolean useGeneratedKeys;
   protected boolean useColumnLabel = true;
-  protected boolean cacheEnabled = true;
+  protected boolean cacheEnabled = true; // 二级缓存配置属性
   protected boolean callSettersOnNulls;
   protected boolean useActualParamName = true;
   protected boolean returnInstanceForEmptyRow;
@@ -123,7 +123,7 @@ public class Configuration {
   protected Class<? extends Log> logImpl;
   protected Class<? extends VFS> vfsImpl;
   protected Class<?> defaultSqlProviderType;
-  protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
+  protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION; // 一级缓存本地默认为session级别的，如果我们修改了为Statement级别的，我们则会进行清空缓存
   protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
   protected Set<String> lazyLoadTriggerMethods = new HashSet<>(
       Arrays.asList("equals", "clone", "hashCode", "toString"));
@@ -134,13 +134,13 @@ public class Configuration {
   protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
   protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
 
-  protected Properties variables = new Properties();
+  protected Properties variables = new Properties(); // 配置文件的properties标签内容存放的变量
   protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
   protected ObjectFactory objectFactory = new DefaultObjectFactory();
   protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
 
   protected boolean lazyLoadingEnabled;
-  protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
+  protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL 代理工厂，这个代理工厂在哪里使用了呢？ 这个好像没用
 
   protected String databaseId;
   /**
@@ -150,17 +150,17 @@ public class Configuration {
    */
   protected Class<?> configurationFactory;
 
-  protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
+  protected final MapperRegistry mapperRegistry = new MapperRegistry(this); //mapperRegistry注册器， 里面封装了我们对应的MapperProxyFactory
   protected final InterceptorChain interceptorChain = new InterceptorChain();
-  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
-  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
-  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
-
+  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this); // 类型解析器
+  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，初始化的时候进行了内部别名的定义
+  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); //sql的语言驱动器，用来解析我们的sql
+  // mappedStatements 用来存放我们的命名空间+id 唯一的值，使用
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>(
       "Mapped Statements collection")
           .conflictMessageProducer((savedValue, targetValue) -> ". please check " + savedValue.getResource() + " and "
               + targetValue.getResource());
-  protected final Map<String, Cache> caches = new StrictMap<>("Caches collection");
+  protected final Map<String, Cache> caches = new StrictMap<>("Caches collection"); // 如果开启了二级缓存，各个mapper下的缓存策略
   protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection");
   protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection");
   protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection");
@@ -725,7 +725,7 @@ public class Configuration {
     return newExecutor(transaction, defaultExecutorType);
   }
 
-  public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
+  public Executor newExecutor(Transaction transaction, ExecutorType executorType) { // 创建我们的执行器，最后用于执行我们的sql相关
     executorType = executorType == null ? defaultExecutorType : executorType;
     Executor executor;
     if (ExecutorType.BATCH == executorType) {
@@ -736,9 +736,9 @@ public class Configuration {
       executor = new SimpleExecutor(this, transaction);
     }
     if (cacheEnabled) {
-      executor = new CachingExecutor(executor);
+      executor = new CachingExecutor(executor);// 如果开启了二级缓存，再进行装饰一下，先用CachingExecutor缓存处理，再用包装的executor处理
     }
-    return (Executor) interceptorChain.pluginAll(executor);
+    return (Executor) interceptorChain.pluginAll(executor); // 链结构处理，需要确定是责任链吗
   }
 
   public void addKeyGenerator(String id, KeyGenerator keyGenerator) {
@@ -824,7 +824,7 @@ public class Configuration {
   }
 
   public void addMappedStatement(MappedStatement ms) {
-    mappedStatements.put(ms.getId(), ms);
+    mappedStatements.put(ms.getId(), ms); //存放命名空间和解析出来的mappedStatement
   }
 
   public Collection<String> getMappedStatementNames() {
@@ -913,7 +913,7 @@ public class Configuration {
     if (validateIncompleteStatements) {
       buildAllStatements();
     }
-    return mappedStatements.get(id);
+    return mappedStatements.get(id); // 从我们的mappedStatements中得到我们的mappedStatement
   }
 
   public Map<String, XNode> getSqlFragments() {
@@ -1126,7 +1126,7 @@ public class Configuration {
       this.name = name;
     }
 
-    /**
+    /**  指定一个函数，用于在包含具有相同键的值时产生冲突错误消息。
      * Assign a function for producing a conflict error message when contains value with the same key.
      * <p>
      * function arguments are 1st is saved value and 2nd is target value.
@@ -1135,7 +1135,7 @@ public class Configuration {
      *          A function for producing a conflict error message
      *
      * @return a conflict error message
-     *
+     * 指定一个函数，用于在包含具有相同键的值时产生冲突错误消息。
      * @since 3.5.0
      */
     public StrictMap<V> conflictMessageProducer(BiFunction<V, V, String> conflictMessageProducer) {

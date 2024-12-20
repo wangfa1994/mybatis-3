@@ -125,7 +125,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       Integer size, boolean readWrite, boolean blocking, Properties props) {
     Cache cache = new CacheBuilder(currentNamespace).implementation(valueOrDefault(typeClass, PerpetualCache.class))
         .addDecorator(valueOrDefault(evictionClass, LruCache.class)).clearInterval(flushInterval).size(size)
-        .readWrite(readWrite).blocking(blocking).properties(props).build();
+        .readWrite(readWrite).blocking(blocking).properties(props).build(); // 将我们的底层cache开始进行包装
     configuration.addCache(cache);
     currentCache = cache;
     return cache;
@@ -205,8 +205,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       throw new IncompleteElementException("Cache-ref not yet resolved");
     }
 
-    id = applyCurrentNamespace(id, false);
-
+    id = applyCurrentNamespace(id, false); // 在创建添加我们的mappedStatement的时候才真正得到我们的命名空间
+    //使用builder模式来创建我们的mappedStatement对象
     MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
         .resource(resource).fetchSize(fetchSize).timeout(timeout).statementType(statementType)
         .keyGenerator(keyGenerator).keyProperty(keyProperty).keyColumn(keyColumn).databaseId(databaseId).lang(lang)
@@ -220,7 +220,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     MappedStatement statement = statementBuilder.build();
-    configuration.addMappedStatement(statement);
+    configuration.addMappedStatement(statement); // 将解析出来的mappedStatement 存放到配置文件中去
     return statement;
   }
 

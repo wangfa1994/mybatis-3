@@ -33,19 +33,19 @@ import org.apache.ibatis.session.Configuration;
  */
 public final class MappedStatement {
 
-  private String resource;
-  private Configuration configuration;
-  private String id;
+  private String resource; //mapped所属那个资源的路径
+  private Configuration configuration; // 整体的配置文件
+  private String id;  // 解析出来的命名空间
   private Integer fetchSize;
   private Integer timeout;
   private StatementType statementType;
   private ResultSetType resultSetType;
-  private SqlSource sqlSource;
-  private Cache cache;
-  private ParameterMap parameterMap;
+  private SqlSource sqlSource; // sql片段语句
+  private Cache cache; //二级缓存策略 这个是装饰者模式处理
+  private ParameterMap parameterMap; //
   private List<ResultMap> resultMaps;
   private boolean flushCacheRequired;
-  private boolean useCache;
+  private boolean useCache; //二级缓存默认是开启的
   private boolean resultOrdered;
   private SqlCommandType sqlCommandType;
   private KeyGenerator keyGenerator;
@@ -317,13 +317,13 @@ public final class MappedStatement {
   }
 
   public BoundSql getBoundSql(Object parameterObject) {
-    BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    BoundSql boundSql = sqlSource.getBoundSql(parameterObject); // 将我们mapper中的的sql片段进行处理
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings == null || parameterMappings.isEmpty()) {
       boundSql = new BoundSql(configuration, boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);
     }
 
-    // check for nested result maps in parameter mappings (issue #30)
+    // check for nested result maps in parameter mappings (issue #30) 检查参数映射中的嵌套结果映射
     for (ParameterMapping pm : boundSql.getParameterMappings()) {
       String rmId = pm.getResultMapId();
       if (rmId != null) {

@@ -116,9 +116,9 @@ public class XMLMapperBuilder extends BaseBuilder {
       }
       builderAssistant.setCurrentNamespace(namespace);
       cacheRefElement(context.evalNode("cache-ref"));
-      cacheElement(context.evalNode("cache"));
-      parameterMapElement(context.evalNodes("/mapper/parameterMap"));
-      resultMapElements(context.evalNodes("/mapper/resultMap"));
+      cacheElement(context.evalNode("cache")); // 处理我们的二级缓存，利用了装饰者模式，如果既配置了cache-ref 又配置了cache 会怎样呢？
+      parameterMapElement(context.evalNodes("/mapper/parameterMap")); //解析通用的parameterMap
+      resultMapElements(context.evalNodes("/mapper/resultMap")); // 解析
       sqlElement(context.evalNodes("/mapper/sql"));
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
@@ -130,7 +130,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     if (configuration.getDatabaseId() != null) {
       buildStatementFromContext(list, configuration.getDatabaseId());
     }
-    buildStatementFromContext(list, null);
+    buildStatementFromContext(list, null); // 解析我们的增删改查语句
   }
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
@@ -138,7 +138,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context,
           requiredDatabaseId);
       try {
-        statementParser.parseStatementNode();
+        statementParser.parseStatementNode(); // 委派给 XMLStatementBuilder 开始解析我们的增删改查
       } catch (IncompleteElementException e) {
         configuration.addIncompleteStatement(statementParser);
       }
@@ -161,7 +161,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void cacheElement(XNode context) {
     if (context != null) {
       String type = context.getStringAttribute("type", "PERPETUAL");
-      Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
+      Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type); // 默认的缓存策略类型为 PERPETUAL  PerpetualCache这个是最基础的，里面的map存放的才是二级缓存存放的真正数据
       String eviction = context.getStringAttribute("eviction", "LRU");
       Class<? extends Cache> evictionClass = typeAliasRegistry.resolveAlias(eviction);
       Long flushInterval = context.getLongAttribute("flushInterval");
@@ -169,7 +169,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       boolean readWrite = !context.getBooleanAttribute("readOnly", false);
       boolean blocking = context.getBooleanAttribute("blocking", false);
       Properties props = context.getChildrenAsProperties();
-      builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
+      builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props); // 使用助手创建新的cache
     }
   }
 

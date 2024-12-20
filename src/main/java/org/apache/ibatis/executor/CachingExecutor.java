@@ -38,8 +38,8 @@ import org.apache.ibatis.transaction.Transaction;
  */
 public class CachingExecutor implements Executor {
 
-  private final Executor delegate;
-  private final TransactionalCacheManager tcm = new TransactionalCacheManager();
+  private final Executor delegate; // 装饰SimpleExecutor 代理？
+  private final TransactionalCacheManager tcm = new TransactionalCacheManager(); // 二级缓存进行的缓存管理，存储，获取等操作
 
   public CachingExecutor(Executor delegate) {
     this.delegate = delegate;
@@ -85,24 +85,24 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler)
       throws SQLException {
-    BoundSql boundSql = ms.getBoundSql(parameterObject);
-    CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
+    BoundSql boundSql = ms.getBoundSql(parameterObject); // 这里会根据不同的SqlSource进行处理，$的sqlSource会被处理成完整的sql
+    CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql); //创建我们的缓存key，传进去四个，实际上多运用了一个环境。rowBounds表示分页数据
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler,
       CacheKey key, BoundSql boundSql) throws SQLException {
-    Cache cache = ms.getCache();
-    if (cache != null) {
+    Cache cache = ms.getCache(); // MapperedStatement中的缓存策略是否存在，这个是二级缓存的mapper级别的 ，如果我们配置了对应的二级缓存配置，这里则会获取对应的值，策略存在的情况下，才会进行二级缓存逻辑
+    if (cache != null) {// 二级缓存逻辑
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, boundSql);
         @SuppressWarnings("unchecked")
-        List<E> list = (List<E>) tcm.getObject(cache, key);
+        List<E> list = (List<E>) tcm.getObject(cache, key); // 一级缓存二级缓存共用同一个缓存，但是会走到不同的分支中
         if (list == null) {
-          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
-          tcm.putObject(cache, key, list); // issue #578 and #116
+          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql); // 二级缓存下，一级缓存也不会失效，查询之后会进行存储的
+          tcm.putObject(cache, key, list); // issue #578 and #116 将我们的二级缓存进行存放
         }
         return list;
       }
@@ -117,8 +117,8 @@ public class CachingExecutor implements Executor {
 
   @Override
   public void commit(boolean required) throws SQLException {
-    delegate.commit(required);
-    tcm.commit();
+    delegate.commit(required); //这个会清空一级缓存
+    tcm.commit(); // 这里会添加二级缓存
   }
 
   @Override

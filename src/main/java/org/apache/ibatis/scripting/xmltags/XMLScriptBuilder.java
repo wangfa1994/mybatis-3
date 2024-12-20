@@ -63,12 +63,12 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   public SqlSource parseScriptNode() {
-    MixedSqlNode rootSqlNode = parseDynamicTags(context);
+    MixedSqlNode rootSqlNode = parseDynamicTags(context); // 解析我们的动态sql， context是我们的sql语句 <select parameterType="java.lang.Integer" id="findById" resultType="User">select * from user where id = #{id}</select>
     SqlSource sqlSource;
     if (isDynamic) {
-      sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
+      sqlSource = new DynamicSqlSource(configuration, rootSqlNode); // $占位符会被解析成动态sql源
     } else {
-      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType);
+      sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType); //#占位符会被解析成原始sql源
     }
     return sqlSource;
   }

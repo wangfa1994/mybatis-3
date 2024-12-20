@@ -27,8 +27,8 @@ import org.apache.ibatis.session.Configuration;
  */
 public class StaticSqlSource implements SqlSource {
 
-  private final String sql;
-  private final List<ParameterMapping> parameterMappings;
+  private final String sql; // 移除占位符的sql语句，sql可以直接执行的预编译语句
+  private final List<ParameterMapping> parameterMappings; // 参数列表
   private final Configuration configuration;
 
   public StaticSqlSource(Configuration configuration, String sql) {

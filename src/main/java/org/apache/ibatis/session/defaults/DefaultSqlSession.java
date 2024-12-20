@@ -46,8 +46,8 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class DefaultSqlSession implements SqlSession {
 
-  private final Configuration configuration;
-  private final Executor executor;
+  private final Configuration configuration; //整体的配置文件
+  private final Executor executor; // 方法执行器接口规范,里面放置了一个Transaction接口，这个接口里面包装了数据库操作
 
   private final boolean autoCommit;
   private boolean dirty;
@@ -149,9 +149,9 @@ public class DefaultSqlSession implements SqlSession {
 
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
     try {
-      MappedStatement ms = configuration.getMappedStatement(statement);
+      MappedStatement ms = configuration.getMappedStatement(statement); // 从我们的mapper中得到我们的mappedStatement
       dirty |= ms.isDirtySelect();
-      return executor.query(ms, wrapCollection(parameter), rowBounds, handler);
+      return executor.query(ms, wrapCollection(parameter), rowBounds, handler);//委派给我们的Executor进行执行
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
     } finally {

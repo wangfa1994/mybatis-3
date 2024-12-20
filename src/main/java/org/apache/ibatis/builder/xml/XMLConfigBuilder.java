@@ -56,7 +56,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   private boolean parsed;
   private final XPathParser parser;
   private String environment;
-  private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
+  private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory(); //默认的反射工厂
 
   public XMLConfigBuilder(Reader reader) {
     this(reader, null, null);
@@ -114,8 +114,8 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
-      propertiesElement(root.evalNode("properties"));
-      Properties settings = settingsAsProperties(root.evalNode("settings"));
+      propertiesElement(root.evalNode("properties")); // 先解析properties标签属性，并且放置到configuration类的变量中 XMLConfigBuilder包含了这个配置类configuration，在BaseBuilder父类中
+      Properties settings = settingsAsProperties(root.evalNode("settings")); // settings标签的解析 主要是处理 logImpl标签和vfsImpl标签
       loadCustomVfsImpl(settings);
       loadCustomLogImpl(settings);
       typeAliasesElement(root.evalNode("typeAliases"));
@@ -128,7 +128,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       typeHandlersElement(root.evalNode("typeHandlers"));
-      mappersElement(root.evalNode("mappers"));
+      mappersElement(root.evalNode("mappers")); //真正的解析我们的Mapper配置文件
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
     }
@@ -171,13 +171,13 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   private void typeAliasesElement(XNode context) {
-    if (context == null) {
+    if (context == null) { // <typeAliases> <package name="com.wf.pojo"/>< /typeAliases>
       return;
     }
     for (XNode child : context.getChildren()) {
-      if ("package".equals(child.getName())) {
+      if ("package".equals(child.getName())) { // 如果是包的话，使用类型注册器进行注册别名
         String typeAliasPackage = child.getStringAttribute("name");
-        configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
+        configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage); // 使用configuration中的别名注册器进行注册我们的别名，
       } else {
         String alias = child.getStringAttribute("alias");
         String type = child.getStringAttribute("type");
@@ -235,22 +235,22 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   private void propertiesElement(XNode context) throws Exception {
-    if (context == null) {
+    if (context == null) { // <properties resource="demo/jdbc.properties" />
       return;
     }
     Properties defaults = context.getChildrenAsProperties();
     String resource = context.getStringAttribute("resource");
     String url = context.getStringAttribute("url");
-    if (resource != null && url != null) {
+    if (resource != null && url != null) { //properties标签中的resource属性 和 url属性只能存在一个
       throw new BuilderException(
           "The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
     }
     if (resource != null) {
-      defaults.putAll(Resources.getResourceAsProperties(resource));
+      defaults.putAll(Resources.getResourceAsProperties(resource)); // 从资源中解析我们的配置文件
     } else if (url != null) {
-      defaults.putAll(Resources.getUrlAsProperties(url));
+      defaults.putAll(Resources.getUrlAsProperties(url)); // 从url中解析我们的配置文件
     }
-    Properties vars = configuration.getVariables();
+    Properties vars = configuration.getVariables(); // 获取到已经存在的属性值，进行添加，整体处理
     if (vars != null) {
       defaults.putAll(vars);
     }
@@ -263,8 +263,8 @@ public class XMLConfigBuilder extends BaseBuilder {
         .setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
     configuration.setAutoMappingUnknownColumnBehavior(
         AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
-    configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true));
-    configuration.setProxyFactory((ProxyFactory) createInstance(props.getProperty("proxyFactory")));
+    configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true)); // 二级缓存的属性配置，一级缓存sqlSession级别的
+    configuration.setProxyFactory((ProxyFactory) createInstance(props.getProperty("proxyFactory"))); // 设置代理工厂？
     configuration.setLazyLoadingEnabled(booleanValueOf(props.getProperty("lazyLoadingEnabled"), false));
     configuration.setAggressiveLazyLoading(booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
     configuration.setMultipleResultSetsEnabled(booleanValueOf(props.getProperty("multipleResultSetsEnabled"), true));

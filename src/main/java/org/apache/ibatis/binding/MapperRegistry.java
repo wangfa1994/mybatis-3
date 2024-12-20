@@ -34,7 +34,7 @@ import org.apache.ibatis.session.SqlSession;
 public class MapperRegistry {
 
   private final Configuration config;
-  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new ConcurrentHashMap<>();
+  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new ConcurrentHashMap<>(); // 存放了我们的接口类 和 对应的 代理工厂
 
   public MapperRegistry(Configuration config) {
     this.config = config;

@@ -32,17 +32,17 @@ import org.apache.ibatis.transaction.TransactionException;
  * getConnection() is called. Ignores commit or rollback requests when autocommit is on.
  *
  * @author Clinton Begin
- *
+ * Transaction的接口定义了数据库连接。处理连接生命周期，包括：连接的创建、准备、提交回滚和关闭等方法，而我们的 JdbcTransaction 实现了Transaction，表示对数据库连接的一个包装
  * @see JdbcTransactionFactory
  */
 public class JdbcTransaction implements Transaction {
 
   private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
-  protected Connection connection;
-  protected DataSource dataSource;
-  protected TransactionIsolationLevel level;
-  protected boolean autoCommit;
+  protected Connection connection; // 连接器，在原始中，通过Manager.getConnection()获得到我们的链接
+  protected DataSource dataSource; // 从我们的dataSource数据源中进行得到Connection
+  protected TransactionIsolationLevel level; // 事务隔离级别
+  protected boolean autoCommit; // 是否是自定提交
   protected boolean skipSetAutoCommitOnClose;
 
   public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
@@ -142,7 +142,7 @@ public class JdbcTransaction implements Transaction {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
-    connection = dataSource.getConnection();
+    connection = dataSource.getConnection(); // 从数据源中得到我们的链接，然后可以使用链接进行sql交互
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());
     }

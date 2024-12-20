@@ -72,7 +72,7 @@ public final class TypeHandlerRegistry {
 
   /**
    * The constructor that pass the MyBatis configuration.
-   *
+   * 传递MyBatis配置的构造函数。
    * @param configuration
    *          a MyBatis configuration
    *

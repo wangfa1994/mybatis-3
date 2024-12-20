@@ -49,7 +49,7 @@ public class XPathParser {
   private final Document document;
   private boolean validation;
   private EntityResolver entityResolver;
-  private Properties variables;
+  private Properties variables; // 配置文件解析出来的properties标签值
   private XPath xpath;
 
   public XPathParser(String xml) {

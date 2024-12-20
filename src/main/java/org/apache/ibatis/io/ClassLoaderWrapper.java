@@ -136,7 +136,7 @@ public class ClassLoaderWrapper {
 
         // try to find the resource as passed
         InputStream returnValue = cl.getResourceAsStream(resource);
-
+        // 现在，一些类加载器想要这个 / 开头，所以我们将添加它，如果我们没有找到资源再试一次
         // now, some class loaders want this leading "/", so we'll add it and try again if we didn't find the resource
         if (null == returnValue) {
           returnValue = cl.getResourceAsStream("/" + resource);

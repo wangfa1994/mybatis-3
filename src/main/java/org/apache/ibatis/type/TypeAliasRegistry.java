@@ -37,7 +37,7 @@ import org.apache.ibatis.io.Resources;
  */
 public class TypeAliasRegistry {
 
-  private final Map<String, Class<?>> typeAliases = new HashMap<>();
+  private final Map<String, Class<?>> typeAliases = new HashMap<>(); // 用来存放我们的类型别名
 
   public TypeAliasRegistry() {
     registerAlias("string", String.class);
@@ -134,7 +134,7 @@ public class TypeAliasRegistry {
   }
 
   public void registerAliases(String packageName, Class<?> superType) {
-    ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
+    ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>(); //创建工具类，使用工具类进行解析包下的所有class
     resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
     Set<Class<? extends Class<?>>> typeSet = resolverUtil.getClasses();
     for (Class<?> type : typeSet) {
@@ -146,8 +146,8 @@ public class TypeAliasRegistry {
     }
   }
 
-  public void registerAlias(Class<?> type) {
-    String alias = type.getSimpleName();
+  public void registerAlias(Class<?> type) { //注册别名， 传递的是匹配的类
+    String alias = type.getSimpleName();// 得到简单的类名称 User
     Alias aliasAnnotation = type.getAnnotation(Alias.class);
     if (aliasAnnotation != null) {
       alias = aliasAnnotation.value();
@@ -160,12 +160,12 @@ public class TypeAliasRegistry {
       throw new TypeException("The parameter alias cannot be null");
     }
     // issue #748
-    String key = alias.toLowerCase(Locale.ENGLISH);
+    String key = alias.toLowerCase(Locale.ENGLISH); //转换成小写字母
     if (typeAliases.containsKey(key) && typeAliases.get(key) != null && !typeAliases.get(key).equals(value)) {
       throw new TypeException(
           "The alias '" + alias + "' is already mapped to the value '" + typeAliases.get(key).getName() + "'.");
     }
-    typeAliases.put(key, value);
+    typeAliases.put(key, value); // 将我们的类别名进行和class类进行绑定，存档到typeAliases中，这个TypeAliasRegistry在 BaseBuilder中进行定义
   }
 
   public void registerAlias(String alias, String value) {

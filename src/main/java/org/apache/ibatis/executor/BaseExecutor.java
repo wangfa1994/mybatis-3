@@ -51,11 +51,11 @@ public abstract class BaseExecutor implements Executor {
 
   private static final Log log = LogFactory.getLog(BaseExecutor.class);
 
-  protected Transaction transaction;
+  protected Transaction transaction; // 执行器中封装了我们的
   protected Executor wrapper;
 
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
-  protected PerpetualCache localCache;
+  protected PerpetualCache localCache; //SQL级别的缓存？ 一级缓存存放的地方，存放在BaseExecutor中的数据
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
 
@@ -113,7 +113,7 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
-    clearLocalCache();
+    clearLocalCache(); // 更新的时候，会先进行本地缓存的清空
     return doUpdate(ms, parameter);
   }
 
@@ -151,8 +151,8 @@ public abstract class BaseExecutor implements Executor {
     List<E> list;
     try {
       queryStack++;
-      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
-      if (list != null) {
+      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null; // localCache本地缓存，这个是一级缓存，
+      if (list != null) { // list不为空，表示从一级缓存中获取到了数据，然后会进行缓存输出的处理
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
@@ -166,7 +166,7 @@ public abstract class BaseExecutor implements Executor {
       }
       // issue #601
       deferredLoads.clear();
-      if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
+      if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) { // 如果我们的缓存为 STATEMENT级别的，则需要进行清空缓存，这个配置是在
         // issue #482
         clearLocalCache();
       }
@@ -200,12 +200,12 @@ public abstract class BaseExecutor implements Executor {
       throw new ExecutorException("Executor was closed.");
     }
     CacheKey cacheKey = new CacheKey();
-    cacheKey.update(ms.getId());
-    cacheKey.update(rowBounds.getOffset());
-    cacheKey.update(rowBounds.getLimit());
-    cacheKey.update(boundSql.getSql());
-    List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-    TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
+    cacheKey.update(ms.getId()); // 命名空间id
+    cacheKey.update(rowBounds.getOffset()); // 偏移量
+    cacheKey.update(rowBounds.getLimit()); // limit数据
+    cacheKey.update(boundSql.getSql()); //sql语句
+    List<ParameterMapping> parameterMappings = boundSql.getParameterMappings(); // 得到我们的参数对象
+    TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry(); // 获得类型解析注册器
     // mimic DefaultParameterHandler logic
     MetaObject metaObject = null;
     for (ParameterMapping parameterMapping : parameterMappings) {
@@ -216,7 +216,7 @@ public abstract class BaseExecutor implements Executor {
           value = boundSql.getAdditionalParameter(propertyName);
         } else if (parameterObject == null) {
           value = null;
-        } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+        } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {// 判断参数，是不是我们的类型处理器处理
           value = parameterObject;
         } else {
           if (metaObject == null) {
@@ -244,7 +244,7 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Cannot commit, transaction is already closed");
     }
-    clearLocalCache();
+    clearLocalCache(); // 事务提交的时候会清空一级缓存
     flushStatements();
     if (required) {
       transaction.commit();
@@ -331,7 +331,7 @@ public abstract class BaseExecutor implements Executor {
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
       ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
-    localCache.putObject(key, EXECUTION_PLACEHOLDER);
+    localCache.putObject(key, EXECUTION_PLACEHOLDER); // 一级缓存，先缓存默认值，查询到结果之后，在进行替换
     try {
       list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     } finally {

@@ -26,7 +26,7 @@ import org.apache.ibatis.util.MapUtil;
  */
 public class TransactionalCacheManager {
 
-  private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
+  private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>(); // 二级缓存存放属性
 
   public void clear(Cache cache) {
     getTransactionalCache(cache).clear();

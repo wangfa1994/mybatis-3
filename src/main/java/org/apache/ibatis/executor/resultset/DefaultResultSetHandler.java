@@ -363,7 +363,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     skipRows(resultSet, rowBounds);
     while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
       ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(resultSet, resultMap, null);
-      Object rowValue = getRowValue(rsw, discriminatedResultMap, null);
+      Object rowValue = getRowValue(rsw, discriminatedResultMap, null);//从rsw中解析处理我们的返回对象
       storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
     }
   }
@@ -402,13 +402,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
-  //
+  // 从行获取简单结果映射的值
   // GET VALUE FROM ROW FOR SIMPLE RESULT MAP
   //
 
   private Object getRowValue(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix) throws SQLException {
     final ResultLoaderMap lazyLoader = new ResultLoaderMap();
-    Object rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix);
+    Object rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix); // 这里只是创建了一个对象，并没有进行我们的值赋值
     if (rowValue != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
       final MetaObject metaObject = configuration.newMetaObject(rowValue);
       boolean foundValues = this.useConstructorMappings;
@@ -589,7 +589,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
         if (value != null || configuration.isCallSettersOnNulls() && !mapping.primitive) {
           // gcode issue #377, call setter on nulls (value is not 'found')
-          metaObject.setValue(mapping.property, value);
+          metaObject.setValue(mapping.property, value); // 设置对象的属性
         }
       }
     }
@@ -656,10 +656,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     this.useConstructorMappings = false; // reset previous mapping result
     final List<Class<?>> constructorArgTypes = new ArrayList<>();
     final List<Object> constructorArgs = new ArrayList<>();
-    Object resultObject = createResultObject(rsw, resultMap, constructorArgTypes, constructorArgs, columnPrefix);
+    Object resultObject = createResultObject(rsw, resultMap, constructorArgTypes, constructorArgs, columnPrefix); // 创建我们的返回对象，这里只是创建对象，没有进行属性赋值
     if (resultObject != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
-      final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings();
-      for (ResultMapping propertyMapping : propertyMappings) {
+      final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings(); // 从我们的resultMap中得到我们的映射关系
+      for (ResultMapping propertyMapping : propertyMappings) { // 只有存在属性的时候才会进行设置走到我们的代理中
         // issue gcode #109 && issue #149
         if (propertyMapping.getNestedQueryId() != null && propertyMapping.isLazy()) {
           resultObject = configuration.getProxyFactory().createProxy(resultObject, lazyLoader, configuration,
