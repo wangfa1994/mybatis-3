@@ -70,7 +70,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     boolean useCache = context.getBooleanAttribute("useCache", isSelect); // 如果我们的sql是select语句，在没有设置的情况下会默认为开启
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
-    // Include Fragments before parsing 在解析之前包含Fragments
+    // Include Fragments before parsing 在解析之前包含Fragments，用来解析我们sql中的include标签
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
     includeParser.applyIncludes(context.getNode()); // 这个是干啥的?
 
@@ -98,7 +98,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass); //通过我们的语言驱动器来解析我们的sql片段为sqlSource，里面会处理成我们sql可执行的语句
     StatementType statementType = StatementType
         .valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString())); //如果没有设置的话，默认为预编译模式 prapared
-    Integer fetchSize = context.getIntAttribute("fetchSize");
+    Integer fetchSize = context.getIntAttribute("fetchSize"); // 解析正删改查中的标签
     Integer timeout = context.getIntAttribute("timeout");
     String parameterMap = context.getStringAttribute("parameterMap");
     String resultType = context.getStringAttribute("resultType");

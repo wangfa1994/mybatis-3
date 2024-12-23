@@ -51,7 +51,7 @@ public abstract class BaseExecutor implements Executor {
 
   private static final Log log = LogFactory.getLog(BaseExecutor.class);
 
-  protected Transaction transaction; // 执行器中封装了我们的
+  protected Transaction transaction; // 执行器中封装了我们的事务和生命周期
   protected Executor wrapper;
 
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
@@ -331,7 +331,7 @@ public abstract class BaseExecutor implements Executor {
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
       ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
-    localCache.putObject(key, EXECUTION_PLACEHOLDER); // 一级缓存，先缓存默认值，查询到结果之后，在进行替换
+    localCache.putObject(key, EXECUTION_PLACEHOLDER); // 一级缓存，先缓存默认值，查询到结果之后，在进行替换，和懒加载有关
     try {
       list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     } finally {

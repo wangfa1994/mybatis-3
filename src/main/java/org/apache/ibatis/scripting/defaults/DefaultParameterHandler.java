@@ -81,13 +81,13 @@ public class DefaultParameterHandler implements ParameterHandler {
             }
             value = metaObject.getValue(propertyName);
           }
-          TypeHandler typeHandler = parameterMapping.getTypeHandler();
+          TypeHandler typeHandler = parameterMapping.getTypeHandler(); // 获取到此参数的类型转换器，然后进行设置值
           JdbcType jdbcType = parameterMapping.getJdbcType();
           if (value == null && jdbcType == null) {
             jdbcType = configuration.getJdbcTypeForNull();
           }
           try {
-            typeHandler.setParameter(ps, i + 1, value, jdbcType);
+            typeHandler.setParameter(ps, i + 1, value, jdbcType); // 注意把我们的PreparedStatement进行传递，然后进行设置值
           } catch (TypeException | SQLException e) {
             throw new TypeException("Could not set parameters for mapping: " + parameterMapping + ". Cause: " + e, e);
           }

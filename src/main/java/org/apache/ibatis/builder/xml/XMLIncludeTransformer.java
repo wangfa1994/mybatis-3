@@ -30,7 +30,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/**
+/** 处理include标签和 占位符的
  * @author Frank D. Martinez [mnesarco]
  */
 public class XMLIncludeTransformer {

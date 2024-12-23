@@ -19,13 +19,13 @@ import javax.sql.DataSource;
 
 import org.apache.ibatis.transaction.TransactionFactory;
 
-/**
+/** 这个环境是通过内置的Builder静态类进行创建的
  * @author Clinton Begin
  */
 public final class Environment {
   private final String id;
-  private final TransactionFactory transactionFactory;
-  private final DataSource dataSource;
+  private final TransactionFactory transactionFactory; // 环境中我们创建Transaction的工厂
+  private final DataSource dataSource; // 通过DataSourceFactory创建出我们的dataSource，
 
   public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
     if (id == null) {

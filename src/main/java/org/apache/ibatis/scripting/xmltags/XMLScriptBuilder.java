@@ -34,10 +34,10 @@ import org.w3c.dom.NodeList;
  */
 public class XMLScriptBuilder extends BaseBuilder {
 
-  private final XNode context;
+  private final XNode context; //我们的整个select语句
   private boolean isDynamic;
-  private final Class<?> parameterType;
-  private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
+  private final Class<?> parameterType; // 我们的参数类型
+  private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>(); // 语句中的一些其他标签，初始化时设定
 
   public XMLScriptBuilder(Configuration configuration, XNode context) {
     this(configuration, context, null);

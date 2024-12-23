@@ -85,7 +85,7 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler)
       throws SQLException {
-    BoundSql boundSql = ms.getBoundSql(parameterObject); // 这里会根据不同的SqlSource进行处理，$的sqlSource会被处理成完整的sql
+    BoundSql boundSql = ms.getBoundSql(parameterObject); //将我们的参数传递进去，进行封装成我们的对象， 这里会根据不同的SqlSource进行处理，$的sqlSource会被处理成完整的sql
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql); //创建我们的缓存key，传进去四个，实际上多运用了一个环境。rowBounds表示分页数据
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }

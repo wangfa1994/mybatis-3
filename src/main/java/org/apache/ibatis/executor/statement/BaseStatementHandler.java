@@ -41,14 +41,14 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected final Configuration configuration;
   protected final ObjectFactory objectFactory;
   protected final TypeHandlerRegistry typeHandlerRegistry;
-  protected final ResultSetHandler resultSetHandler;
-  protected final ParameterHandler parameterHandler;
+  protected final ResultSetHandler resultSetHandler; // 进行我们的结果处理的handler
+  protected final ParameterHandler parameterHandler; // 进行我们的参数处理的handler
 
-  protected final Executor executor;
+  protected final Executor executor; // 执行器
   protected final MappedStatement mappedStatement;
-  protected final RowBounds rowBounds;
+  protected final RowBounds rowBounds; // 分页数据的
 
-  protected BoundSql boundSql;
+  protected BoundSql boundSql; // 要执行的sql对象
 
   protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject,
       RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
@@ -87,7 +87,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
-      statement = instantiateStatement(connection);
+      statement = instantiateStatement(connection); // 通过抽象类进行不通类型实现，这个返回的Statement直接是设置好了sql的，sql是怎么设置进去的呢？
       setStatementTimeout(statement, transactionTimeout);
       setFetchSize(statement);
       return statement;
@@ -99,7 +99,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
       throw new ExecutorException("Error preparing statement.  Cause: " + e, e);
     }
   }
-
+   //这个抽象方法为什么定义在了BaseStatementHandler中？
   protected abstract Statement instantiateStatement(Connection connection) throws SQLException;
 
   protected void setStatementTimeout(Statement stmt, Integer transactionTimeout) throws SQLException {

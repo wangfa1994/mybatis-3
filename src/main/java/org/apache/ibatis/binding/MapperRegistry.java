@@ -34,7 +34,7 @@ import org.apache.ibatis.session.SqlSession;
 public class MapperRegistry {
 
   private final Configuration config;
-  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new ConcurrentHashMap<>(); // 存放了我们的接口类 和 对应的 代理工厂
+  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new ConcurrentHashMap<>(); // 存放了我们的mapper接口 和 对应的创建mapper的代理工厂
 
   public MapperRegistry(Configuration config) {
     this.config = config;
@@ -64,11 +64,11 @@ public class MapperRegistry {
       }
       boolean loadCompleted = false;
       try {
-        knownMappers.put(type, new MapperProxyFactory<>(type));
+        knownMappers.put(type, new MapperProxyFactory<>(type)); // 将我们的接口类型 和 MapperProxyFactory进行存放
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the
         // mapper parser. If the type is already known, it won't try.
-        MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
+        MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type); // 解析我们的接口中的注解信息
         parser.parse();
         loadCompleted = true;
       } finally {
@@ -103,7 +103,7 @@ public class MapperRegistry {
   public void addMappers(String packageName, Class<?> superType) {
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
     resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
-    Set<Class<? extends Class<?>>> mapperSet = resolverUtil.getClasses();
+    Set<Class<? extends Class<?>>> mapperSet = resolverUtil.getClasses(); // 获取到我们匹配的class接口
     for (Class<?> mapperClass : mapperSet) {
       addMapper(mapperClass);
     }

@@ -97,7 +97,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     try {
       final Environment environment = configuration.getEnvironment();
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment); // TransactionFactory事务的工厂，用来创建Transaction,而Transaction接口封装针对jdbc的基本操作
-      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit); // 根据数据源得到我们的Transaction，这个类中封装了针对数据源的操作 ，事务的自动提交标志会被设置到tx中
+      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit); // TransactionFactory创建Transaction， 根据数据源得到我们的Transaction，这个类中封装了针对数据源的操作 ，事务的自动提交标志会被设置到tx中
       final Executor executor = configuration.newExecutor(tx, execType);
       return createSqlSession(configuration, executor, autoCommit); // 执行器中存在tx, 创建我们的sqlSession
     } catch (Exception e) {

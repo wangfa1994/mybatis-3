@@ -1,4 +1,4 @@
-package com.wf.dao;
+package com.wf.mapper;
 
 
 
@@ -7,7 +7,7 @@ import com.wf.pojo.User;
 import java.io.IOException;
 import java.util.List;
 
-public interface IUserDao {
+public interface IUserMapper {
 
     //查询所有用户
     public List<User> findAll() throws IOException;

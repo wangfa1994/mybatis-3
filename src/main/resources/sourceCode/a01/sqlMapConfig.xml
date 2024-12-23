@@ -3,18 +3,13 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 
 <!-- MyBatis 配置文件的顺序要求是为了确保配置项之间的依赖关系得到正确处理，并且保证配置文件的解析和加载过程顺利进行。遵循规定的顺序可以避免潜在的解析错误，并提高配置文件的可读性和维护性 -->
-
-
-
 <configuration>
 
     <!--加载外部的properties文件-->
-    <properties resource="demo/jdbc.properties"></properties>
+    <properties resource="jdbc.properties"></properties>
 
     <settings>
         <setting name="logImpl" value="STDOUT_LOGGING"/>
-        <!--<setting name="cacheEnabled" value="true"/> --><!--开启二级缓存-->
-
     </settings>
 
     <!--给实体类的全限定类名给别名-->
@@ -43,7 +38,7 @@
 
     <!--引入映射配置文件-->
     <mappers>
-        <mapper resource="demo/oldUserMapper.xml"></mapper>
+        <mapper resource="sourceCode/a01/userMapper.xml"></mapper>
     </mappers>
 
 

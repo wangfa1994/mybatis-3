@@ -5,18 +5,14 @@
 <configuration>
 
     <!--加载外部的properties文件-->
-    <properties resource="demo/jdbc.properties"></properties>
-
-    <settings>
-        <setting name="proxyFactory" value="org.apache.ibatis.executor.loader.cglib.CglibProxyFactory"/>
-    </settings>
+    <properties resource="jdbc.properties"></properties>
 
     <!--给实体类的全限定类名给别名-->
     <typeAliases>
         <!--给单独的实体起别名-->
       <!--  <typeAlias type="com.lagou.pojo.User" alias="user"></typeAlias>-->
         <!--批量起别名：该包下所有的类的本身的类名：别名还不区分大小写-->
-        <package name="com.wf.pojo"/>
+        <package name="com.lagou.pojo"/>
     </typeAliases>
 
     <!--environments:运行环境-->
@@ -36,7 +32,7 @@
 
     <!--引入映射配置文件-->
     <mappers>
-        <mapper resource="demo/UserMapper.xml"></mapper>
+        <mapper resource="UserMapper.xml"></mapper>
     </mappers>
 
 

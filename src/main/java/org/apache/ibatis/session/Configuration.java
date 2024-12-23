@@ -102,72 +102,72 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  */
 public class Configuration {
 
-  protected Environment environment;
+  protected Environment environment; //configuraton标签中的子标签 环境标签environments
 
-  protected boolean safeRowBoundsEnabled;
-  protected boolean safeResultHandlerEnabled = true;
-  protected boolean mapUnderscoreToCamelCase;
-  protected boolean aggressiveLazyLoading;
-  protected boolean useGeneratedKeys;
-  protected boolean useColumnLabel = true;
-  protected boolean cacheEnabled = true; // 二级缓存配置属性
-  protected boolean callSettersOnNulls;
-  protected boolean useActualParamName = true;
-  protected boolean returnInstanceForEmptyRow;
-  protected boolean shrinkWhitespacesInSql;
-  protected boolean nullableOnForEach;
-  protected boolean argNameBasedConstructorAutoMapping;
+  protected boolean safeRowBoundsEnabled; // settings标签中的子标签
+  protected boolean safeResultHandlerEnabled = true;  // settings标签中的子标签
+  protected boolean mapUnderscoreToCamelCase; // settings标签中的子标签
+  protected boolean aggressiveLazyLoading; // settings标签中的子标签
+  protected boolean useGeneratedKeys; // settings标签中的子标签
+  protected boolean useColumnLabel = true; // settings标签中的子标签
+  protected boolean cacheEnabled = true; // settings标签中的子标签   二级缓存配置属性
+  protected boolean callSettersOnNulls; // settings标签中的子标签
+  protected boolean useActualParamName = true; // settings标签中的子标签
+  protected boolean returnInstanceForEmptyRow; // settings标签中的子标签
+  protected boolean shrinkWhitespacesInSql; // settings标签中的子标签
+  protected boolean nullableOnForEach; // settings标签中的子标签
+  protected boolean argNameBasedConstructorAutoMapping; // settings标签中的子标签
 
-  protected String logPrefix;
+  protected String logPrefix; // settings标签中的子标签
   protected Class<? extends Log> logImpl;
   protected Class<? extends VFS> vfsImpl;
-  protected Class<?> defaultSqlProviderType;
-  protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION; // 一级缓存本地默认为session级别的，如果我们修改了为Statement级别的，我们则会进行清空缓存
-  protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
+  protected Class<?> defaultSqlProviderType; // settings标签中的子标签
+  protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION; // settings标签中的子标签  一级缓存本地默认为session级别的，如果我们修改了为Statement级别的，我们则会进行清空缓存
+  protected JdbcType jdbcTypeForNull = JdbcType.OTHER;  // settings标签中的子标签
   protected Set<String> lazyLoadTriggerMethods = new HashSet<>(
-      Arrays.asList("equals", "clone", "hashCode", "toString"));
-  protected Integer defaultStatementTimeout;
-  protected Integer defaultFetchSize;
-  protected ResultSetType defaultResultSetType;
-  protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
-  protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
-  protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
+      Arrays.asList("equals", "clone", "hashCode", "toString")); //  settings标签中的子标签 lazyLoadTriggerMethods
+  protected Integer defaultStatementTimeout; // settings标签中的子标签
+  protected Integer defaultFetchSize; // settings标签中的子标签
+  protected ResultSetType defaultResultSetType; // settings标签中的子标签
+  protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE; // settings标签中的子标签
+  protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;  // settings标签中的子标签
+  protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE; // settings标签中的子标签
 
-  protected Properties variables = new Properties(); // 配置文件的properties标签内容存放的变量
-  protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
-  protected ObjectFactory objectFactory = new DefaultObjectFactory();
-  protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
+  protected Properties variables = new Properties(); //通过resource或者url解析出来的properties数据存放，jdbc的配置属性 配置文件的properties标签内容存放的变量
+  protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory(); // 解析我们的 reflectorFactory 标签存放值
+  protected ObjectFactory objectFactory = new DefaultObjectFactory(); // 解析出来我们的objectFactory标签存放的值，用来创建我们的对象
+  protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory(); // 解析出来我们的ObjectWrapperFactory标签存放值
 
-  protected boolean lazyLoadingEnabled;
-  protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL 代理工厂，这个代理工厂在哪里使用了呢？ 这个好像没用
+  protected boolean lazyLoadingEnabled; // settings标签中的子标签
+  protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL  settings标签中的子标签 代理工厂，这个代理工厂在哪里使用了呢？ 这个好像没用
 
-  protected String databaseId;
+  protected String databaseId; // configuration标签中的子标签
   /**
    * Configuration factory class. Used to create Configuration for loading deserialized unread properties.
    *
    * @see <a href='https://github.com/mybatis/old-google-code-issues/issues/300'>Issue 300 (google code)</a>
    */
-  protected Class<?> configurationFactory;
+  protected Class<?> configurationFactory; // settings标签中的子标签
 
-  protected final MapperRegistry mapperRegistry = new MapperRegistry(this); //mapperRegistry注册器， 里面封装了我们对应的MapperProxyFactory
-  protected final InterceptorChain interceptorChain = new InterceptorChain();
-  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this); // 类型解析器
-  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，初始化的时候进行了内部别名的定义
+  protected final MapperRegistry mapperRegistry = new MapperRegistry(this); //configuration标签下的子标签  mapperRegistry注册器， 里面封装了我们对应的MapperProxyFactory,当我们的mapper资源通过package进行引入的话，会进行这个对象的赋值
+  protected final InterceptorChain interceptorChain = new InterceptorChain(); // 存放我们的插件链，解析的plugin标签会被封装到这里
+  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this); // configuration标签下的子标签，类型解析器 ，// settings标签中的子标签的结果会被放置到这个对象中的 defaultEnumTypeHandler
+  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，初始化的时候进行了内部别名的定义， 还有我们自定义通过typeAliases标签进行定义的，用于简化我们的sql片段
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); //sql的语言驱动器，用来解析我们的sql
   // mappedStatements 用来存放我们的命名空间+id 唯一的值，使用
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>(
       "Mapped Statements collection")
           .conflictMessageProducer((savedValue, targetValue) -> ". please check " + savedValue.getResource() + " and "
-              + targetValue.getResource());
-  protected final Map<String, Cache> caches = new StrictMap<>("Caches collection"); // 如果开启了二级缓存，各个mapper下的缓存策略
-  protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection");
-  protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection");
+              + targetValue.getResource()); // mapper文件中的增删改查标签解析出来的对象存放处
+  protected final Map<String, Cache> caches = new StrictMap<>("Caches collection"); // 解析mapper下中的cache标签  如果开启了二级缓存，各个mapper下的缓存策略
+  protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection"); // mapper文件中的resultMap标签的解析存放值
+  protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection"); // mapper文件中的parameterMap标签的解析存放值,每一个
   protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection");
 
   protected final Set<String> loadedResources = new HashSet<>();
-  protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
+  protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers"); // mapper文件中标签sql片段的存储，在创建xmlMapperBuilder的时候进行传递
   protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
-  protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
+  protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>(); // mapper文件中的标签cache-ref 存放 这个存在异常的时候放值？
   protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
   protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
 
@@ -180,7 +180,7 @@ public class Configuration {
    * A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and
    * the value is the namespace which the actual cache is bound to.
    */
-  protected final Map<String, String> cacheRefMap = new HashMap<>();
+  protected final Map<String, String> cacheRefMap = new HashMap<>(); // mapper文件中的标签cache-ref 存放
 
   public Configuration(Environment environment) {
     this();
@@ -724,7 +724,7 @@ public class Configuration {
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement,
       Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject,
-        rowBounds, resultHandler, boundSql);
+        rowBounds, resultHandler, boundSql); // 创建出来一个路由RoutingStatementHandler，然后得到对应的真正StatementHandler
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);
   }
 

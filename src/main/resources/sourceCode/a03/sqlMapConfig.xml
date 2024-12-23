@@ -9,12 +9,10 @@
 <configuration>
 
     <!--加载外部的properties文件-->
-    <properties resource="demo/jdbc.properties"></properties>
+    <properties resource="jdbc.properties"></properties>
 
     <settings>
         <setting name="logImpl" value="STDOUT_LOGGING"/>
-        <!--<setting name="cacheEnabled" value="true"/> --><!--开启二级缓存-->
-
     </settings>
 
     <!--给实体类的全限定类名给别名-->
@@ -43,9 +41,7 @@
 
     <!--引入映射配置文件-->
     <mappers>
-        <mapper resource="placehold/placeholderUserMapper.xml"></mapper>
+        <mapper resource="sourceCode/a03/userMapper.xml"></mapper>
     </mappers>
-
-
 
 </configuration>

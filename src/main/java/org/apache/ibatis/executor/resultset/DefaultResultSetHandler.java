@@ -199,7 +199,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     validateResultMapsCount(rsw, resultMapCount);
     while (rsw != null && resultMapCount > resultSetCount) {
       ResultMap resultMap = resultMaps.get(resultSetCount);
-      handleResultSet(rsw, resultMap, multipleResults, null);
+      handleResultSet(rsw, resultMap, multipleResults, null);// 处理我们的结果值
       rsw = getNextResultSet(stmt);
       cleanUpAfterHandlingResultSet();
       resultSetCount++;
@@ -306,7 +306,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       if (parentMapping != null) {
         handleRowValues(rsw, resultMap, null, RowBounds.DEFAULT, parentMapping);
       } else if (resultHandler == null) {
-        DefaultResultHandler defaultResultHandler = new DefaultResultHandler(objectFactory);
+        DefaultResultHandler defaultResultHandler = new DefaultResultHandler(objectFactory); //设置我们的ResultHandler,并且进行一个对象工厂的设置，用于创建对象
         handleRowValues(rsw, resultMap, defaultResultHandler, rowBounds, null);
         multipleResults.add(defaultResultHandler.getResultList());
       } else {
@@ -408,12 +408,12 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private Object getRowValue(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix) throws SQLException {
     final ResultLoaderMap lazyLoader = new ResultLoaderMap();
-    Object rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix); // 这里只是创建了一个对象，并没有进行我们的值赋值
+    Object rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix); // 这里只是创建了一个对象，并没有进行我们的值赋值，用的是反射进行创建的
     if (rowValue != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
       final MetaObject metaObject = configuration.newMetaObject(rowValue);
       boolean foundValues = this.useConstructorMappings;
       if (shouldApplyAutomaticMappings(resultMap, false)) {
-        foundValues = applyAutomaticMappings(rsw, resultMap, metaObject, columnPrefix) || foundValues;
+        foundValues = applyAutomaticMappings(rsw, resultMap, metaObject, columnPrefix) || foundValues; // 设置对应属性的值
       }
       foundValues = applyPropertyMappings(rsw, resultMap, metaObject, lazyLoader, columnPrefix) || foundValues;
       foundValues = lazyLoader.size() > 0 || foundValues;
@@ -583,7 +583,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     boolean foundValues = false;
     if (!autoMapping.isEmpty()) {
       for (UnMappedColumnAutoMapping mapping : autoMapping) {
-        final Object value = mapping.typeHandler.getResult(rsw.getResultSet(), mapping.column);
+        final Object value = mapping.typeHandler.getResult(rsw.getResultSet(), mapping.column); // 从我们的ResultSet中获取到我们对应的属性值
         if (value != null) {
           foundValues = true;
         }
@@ -684,7 +684,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       return createParameterizedResultObject(rsw, resultType, constructorMappings, constructorArgTypes, constructorArgs,
           columnPrefix);
     } else if (resultType.isInterface() || metaType.hasDefaultConstructor()) {
-      return objectFactory.create(resultType);
+      return objectFactory.create(resultType); // 创建我们的返回对象实例化 ，利用了反射进行创建的
     } else if (shouldApplyAutomaticMappings(resultMap, false)) {
       return createByConstructorSignature(rsw, resultMap, columnPrefix, resultType, constructorArgTypes,
           constructorArgs);

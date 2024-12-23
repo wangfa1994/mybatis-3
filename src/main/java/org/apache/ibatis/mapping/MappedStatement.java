@@ -28,7 +28,7 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
-/**
+/** 增删改查sql的语句的包装类
  * @author Clinton Begin
  */
 public final class MappedStatement {
@@ -36,18 +36,18 @@ public final class MappedStatement {
   private String resource; //mapped所属那个资源的路径
   private Configuration configuration; // 整体的配置文件
   private String id;  // 解析出来的命名空间
-  private Integer fetchSize;
-  private Integer timeout;
-  private StatementType statementType;
-  private ResultSetType resultSetType;
+  private Integer fetchSize; // 增删改查sql中的fetchSize属性
+  private Integer timeout; // 增删改查sql中的timeout属性
+  private StatementType statementType; // 增删改查sql中的statementType属性
+  private ResultSetType resultSetType; // 增删改查sql中的resultType属性
   private SqlSource sqlSource; // sql片段语句
   private Cache cache; //二级缓存策略 这个是装饰者模式处理
-  private ParameterMap parameterMap; //
-  private List<ResultMap> resultMaps;
+  private ParameterMap parameterMap; //增删改查sql中的parameterMap属性  参数类型
+  private List<ResultMap> resultMaps; //
   private boolean flushCacheRequired;
   private boolean useCache; //二级缓存默认是开启的
   private boolean resultOrdered;
-  private SqlCommandType sqlCommandType;
+  private SqlCommandType sqlCommandType; // sql的类型，增删改查
   private KeyGenerator keyGenerator;
   private String[] keyProperties;
   private String[] keyColumns;
@@ -317,8 +317,8 @@ public final class MappedStatement {
   }
 
   public BoundSql getBoundSql(Object parameterObject) {
-    BoundSql boundSql = sqlSource.getBoundSql(parameterObject); // 将我们mapper中的的sql片段进行处理
-    List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+    BoundSql boundSql = sqlSource.getBoundSql(parameterObject); // 将我们mapper中的的sql片段进行处理，这里是怎么处理的?
+    List<ParameterMapping> parameterMappings = boundSql.getParameterMappings(); // 获得对应的参数类型
     if (parameterMappings == null || parameterMappings.isEmpty()) {
       boundSql = new BoundSql(configuration, boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);
     }

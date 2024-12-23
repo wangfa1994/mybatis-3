@@ -88,7 +88,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public XMLConfigBuilder(Class<? extends Configuration> configClass, InputStream inputStream, String environment,
-      Properties props) {
+      Properties props) { // 直接创建了一个 XPathParser xml的解析器，进行解析数据
     this(configClass, new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
   }
 
@@ -118,12 +118,12 @@ public class XMLConfigBuilder extends BaseBuilder {
       Properties settings = settingsAsProperties(root.evalNode("settings")); // settings标签的解析 主要是处理 logImpl标签和vfsImpl标签
       loadCustomVfsImpl(settings);
       loadCustomLogImpl(settings);
-      typeAliasesElement(root.evalNode("typeAliases"));
+      typeAliasesElement(root.evalNode("typeAliases"));//解析我们的别名，用在我们的sql片段中，主要是类型和简称的映射
       pluginsElement(root.evalNode("plugins"));
       objectFactoryElement(root.evalNode("objectFactory"));
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
-      settingsElement(settings);
+      settingsElement(settings); //设置我们的settings配置属性
       // read it after objectFactory and objectWrapperFactory issue #631
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
@@ -138,7 +138,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context == null) {
       return new Properties();
     }
-    Properties props = context.getChildrenAsProperties();
+    Properties props = context.getChildrenAsProperties();//获取节点中的孩子节点，并封装成properties
     // Check that all settings are known to the configuration class
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
     for (Object key : props.keySet()) {
@@ -176,7 +176,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
     for (XNode child : context.getChildren()) {
       if ("package".equals(child.getName())) { // 如果是包的话，使用类型注册器进行注册别名
-        String typeAliasPackage = child.getStringAttribute("name");
+        String typeAliasPackage = child.getStringAttribute("name"); // 获得到我们的基础别名
         configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage); // 使用configuration中的别名注册器进行注册我们的别名，
       } else {
         String alias = child.getStringAttribute("alias");
@@ -254,8 +254,8 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (vars != null) {
       defaults.putAll(vars);
     }
-    parser.setVariables(defaults);
-    configuration.setVariables(defaults);
+    parser.setVariables(defaults); //将解析出来的配置文件放置到了xPathParse中一份
+    configuration.setVariables(defaults); // 放置到总的配置文件中一份
   }
 
   private void settingsElement(Properties props) {
@@ -265,7 +265,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
     configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true)); // 二级缓存的属性配置，一级缓存sqlSession级别的
     configuration.setProxyFactory((ProxyFactory) createInstance(props.getProperty("proxyFactory"))); // 设置代理工厂？
-    configuration.setLazyLoadingEnabled(booleanValueOf(props.getProperty("lazyLoadingEnabled"), false));
+    configuration.setLazyLoadingEnabled(booleanValueOf(props.getProperty("lazyLoadingEnabled"), false)); // 设置懒加载属性
     configuration.setAggressiveLazyLoading(booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
     configuration.setUseColumnLabel(booleanValueOf(props.getProperty("useColumnLabel"), true));
     configuration.setUseGeneratedKeys(booleanValueOf(props.getProperty("useGeneratedKeys"), false));
@@ -280,8 +280,8 @@ public class XMLConfigBuilder extends BaseBuilder {
     configuration.setLazyLoadTriggerMethods(
         stringSetValueOf(props.getProperty("lazyLoadTriggerMethods"), "equals,clone,hashCode,toString"));
     configuration.setSafeResultHandlerEnabled(booleanValueOf(props.getProperty("safeResultHandlerEnabled"), true));
-    configuration.setDefaultScriptingLanguage(resolveClass(props.getProperty("defaultScriptingLanguage")));
-    configuration.setDefaultEnumTypeHandler(resolveClass(props.getProperty("defaultEnumTypeHandler")));
+    configuration.setDefaultScriptingLanguage(resolveClass(props.getProperty("defaultScriptingLanguage"))); // settings中的子标签属性放到了Registry中
+    configuration.setDefaultEnumTypeHandler(resolveClass(props.getProperty("defaultEnumTypeHandler"))); // settings中的子标签属性放到了Registry中
     configuration.setCallSettersOnNulls(booleanValueOf(props.getProperty("callSettersOnNulls"), false));
     configuration.setUseActualParamName(booleanValueOf(props.getProperty("useActualParamName"), true));
     configuration.setReturnInstanceForEmptyRow(booleanValueOf(props.getProperty("returnInstanceForEmptyRow"), false));
@@ -339,7 +339,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
-      TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+      TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance(); // 通过反射创建我们的TransactionFactory
       factory.setProperties(props);
       return factory;
     }
@@ -389,7 +389,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context == null) {
       return;
     }
-    for (XNode child : context.getChildren()) {
+    for (XNode child : context.getChildren()) { //for循环解析我们的mapper文件，每次都会新创建一个针对此mapper的助手assistant类
       if ("package".equals(child.getName())) {
         String mapperPackage = child.getStringAttribute("name");
         configuration.addMappers(mapperPackage);
@@ -401,7 +401,7 @@ public class XMLConfigBuilder extends BaseBuilder {
           ErrorContext.instance().resource(resource);
           try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource,
-                configuration.getSqlFragments());
+                configuration.getSqlFragments()); // 每次都创建出一个助手类
             mapperParser.parse();
           }
         } else if (resource == null && url != null && mapperClass == null) {

@@ -40,7 +40,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-/**
+/** 解析xml的基本类
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */

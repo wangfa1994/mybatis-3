@@ -1,4 +1,4 @@
-package com.wf.test;
+package com.wf.test.sourceCode;
 
 import com.wf.pojo.User;
 import org.apache.ibatis.io.Resources;
@@ -8,21 +8,17 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
-public class OldMybatisTest {
-  public static void main(String[] args) throws Exception {
-    //select();
-    //saveUser();
-    //select();
-    //updateUser();
+public class A04CacheTest {
 
-    // deleteUser();
+  public static void main(String[] args) throws IOException {
     findById();
   }
 
+
+
   public static void findById() throws IOException {
-    InputStream resourceAsStream = Resources.getResourceAsStream("demo/oldSqlMapConfig.xml");
+    InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a04/sqlMapConfig.xml");
     SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);  // 返回的是 DefaultSqlSessionFactory 主要类
     SqlSession sqlSession = sqlSessionFactory.openSession(); //DefaultSqlSession 主要类，sql
     // 通过sql
@@ -31,7 +27,7 @@ public class OldMybatisTest {
 
     User user1 = (User)sqlSession.selectOne("user.findById", 1);
 
-    sqlSession.commit(); // 事务提交的情况下，才会进行二级缓存的存放
+    sqlSession.commit(); // 事务提交的情况下，才会进行二级缓存的存放 ,close() 也会触发二级缓存的提交
 
     // 二级缓存新开session
     SqlSession sqlSessionNew = sqlSessionFactory.openSession();
@@ -55,7 +51,8 @@ public class OldMybatisTest {
      *
      * 二级缓存用的是装饰者模式，而且里面装饰了日志和定时的实现，缓存过期，是在查询的时候进行过期的，不是用任务去执行的，查询的时候先判断是否过期，如果过期了就直接删除返回null，从新获取
      * 二级缓存查询语句默认为true，走二级缓存的。
-     * 二级缓存的存放是在事务提交的时候进行存放到赌赢的缓存存储中的。缓存失效有很大可能是第一个的事务没有提交导致缓存没有进入
+     * 二级缓存的存放是在事务提交或者关闭的时候进行存放到赌赢的缓存存储中的。缓存失效有很大可能是第一个的事务没有提交导致缓存没有进入，为什么要进行在提交或者关闭的时候才会进行存储呢？
+     * 如果直接存储的情况下，这个可能会被其他的事务读取，产生脏读。
      *
      *
      * 整体流程:
@@ -73,68 +70,4 @@ public class OldMybatisTest {
 
     sqlSession.close();
   }
-
-  public static void select() throws IOException {
-    //1.Resources工具类，配置文件的加载，把配置文件加载成字节输入流
-    InputStream resourceAsStream = Resources.getResourceAsStream("demo/oldSqlMapConfig.xml");
-    //2.解析了配置文件，并创建了sqlSessionFactory工厂
-    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
-    //3.生产sqlSession
-    SqlSession sqlSession = sqlSessionFactory.openSession();// 默认开启一个事务，但是该事务不会自动提交
-    //在进行增删改操作时，要手动提交事务
-    //4.sqlSession调用方法：查询所有selectList  查询单个：selectOne 添加：insert  修改：update 删除：delete
-    // 在最初的ibatis,我们的查询是通过nameSpace+id进行查询处理的,后来进行迭代升级面向mapper编程之后，将我们的mapper类与namespace相同，进行mapper开发
-    List<User> users = sqlSession.selectList("user.findAll");
-    for (User user : users) {
-      System.out.println(user);
-    }
-    sqlSession.close();
-
-  }
-
-
-
-  public static void saveUser() throws IOException {
-    InputStream resourceAsStream = Resources.getResourceAsStream("demo/oldSqlMapConfig.xml");
-    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
-    SqlSession sqlSession = sqlSessionFactory.openSession(true);//事务自动提交
-
-    User user = new User();
-    user.setId(6);
-    user.setUsername("tom");
-    user.setPassword("123456");
-    user.setBirthday("2024-12-18");
-    sqlSession.insert("user.saveUser", user);
-
-
-    sqlSession.close();
-  }
-
-  public static void updateUser() throws IOException {
-    InputStream resourceAsStream = Resources.getResourceAsStream("demo/oldSqlMapConfig.xml");
-    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
-    SqlSession sqlSession = sqlSessionFactory.openSession();
-
-    User user = new User();
-    user.setId(6);
-    user.setUsername("lucy");
-    sqlSession.update("user.updateUser", user);
-    sqlSession.commit();
-
-    sqlSession.close();
-  }
-
-
-  public static void deleteUser() throws IOException {
-    InputStream resourceAsStream = Resources.getResourceAsStream("demo/oldSqlMapConfig.xml");
-    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
-    SqlSession sqlSession = sqlSessionFactory.openSession();
-
-
-    sqlSession.delete("user.deleteUser", 6);
-    sqlSession.commit();
-
-    sqlSession.close();
-  }
-
 }

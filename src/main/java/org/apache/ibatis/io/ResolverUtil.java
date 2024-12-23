@@ -142,7 +142,7 @@ public class ResolverUtil<T> {
     }
   }
 
-  /** The set of matches being accumulated. */
+  /** The set of matches being accumulated. 正在累积的匹配集 */
   private Set<Class<? extends T>> matches = new HashSet<>();
 
   /**
@@ -247,7 +247,7 @@ public class ResolverUtil<T> {
     String path = getPackagePath(packageName);
 
     try {
-      List<String> children = VFS.getInstance().list(path);
+      List<String> children = VFS.getInstance().list(path); //获取到我们路径下的资源，包括class和xml
       for (String child : children) {
         if (child.endsWith(".class")) {
           addIfMatching(test, child);

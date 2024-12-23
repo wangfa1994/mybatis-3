@@ -56,7 +56,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
   private String currentNamespace;
   private final String resource;
-  private Cache currentCache;
+  private Cache currentCache; // 当前缓存
   private boolean unresolvedCacheRef; // issue #676
 
   public MapperBuilderAssistant(Configuration configuration, String resource) {
@@ -125,9 +125,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
       Integer size, boolean readWrite, boolean blocking, Properties props) {
     Cache cache = new CacheBuilder(currentNamespace).implementation(valueOrDefault(typeClass, PerpetualCache.class))
         .addDecorator(valueOrDefault(evictionClass, LruCache.class)).clearInterval(flushInterval).size(size)
-        .readWrite(readWrite).blocking(blocking).properties(props).build(); // 将我们的底层cache开始进行包装
-    configuration.addCache(cache);
-    currentCache = cache;
+        .readWrite(readWrite).blocking(blocking).properties(props).build(); // 将我们的底层cache开始进行包装 ，默认的是PerpetualCache
+    configuration.addCache(cache); // 放到我们的配置文件中，
+    currentCache = cache; // 再将当前助手的属性设置为当前缓存，这个是做什么？
     return cache;
   }
 
@@ -206,13 +206,13 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     id = applyCurrentNamespace(id, false); // 在创建添加我们的mappedStatement的时候才真正得到我们的命名空间
-    //使用builder模式来创建我们的mappedStatement对象
+    //使用builder模式来创建我们的mappedStatement对象 ，在创建的时候将我们的currentCache也进行了存放
     MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
         .resource(resource).fetchSize(fetchSize).timeout(timeout).statementType(statementType)
         .keyGenerator(keyGenerator).keyProperty(keyProperty).keyColumn(keyColumn).databaseId(databaseId).lang(lang)
         .resultOrdered(resultOrdered).resultSets(resultSets)
         .resultMaps(getStatementResultMaps(resultMap, resultType, id)).resultSetType(resultSetType)
-        .flushCacheRequired(flushCache).useCache(useCache).cache(currentCache).dirtySelect(dirtySelect);
+        .flushCacheRequired(flushCache).useCache(useCache).cache(currentCache).dirtySelect(dirtySelect); //解析mapper中的时候，需要把缓存缓存起来，currentCache用于每一个增删改查的使用
 
     ParameterMap statementParameterMap = getStatementParameterMap(parameterMap, parameterType, id);
     if (statementParameterMap != null) {

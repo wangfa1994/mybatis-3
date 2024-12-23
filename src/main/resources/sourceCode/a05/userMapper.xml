@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="user">
+    <!--namespace : 名称空间：与id组成sql的唯一标识
+        resultType： 表明返回值类型-->
+
+    <resultMap id="userMap" type="com.wf.pojo.UserLazy">
+        <id property="id" column="id"></id>
+        <result property="username" column="username"></result>
+
+        <collection property="orderList" ofType="com.wf.pojo.Order"
+                    select="order.findOrderByUid" column="id" fetchType="lazy">
+
+            <id property="id" column="oid"/>
+            <result property="orderTime" column="ordertime"/>
+            <result property="total" column="total"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="findById" resultMap="userMap"  >
+        select * from user where id = #{id}
+    </select>
+
+
+
+
+
+
+
+
+</mapper>

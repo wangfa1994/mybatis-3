@@ -60,8 +60,8 @@ public class SimpleExecutor extends BaseExecutor {
     try {
       Configuration configuration = ms.getConfiguration();
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
-          boundSql);
-      stmt = prepareStatement(handler, ms.getStatementLog());
+          boundSql); // 创建我们的StatementHandler , 这个StatementHandler 封装了我们与sql打交道的Statement。
+      stmt = prepareStatement(handler, ms.getStatementLog()); // 得到了我们的Statement，并且进行了参数化的处理，参数化的处理是委派给了ParameterHandler
       return handler.query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -86,10 +86,10 @@ public class SimpleExecutor extends BaseExecutor {
 
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
-    Connection connection = getConnection(statementLog);
-    stmt = handler.prepare(connection, transaction.getTimeout());
-    handler.parameterize(stmt);
-    return stmt;
+    Connection connection = getConnection(statementLog); // 获取到我们的Connection链接，从我们的Connection中才能拿到我们的Statement
+    stmt = handler.prepare(connection, transaction.getTimeout()); //准备我们的Statement对象，并且将我们的sql已经进行了注入设置，得到我们的Statement之后，下面就要开始给我们的Statement中的sql语句开始进行设置参数
+    handler.parameterize(stmt); // 这里的实现委派给我们的ParameterHandler,parameterHandler通过TypeHandler进行了值的转换与设置
+    return stmt; //返回了设置了sql，设置了参数的Statement对象，可以直接进行sql执行了
   }
 
 }

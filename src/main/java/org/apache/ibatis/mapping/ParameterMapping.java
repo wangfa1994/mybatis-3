@@ -34,7 +34,7 @@ public class ParameterMapping {
   private Class<?> javaType = Object.class;
   private JdbcType jdbcType;
   private Integer numericScale;
-  private TypeHandler<?> typeHandler;
+  private TypeHandler<?> typeHandler; // 存放我们的参数值
   private String resultMapId;
   private String jdbcTypeName;
   private String expression;

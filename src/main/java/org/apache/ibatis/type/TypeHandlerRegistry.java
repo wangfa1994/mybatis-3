@@ -61,7 +61,7 @@ public final class TypeHandlerRegistry {
 
   private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = Collections.emptyMap();
 
-  private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
+  private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class; // // settings标签中的子标签 defaultEnumTypeHandler 值
 
   /**
    * The default constructor.

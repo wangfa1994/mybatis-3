@@ -55,7 +55,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private final XPathParser parser;
   private final MapperBuilderAssistant builderAssistant;
-  private final Map<String, XNode> sqlFragments;
+  private final Map<String, XNode> sqlFragments; // 存放我们的Sql片段 mapper文件中的sql标签
   private final String resource;
 
   @Deprecated
@@ -79,7 +79,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource,
-      Map<String, XNode> sqlFragments) {
+      Map<String, XNode> sqlFragments) { // 创建了XPathParser，用来解析xml的
     this(new XPathParser(inputStream, true, configuration.getVariables(), new XMLMapperEntityResolver()), configuration,
         resource, sqlFragments);
   }
@@ -87,7 +87,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private XMLMapperBuilder(XPathParser parser, Configuration configuration, String resource,
       Map<String, XNode> sqlFragments) {
     super(configuration);
-    this.builderAssistant = new MapperBuilderAssistant(configuration, resource);
+    this.builderAssistant = new MapperBuilderAssistant(configuration, resource); // 每次生成的时候，创建MapperBuilderAssistant对象
     this.parser = parser;
     this.sqlFragments = sqlFragments;
     this.resource = resource;
@@ -108,7 +108,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     return sqlFragments.get(refid);
   }
 
-  private void configurationElement(XNode context) {
+  private void configurationElement(XNode context) { // context 为mapper文件中的内容
     try {
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.isEmpty()) {
@@ -119,7 +119,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       cacheElement(context.evalNode("cache")); // 处理我们的二级缓存，利用了装饰者模式，如果既配置了cache-ref 又配置了cache 会怎样呢？
       parameterMapElement(context.evalNodes("/mapper/parameterMap")); //解析通用的parameterMap
       resultMapElements(context.evalNodes("/mapper/resultMap")); // 解析
-      sqlElement(context.evalNodes("/mapper/sql"));
+      sqlElement(context.evalNodes("/mapper/sql")); // 这个没有放置到Configuration对象中?
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
@@ -153,7 +153,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       try {
         cacheRefResolver.resolveCacheRef();
       } catch (IncompleteElementException e) {
-        configuration.addIncompleteCacheRef(cacheRefResolver);
+        configuration.addIncompleteCacheRef(cacheRefResolver); // 为甚么catch住异常之后才进行处理？
       }
     }
   }
@@ -169,7 +169,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       boolean readWrite = !context.getBooleanAttribute("readOnly", false);
       boolean blocking = context.getBooleanAttribute("blocking", false);
       Properties props = context.getChildrenAsProperties();
-      builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props); // 使用助手创建新的cache
+      builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props); // 使用助手创建新的cache，并放到我们的configuration对象中
     }
   }
 

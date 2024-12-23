@@ -29,9 +29,9 @@ import org.apache.ibatis.session.ResultHandler;
  * @author Clinton Begin
  */
 public interface StatementHandler {
-
+  //得到我们的Statement对象
   Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException;
-
+  //将参数中的Statement对象，进行Statement中的参数进行参数化
   void parameterize(Statement statement) throws SQLException;
 
   void batch(Statement statement) throws SQLException;
