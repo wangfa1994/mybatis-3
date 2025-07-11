@@ -54,16 +54,16 @@ public class XMLStatementBuilder extends BaseBuilder {
     this.context = context;
     this.requiredDatabaseId = databaseId;
   }
-
-  public void parseStatementNode() { // <select parameterType="java.lang.Integer" id="findById" resultType="User">select * from user where id = #{id}</select>
+  // <select parameterType="java.lang.Integer" id="findById" resultType="User">select * from user where id = #{id}</select>
+  public void parseStatementNode() { // 解析增删改查 四类节点 select insert update delete
     String id = context.getStringAttribute("id");
     String databaseId = context.getStringAttribute("databaseId");
-
+    // 读取当前节点的id 和 databaseId属性，然后验证id和databaseId是否匹配Mybatis允许多数据库配置，有些语句可以针对特定数据库生效
     if (!databaseIdMatchesCurrent(id, databaseId, this.requiredDatabaseId)) { // 进行判断我们的id 是否已经存在
       return;
     }
 
-    String nodeName = context.getNode().getNodeName(); // 解析出来结点明层 select
+    String nodeName = context.getNode().getNodeName(); // 解析出来结点名称 select
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH)); //得到我们的sql类型
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT; //判断是否是select语句
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect); // 获得增删改查的flushCache属性，如果没有设置，select不进行刷新，其他的都进行刷新
@@ -72,29 +72,29 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     // Include Fragments before parsing 在解析之前包含Fragments，用来解析我们sql中的include标签
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
-    includeParser.applyIncludes(context.getNode()); // 这个是干啥的?
+    includeParser.applyIncludes(context.getNode()); // 使用XMLIncludeTransformer对象处理操作include结点
 
     String parameterType = context.getStringAttribute("parameterType"); //得到我们的参数类型
     Class<?> parameterTypeClass = resolveClass(parameterType); // 根据传递进行的类型从我们的TypeAliasRegistry进行解析我们的类型
 
-    String lang = context.getStringAttribute("lang");
+    String lang = context.getStringAttribute("lang"); // 得到我们的语句类型，什么是语句类型？
     LanguageDriver langDriver = getLanguageDriver(lang); //获取到我们的语言类型，这个在后面用于解析我们的sql
 
-    // Parse selectKey after includes and remove them. 在包含之后解析selectKey并删除它们。 selectKey 是做什么用的？
+    // Parse selectKey after includes and remove them. 处理我们的selectKey节点，在这里会将KeyGenerator接入到Configuration.keyGenerators中
     processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
-    // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
+    // Parse the SQL (pre: <selectKey> and <include> were parsed and removed) 此时的SelectKey 和 include标签都已经被解析掉了，开始进行sql的解析
     KeyGenerator keyGenerator;
     String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
     keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
-    if (configuration.hasKeyGenerator(keyStatementId)) {
+    if (configuration.hasKeyGenerator(keyStatementId)) { // 判断是否已经有解析好的KeyGenerator
       keyGenerator = configuration.getKeyGenerator(keyStatementId);
-    } else { // useGeneratedKeys 是返回我们的主键id？？？
+    } else { // 全局或者本语句只要启动自动Key生成，则使用Key生成 useGeneratedKeys 是返回我们的主键id？？？
       keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
           configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
               ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
-
+    // 读取各个配置属性
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass); //通过我们的语言驱动器来解析我们的sql片段为sqlSource，里面会处理成我们sql可执行的语句
     StatementType statementType = StatementType
         .valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString())); //如果没有设置的话，默认为预编译模式 prapared
@@ -116,14 +116,14 @@ public class XMLStatementBuilder extends BaseBuilder {
     String keyColumn = context.getStringAttribute("keyColumn");
     String resultSets = context.getStringAttribute("resultSets");
     boolean dirtySelect = context.getBooleanAttribute("affectData", Boolean.FALSE);
-    // 所有的信息处理完成之后，封装成我们的mappedStatement
+    // 所有的信息处理完成之后，在mapperBuilderAssisant的帮助下，封装成我们的mappedStatement对象，并写入到Configuration中
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
         parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
         keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect);
   }
 
   private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
-    List<XNode> selectKeyNodes = context.evalNodes("selectKey");
+    List<XNode> selectKeyNodes = context.evalNodes("selectKey"); // 得到我们的selectKey节点
     if (configuration.getDatabaseId() != null) {
       parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, configuration.getDatabaseId());
     }
@@ -173,7 +173,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     id = builderAssistant.applyCurrentNamespace(id, false);
 
     MappedStatement keyStatement = configuration.getMappedStatement(id, false);
-    configuration.addKeyGenerator(id, new SelectKeyGenerator(keyStatement, executeBefore));
+    configuration.addKeyGenerator(id, new SelectKeyGenerator(keyStatement, executeBefore)); // 添加我们的KeyGenerator
   }
 
   private void removeSelectKeyNodes(List<XNode> selectKeyNodes) {

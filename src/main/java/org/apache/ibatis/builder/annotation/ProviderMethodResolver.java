@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.ibatis.builder.BuilderException;
 
-/**
+/** 通过SQL提供程序类解析SQL提供程序方法的接口。 只有一个默认方法，
  * The interface that resolve an SQL provider method via an SQL provider class.
  * <p>
  * This interface need to implements at an SQL provider class and it need to define the default constructor for creating
@@ -52,18 +52,18 @@ public interface ProviderMethodResolver {
    * @throws BuilderException
    *           Throws when cannot resolve a target method
    */
-  default Method resolveMethod(ProviderContext context) {
-    List<Method> sameNameMethods = Arrays.stream(getClass().getMethods())
+  default Method resolveMethod(ProviderContext context) { // 从带Provider的注解中的type属性指向的类中找出method属性指定的方法
+    List<Method> sameNameMethods = Arrays.stream(getClass().getMethods()) //找出同名方法
         .filter(m -> m.getName().equals(context.getMapperMethod().getName())).collect(Collectors.toList());
-    if (sameNameMethods.isEmpty()) {
+    if (sameNameMethods.isEmpty()) { // 没有找到方法，进行抛出异常
       throw new BuilderException("Cannot resolve the provider method because '" + context.getMapperMethod().getName()
           + "' not found in SqlProvider '" + getClass().getName() + "'.");
     }
-    List<Method> targetMethods = sameNameMethods.stream()
+    List<Method> targetMethods = sameNameMethods.stream() //根据返回类型再次判断，返回类型必须是CharSequence类型及其子类
         .filter(m -> CharSequence.class.isAssignableFrom(m.getReturnType())).collect(Collectors.toList());
     if (targetMethods.size() == 1) {
-      return targetMethods.get(0);
-    }
+      return targetMethods.get(0); // 方法唯一进行返回
+    } // 第一步先找出符合方法名的所有方法；第二步根据方法的返回值进行进一步校验
     if (targetMethods.isEmpty()) {
       throw new BuilderException("Cannot resolve the provider method because '" + context.getMapperMethod().getName()
           + "' does not return the CharSequence or its subclass in SqlProvider '" + getClass().getName() + "'.");

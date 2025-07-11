@@ -60,9 +60,9 @@ public class SimpleExecutor extends BaseExecutor {
     try {
       Configuration configuration = ms.getConfiguration();
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
-          boundSql); // 创建我们的StatementHandler , 这个StatementHandler 封装了我们与sql打交道的Statement。
+          boundSql); // 通过configuration对象创建我们的StatementHandler , 这个StatementHandler 封装了我们与sql打交道的Statement。
       stmt = prepareStatement(handler, ms.getStatementLog()); // 得到了我们的Statement，并且进行了参数化的处理，参数化的处理是委派给了ParameterHandler
-      return handler.query(stmt, resultHandler);
+      return handler.query(stmt, resultHandler); // 通过StatementHandler进行查询获得结果， 不同的Statement被封装成不同的StatementHandler
     } finally {
       closeStatement(stmt);
     }

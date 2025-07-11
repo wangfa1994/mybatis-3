@@ -29,21 +29,21 @@ import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
-/**
+/** 间接注解映射的解析类  解析@SelectProvider 带provider的注解  实现了sqlSource
  * @author Clinton Begin
- * @author Kazuki Shimizu
+ * @author Kazuki Shimizu 通过注解映射的形式获取的sql语句，只有这个实现了sqlSource的是解析注解的，其他的都是解析xml的
  */
 public class ProviderSqlSource implements SqlSource {
 
   private final Configuration configuration;
-  private final Class<?> providerType;
-  private final LanguageDriver languageDriver;
-  private final Method mapperMethod;
-  private final Method providerMethod;
-  private final String[] providerMethodArgumentNames;
-  private final Class<?>[] providerMethodParameterTypes;
-  private final ProviderContext providerContext;
-  private final Integer providerContextIndex;
+  private final Class<?> providerType; // 间接注解上type属性所指的类
+  private final LanguageDriver languageDriver;  // 语言驱动
+  private final Method mapperMethod; // 含有注解的接口方法
+  private final Method providerMethod; // @*Provider 注解上method属性所指的方法
+  private final String[] providerMethodArgumentNames; // 给定SQL语句的方法对应的参数
+  private final Class<?>[] providerMethodParameterTypes; //给定SQL语句的方法对应的参数类型
+  private final ProviderContext providerContext; // 信息封装类
+  private final Integer providerContextIndex; //  ProviderContext编号
 
   /**
    * This constructor will remove at a future version.
@@ -138,7 +138,7 @@ public class ProviderSqlSource implements SqlSource {
           + "' not found in SqlProvider '" + this.providerType.getName() + "'.");
     }
     this.providerMethod = candidateProviderMethod;
-    this.providerMethodArgumentNames = new ParamNameResolver(configuration, this.providerMethod).getNames();
+    this.providerMethodArgumentNames = new ParamNameResolver(configuration, this.providerMethod).getNames(); // 使用参数类解析
     this.providerMethodParameterTypes = this.providerMethod.getParameterTypes();
 
     ProviderContext candidateProviderContext = null;
@@ -161,38 +161,38 @@ public class ProviderSqlSource implements SqlSource {
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject) {
-    SqlSource sqlSource = createSqlSource(parameterObject);
-    return sqlSource.getBoundSql(parameterObject);
+  public BoundSql getBoundSql(Object parameterObject) { // 实现的sqlSource接口的方法
+    SqlSource sqlSource = createSqlSource(parameterObject); // 得到对应的SqlSource对象
+    return sqlSource.getBoundSql(parameterObject); // 从sqlSource中再次得到BoundSql
   }
-
-  private SqlSource createSqlSource(Object parameterObject) {
+  // 1.调用*Provider注解的type类中的method方法获得到SQL字符串，2.通过LanguageDriver产生SqlSource对象 3.根据sqlSource对象产生BoundSql
+  private SqlSource createSqlSource(Object parameterObject) { //得到我们的sqlSource
     try {
-      String sql;
-      if (parameterObject instanceof Map) {
-        int bindParameterCount = providerMethodParameterTypes.length - (providerContext == null ? 0 : 1);
+      String sql; //字符串信息
+      if (parameterObject instanceof Map) { // 参数为Map
+        int bindParameterCount = providerMethodParameterTypes.length - (providerContext == null ? 0 : 1); //得到注解指定的方法的参数的个数
         if (bindParameterCount == 1
             && providerMethodParameterTypes[Integer.valueOf(0).equals(providerContextIndex) ? 1 : 0]
                 .isAssignableFrom(parameterObject.getClass())) {
-          sql = invokeProviderMethod(extractProviderMethodArguments(parameterObject));
+          sql = invokeProviderMethod(extractProviderMethodArguments(parameterObject)); // 调用注解*Provider中指定的方法得到对应的String类型的sql语句
         } else {
           @SuppressWarnings("unchecked")
           Map<String, Object> params = (Map<String, Object>) parameterObject;
           sql = invokeProviderMethod(extractProviderMethodArguments(params, providerMethodArgumentNames));
         }
       } else
-        switch (providerMethodParameterTypes.length) {
+        switch (providerMethodParameterTypes.length) { // 注解Type属性指定的参数的个数
           case 0:
             sql = invokeProviderMethod();
             break;
           case 1:
             if (providerContext == null) {
-              sql = invokeProviderMethod(parameterObject);
+              sql = invokeProviderMethod(parameterObject); //存在一个输入实参
             } else {
-              sql = invokeProviderMethod(providerContext);
+              sql = invokeProviderMethod(providerContext); // 输入的参数类型为 providerContext
             }
             break;
-          case 2:
+          case 2: //两个参数
             sql = invokeProviderMethod(extractProviderMethodArguments(parameterObject));
             break;
           default:
@@ -201,7 +201,7 @@ public class ProviderSqlSource implements SqlSource {
                 + "' because SqlProvider method arguments for '" + mapperMethod + "' is an invalid combination.");
         }
       Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
-      return languageDriver.createSqlSource(configuration, sql, parameterType);
+      return languageDriver.createSqlSource(configuration, sql, parameterType); // 使用languageDriver 产生SqlSource
     } catch (BuilderException e) {
       throw e;
     } catch (Exception e) {

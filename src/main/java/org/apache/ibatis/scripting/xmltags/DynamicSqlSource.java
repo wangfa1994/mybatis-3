@@ -20,7 +20,7 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
-/**
+/** 动态Sql语句处理，含有动态SQL节点(if标签等)或者${}占位符的语句
  * @author Clinton Begin
  */
 public class DynamicSqlSource implements SqlSource {
@@ -37,7 +37,7 @@ public class DynamicSqlSource implements SqlSource {
   public BoundSql getBoundSql(Object parameterObject) {
     DynamicContext context = new DynamicContext(configuration, parameterObject);
     rootSqlNode.apply(context); //
-    SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
+    SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration); // 通过SqlSourceBuilder进行解析parse
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings()); // 利用sqlSource进行解析sql，确定是否需要进行数据绑定 $会在这里进行
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration> <!-- 对应Configuration类 XMLConfigBuilder解析 -->
+
+    <properties resource="jdbc.properties"></properties>
+
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <typeAliases>   <!-- 对应TypeAliasRegistry类 -->
+        <typeAlias type="com.wf.yeecode.a03configparsepackage.a12.User" alias="user"></typeAlias>
+        <package name="com.wf.yeecode.a03configparsepackage.a12"/> <!-- TypeAliasRegistry类进行解析 -->
+    </typeAliases>
+
+    <typeHandlers> <!-- 对应 TypeHandlerRegistry 类 -->
+        <typeHandler handler="com.wf.yeecode.a03configparsepackage.a12.MyTypeHandler"/>
+    </typeHandlers>
+
+    <objectFactory type="com.wf.yeecode.a03configparsepackage.a12.MyObjectFactory"> <!--对应 ObjectFactory类 -->
+        <property name="" value=""/>
+    </objectFactory>
+
+    <!--对应ObjectWrapperFactory类 -->
+    <objectWrapperFactory type="com.wf.yeecode.a03configparsepackage.a12.MyObjectWrapperFactory"/>
+    
+    <!--对应ReflectorFactory类-->
+    <reflectorFactory type="com.wf.yeecode.a03configparsepackage.a12.MyReflectorFactory"/>
+
+    <plugins>
+        <plugin interceptor="com.wf.yeecode.a03configparsepackage.a12.MyPluginInterceptor"> <!--对应 Interceptor类 -->
+            <property name="" value=""/>
+        </plugin>
+    </plugins>
+
+
+    <environments default="development">
+        <environment id="development"> <!--对应 Environment类  -->
+            <transactionManager type="JDBC">
+                <property name="" value=""/>
+            </transactionManager>
+
+            <dataSource type="POOLED"> <!-- 对应 DataSource类 -->
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--对应 DatabaseIdProvider 类  -->
+    <databaseIdProvider type="com.wf.yeecode.a03configparsepackage.a12.MyDatabaseIdProvider"/>
+
+
+    <mappers>
+        <mapper resource="sourceCode/a01/userMapper.xml"/>  <!-- 由XMLConfigBuilder 转交给 XMLMapperBuilder解析 -->
+        <package name="com.wf.yeecode.a03configparsepackage.a12"/>
+    </mappers>
+
+</configuration>

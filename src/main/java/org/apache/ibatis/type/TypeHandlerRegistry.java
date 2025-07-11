@@ -54,15 +54,15 @@ import org.apache.ibatis.session.Configuration;
  */
 public final class TypeHandlerRegistry {
 
-  private final Map<JdbcType, TypeHandler<?>> jdbcTypeHandlerMap = new EnumMap<>(JdbcType.class);
-  private final Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap = new ConcurrentHashMap<>();
-  private final TypeHandler<Object> unknownTypeHandler;
-  private final Map<Class<?>, TypeHandler<?>> allTypeHandlersMap = new HashMap<>();
-
+  private final Map<JdbcType, TypeHandler<?>> jdbcTypeHandlerMap = new EnumMap<>(JdbcType.class); // JDBC类型与对应类型处理器的映射
+  private final Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap = new ConcurrentHashMap<>(); //java类型与之对应的的JDBC类型，一个java类型可能存在多个JDBC类型，不同的jdbc类型又存在不同的处理器
+  private final TypeHandler<Object> unknownTypeHandler; // 未知类型的处理器，我们自定义的类型处理器就会存放在这里
+  private final Map<Class<?>, TypeHandler<?>> allTypeHandlersMap = new HashMap<>(); // 存储了所有的类型处理器，key是TypeHandler的class，value是TypeHandler
+  // java类型没有对应的类型
   private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = Collections.emptyMap();
-
+  // 默认的枚举类型处理器
   private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class; // // settings标签中的子标签 defaultEnumTypeHandler 值
-
+  // 根据传递的java类型 先调用getJdbcHandlerMap方法得到对应的jdbcTypeHandlerMap， 然后再基于 jdbcTypeHandlerMap，根据 JDBC类型找到对应的 TypeHandler
   /**
    * The default constructor.
    */
@@ -111,7 +111,7 @@ public final class TypeHandlerRegistry {
 
     register(Reader.class, new ClobReaderTypeHandler());
     register(String.class, new StringTypeHandler());
-    register(String.class, JdbcType.CHAR, new StringTypeHandler());
+    register(String.class, JdbcType.CHAR, new StringTypeHandler()); // 比如 java中的String类型就会对应出好多JDBC类型，然后会有不同的Handler进行处理
     register(String.class, JdbcType.CLOB, new ClobTypeHandler());
     register(String.class, JdbcType.VARCHAR, new StringTypeHandler());
     register(String.class, JdbcType.LONGVARCHAR, new StringTypeHandler());
@@ -214,7 +214,7 @@ public final class TypeHandlerRegistry {
     return allTypeHandlersMap.get(handlerType);
   }
 
-  public <T> TypeHandler<T> getTypeHandler(Class<T> type) {
+  public <T> TypeHandler<T> getTypeHandler(Class<T> type) { // 根据java类型得到处理器类型
     return getTypeHandler((Type) type, null);
   }
 
@@ -235,24 +235,24 @@ public final class TypeHandlerRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  private <T> TypeHandler<T> getTypeHandler(Type type, JdbcType jdbcType) {
-    if (ParamMap.class.equals(type)) {
+  private <T> TypeHandler<T> getTypeHandler(Type type, JdbcType jdbcType) { // 根据java类型和JDBC类型得到对应的类型处理器
+    if (ParamMap.class.equals(type)) { // 不是单一的类型 直接返回
       return null;
     }
-    Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = getJdbcHandlerMap(type);
+    Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = getJdbcHandlerMap(type); // 先根据java类型得到对应的JdbcType
     TypeHandler<?> handler = null;
     if (jdbcHandlerMap != null) {
-      handler = jdbcHandlerMap.get(jdbcType);
-      if (handler == null) {
+      handler = jdbcHandlerMap.get(jdbcType); // 再根据JDBC类型寻找对应的处理器
+      if (handler == null) { // 如果处理器为空的话，就使用null键查询一次
         handler = jdbcHandlerMap.get(null);
       }
       if (handler == null) {
-        // #591
+        // #591 如果 jdbcHandlerMap只有一个类型处理器，就选他
         handler = pickSoleHandler(jdbcHandlerMap);
       }
     }
     // type drives generics here
-    return (TypeHandler<T>) handler;
+    return (TypeHandler<T>) handler; // 返回找到的类型处理器
   }
 
   private Map<JdbcType, TypeHandler<?>> getJdbcHandlerMap(Type type) {

@@ -964,35 +964,35 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
-  //
+  // 应用鉴别器  rs数据库的查询结果，当前的resultMap，属性的父级前缀columnPrefix，最终返回一个已经没有鉴别器的的新的ResultMap对象
   // DISCRIMINATOR
   //
 
   public ResultMap resolveDiscriminatedResultMap(ResultSet rs, ResultMap resultMap, String columnPrefix)
       throws SQLException {
-    Set<String> pastDiscriminators = new HashSet<>();
+    Set<String> pastDiscriminators = new HashSet<>(); // 已经处理过的鉴别器的存储
     Discriminator discriminator = resultMap.getDiscriminator();
     while (discriminator != null) {
-      final Object value = getDiscriminatorValue(rs, discriminator, columnPrefix);
-      final String discriminatedMapId = discriminator.getMapIdFor(String.valueOf(value));
-      if (!configuration.hasResultMap(discriminatedMapId)) {
+      final Object value = getDiscriminatorValue(rs, discriminator, columnPrefix); // 求解条件判断的结果,这个结果值就是鉴别器鉴别的依据
+      final String discriminatedMapId = discriminator.getMapIdFor(String.valueOf(value)); // 根据真实值判断属于哪个分支
+      if (!configuration.hasResultMap(discriminatedMapId)) {// 从接下来的case里面找到这个分支
         break;
       }
-      resultMap = configuration.getResultMap(discriminatedMapId);
-      Discriminator lastDiscriminator = discriminator;
-      discriminator = resultMap.getDiscriminator();
+      resultMap = configuration.getResultMap(discriminatedMapId); // 找出指定的resultMap
+      Discriminator lastDiscriminator = discriminator; // 继续分析下一层
+      discriminator = resultMap.getDiscriminator(); // 查看本resultMap是否还有鉴别器
       if (discriminator == lastDiscriminator || !pastDiscriminators.add(discriminatedMapId)) {
-        break;
+        break; // 如果成环了，进行退出
       }
     }
     return resultMap;
   }
-
+  // 求解鉴别器条件判断的结果，计算出鉴别器的value对应的真实结果
   private Object getDiscriminatorValue(ResultSet rs, Discriminator discriminator, String columnPrefix)
       throws SQLException {
     final ResultMapping resultMapping = discriminator.getResultMapping();
-    final TypeHandler<?> typeHandler = resultMapping.getTypeHandler();
-    return typeHandler.getResult(rs, prependPrefix(resultMapping.getColumn(), columnPrefix));
+    final TypeHandler<?> typeHandler = resultMapping.getTypeHandler(); // 要鉴别的字段的typeHandler
+    return typeHandler.getResult(rs, prependPrefix(resultMapping.getColumn(), columnPrefix)); // // 得到列名，然后取出列的值
   }
 
   private String prependPrefix(String columnName, String prefix) {

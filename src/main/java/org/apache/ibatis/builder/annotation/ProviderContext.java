@@ -17,7 +17,7 @@ package org.apache.ibatis.builder.annotation;
 
 import java.lang.reflect.Method;
 
-/**
+/** sql提供程序方法的上下文对象。 仅仅包装了三个属性，便于传递和使用
  * The context object for sql provider method.
  *
  * @author Kazuki Shimizu
@@ -26,9 +26,9 @@ import java.lang.reflect.Method;
  */
 public final class ProviderContext {
 
-  private final Class<?> mapperType;
-  private final Method mapperMethod;
-  private final String databaseId;
+  private final Class<?> mapperType; // 提供映射信息的类
+  private final Method mapperMethod; // 提供映射信息的方法，该方法属于mapperType类
+  private final String databaseId; // 数据库编号
 
   /**
    * Constructor.

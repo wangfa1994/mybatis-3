@@ -112,7 +112,7 @@ public class Configuration {
   protected boolean useColumnLabel = true; // settings标签中的子标签
   protected boolean cacheEnabled = true; // settings标签中的子标签   二级缓存配置属性
   protected boolean callSettersOnNulls; // settings标签中的子标签
-  protected boolean useActualParamName = true; // settings标签中的子标签
+  protected boolean useActualParamName = true; // settings标签中的子标签 这个主要是处理mapper接口中方法的参数是否使用了真实形参进行处理，默认是使用了，可以进行没有标注@paramc参数的解析
   protected boolean returnInstanceForEmptyRow; // settings标签中的子标签
   protected boolean shrinkWhitespacesInSql; // settings标签中的子标签
   protected boolean nullableOnForEach; // settings标签中的子标签
@@ -154,7 +154,7 @@ public class Configuration {
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this); // configuration标签下的子标签，类型解析器 ，// settings标签中的子标签的结果会被放置到这个对象中的 defaultEnumTypeHandler
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，初始化的时候进行了内部别名的定义， 还有我们自定义通过typeAliases标签进行定义的，用于简化我们的sql片段
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); //sql的语言驱动器，用来解析我们的sql
-  // mappedStatements 用来存放我们的命名空间+id 唯一的值，使用
+  // mappedStatements 用来存放我们的命名空间+id 唯一的值，这个是操作数据库语句的唯一编号,StrictMap,key 不能被覆盖的map
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>(
       "Mapped Statements collection")
           .conflictMessageProducer((savedValue, targetValue) -> ". please check " + savedValue.getResource() + " and "
@@ -162,15 +162,15 @@ public class Configuration {
   protected final Map<String, Cache> caches = new StrictMap<>("Caches collection"); // 解析mapper下中的cache标签  如果开启了二级缓存，各个mapper下的缓存策略
   protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection"); // mapper文件中的resultMap标签的解析存放值
   protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection"); // mapper文件中的parameterMap标签的解析存放值,每一个
-  protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection");
+  protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection"); //statement类型语句对应的KeyGenerator,在解析增删改查语句的时候会进行放置
 
-  protected final Set<String> loadedResources = new HashSet<>();
+  protected final Set<String> loadedResources = new HashSet<>(); // 已经处理过的资源集合
   protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers"); // mapper文件中标签sql片段的存储，在创建xmlMapperBuilder的时候进行传递
-  protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
-  protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>(); // mapper文件中的标签cache-ref 存放 这个存在异常的时候放值？
-  protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
-  protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
-
+  protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>(); // 存放暂时性错误的结点
+  protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>(); // mapper文件中的标签cache-ref 存放 这个存在异常的时候放值
+  protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>(); // 暂时性存放临时性的错误的结点，因为可能存在依赖关系，而依赖关系的结点还没有处理
+  protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>(); //存放暂时性错误的结点。第一轮解析完之后，进行第二轮错误节点的处理的时候，就会触发这些节点的调用，再次完成解析
+  //方案一：第一轮解析节点和处理依赖，将异常节点进行缓存，第二轮再进行解析一次，再次处理依赖关系， 方案二：第一轮解析所有的结点，不处理依赖关系，在第二轮解析的时候只处理依赖关系(spring模式)
   private final ReentrantLock incompleteResultMapsLock = new ReentrantLock();
   private final ReentrantLock incompleteCacheRefsLock = new ReentrantLock();
   private final ReentrantLock incompleteStatementsLock = new ReentrantLock();
@@ -943,7 +943,7 @@ public class Configuration {
     mapperRegistry.addMapper(type);
   }
 
-  public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+  public <T> T getMapper(Class<T> type, SqlSession sqlSession) { // 根据类型得到我们对应的代理对象，代理对象中包括配置信息和sqlSession
     return mapperRegistry.getMapper(type, sqlSession);
   }
 
@@ -1107,7 +1107,7 @@ public class Configuration {
       }
     }
   }
-
+  // key 不能被覆盖写的一个Map，并且值不能为null ， ConcurrentHashMap的类
   protected static class StrictMap<V> extends ConcurrentHashMap<String, V> {
 
     private static final long serialVersionUID = -4950446264854982944L;

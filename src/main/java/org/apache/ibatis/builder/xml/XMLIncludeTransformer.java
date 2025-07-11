@@ -30,7 +30,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/** 处理include标签和 占位符的
+/** 处理include标签和 占位符的   在增删改查语句中可以通过include标签进行语句片段的复用，使用XMLIncludeTransformer进行解析include标签
  * @author Frank D. Martinez [mnesarco]
  */
 public class XMLIncludeTransformer {
@@ -42,51 +42,51 @@ public class XMLIncludeTransformer {
     this.configuration = configuration;
     this.builderAssistant = builderAssistant;
   }
-
+  // 解析增删改查语句中包括的include标签 ，source为增删改查四类节点
   public void applyIncludes(Node source) {
     Properties variablesContext = new Properties();
-    Properties configurationVariables = configuration.getVariables();
+    Properties configurationVariables = configuration.getVariables(); // 获取全局的属性配置信息
     Optional.ofNullable(configurationVariables).ifPresent(variablesContext::putAll);
     applyIncludes(source, variablesContext, false);
   }
 
-  /**
+  /** 递归地在所有SQL片段中应用include。
    * Recursively apply includes through all SQL fragments.
-   *
+   * 四步走：第一步找到include目标节点，第二步用目标节点的内容替换include结点，第三步，将目标结点中的内容复制到当前目标结点的前面，第四步删除目标结点
    * @param source
    *          Include node in DOM tree
    * @param variablesContext
    *          Current context for static variables with values
    */
   private void applyIncludes(Node source, final Properties variablesContext, boolean included) {
-    if ("include".equals(source.getNodeName())) {
-      Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext);
+    if ("include".equals(source.getNodeName())) { // 当前节点是include结点
+      Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext);// 找出被应用的结点
       Properties toIncludeContext = getVariablesContext(source, variablesContext);
-      applyIncludes(toInclude, toIncludeContext, true);
+      applyIncludes(toInclude, toIncludeContext, true); // 递归处理被引用结点中的include结点
       if (toInclude.getOwnerDocument() != source.getOwnerDocument()) {
         toInclude = source.getOwnerDocument().importNode(toInclude, true);
-      }
+      } // 完成include结点的替换
       source.getParentNode().replaceChild(toInclude, source);
       while (toInclude.hasChildNodes()) {
         toInclude.getParentNode().insertBefore(toInclude.getFirstChild(), toInclude);
       }
       toInclude.getParentNode().removeChild(toInclude);
-    } else if (source.getNodeType() == Node.ELEMENT_NODE) {
+    } else if (source.getNodeType() == Node.ELEMENT_NODE) { //元素节点
       if (included && !variablesContext.isEmpty()) {
-        // replace variables in attribute values
+        // replace variables in attribute values 用属性值替代变量
         NamedNodeMap attributes = source.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
           Node attr = attributes.item(i);
           attr.setNodeValue(PropertyParser.parse(attr.getNodeValue(), variablesContext));
         }
       }
-      NodeList children = source.getChildNodes();
+      NodeList children = source.getChildNodes(); // 循环到下一层节点递归处理下层的include结点
       for (int i = 0; i < children.getLength(); i++) {
         applyIncludes(children.item(i), variablesContext, included);
       }
     } else if (included && (source.getNodeType() == Node.TEXT_NODE || source.getNodeType() == Node.CDATA_SECTION_NODE)
-        && !variablesContext.isEmpty()) {
-      // replace variables in text node
+        && !variablesContext.isEmpty()) { // 文本结点
+      // replace variables in text node 用属性值替换变量
       source.setNodeValue(PropertyParser.parse(source.getNodeValue(), variablesContext));
     }
   }

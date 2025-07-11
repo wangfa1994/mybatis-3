@@ -20,14 +20,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
+/** 类型处理器接口
  * @author Clinton Begin
  */
 public interface TypeHandler<T> {
-
+  // 设置一个参数，
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
-  /**
+  /** 得到一个结果，这个结果是泛型类型 T 方法名一致，方法参数不一致，这个是属于方法的重载
    * Gets the result.
    *
    * @param rs

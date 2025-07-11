@@ -49,7 +49,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
-/**
+/** 建造者的辅助类 继承BaseBuilder是为了要使用其中的方法，Mybatis映射文件的设置项非常多，命名空间，缓存共享，结果映射等，这些会被解析设置成不同的类，此类是解析这些的辅助类
  * @author Clinton Begin
  */
 public class MapperBuilderAssistant extends BaseBuilder {
@@ -109,11 +109,11 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
     try {
       unresolvedCacheRef = true;
-      Cache cache = configuration.getCache(namespace);
+      Cache cache = configuration.getCache(namespace); // 获取其他nameSpace的缓存对象
       if (cache == null) {
         throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.");
       }
-      currentCache = cache;
+      currentCache = cache; // 设置自己的缓存对象为其他的缓存对象，从而实现缓存共享
       unresolvedCacheRef = false;
       return cache;
     } catch (IllegalArgumentException e) {
@@ -150,31 +150,31 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return new ParameterMapping.Builder(configuration, property, javaTypeClass).jdbcType(jdbcType)
         .resultMapId(resultMap).mode(parameterMode).numericScale(numericScale).typeHandler(typeHandlerInstance).build();
   }
-
+  // 创建结果映射对象，解析我们的resultMap标签
   public ResultMap addResultMap(String id, Class<?> type, String extend, Discriminator discriminator,
       List<ResultMapping> resultMappings, Boolean autoMapping) {
     id = applyCurrentNamespace(id, false);
     extend = applyCurrentNamespace(extend, true);
 
-    if (extend != null) {
+    if (extend != null) { // 解析继承关系
       if (!configuration.hasResultMap(extend)) {
         throw new IncompleteElementException("Could not find a parent resultmap with id '" + extend + "'");
       }
-      ResultMap resultMap = configuration.getResultMap(extend);
+      ResultMap resultMap = configuration.getResultMap(extend); // 获取父级的resultMap
       List<ResultMapping> extendedResultMappings = new ArrayList<>(resultMap.getResultMappings());
-      extendedResultMappings.removeAll(resultMappings);
+      extendedResultMappings.removeAll(resultMappings); // 移除父级中子类重写的相关属性
       // Remove parent constructor if this resultMap declares a constructor.
-      boolean declaresConstructor = false;
+      boolean declaresConstructor = false; // 如果当前resultMap声明了构造函数，则删除父构造函数。
       for (ResultMapping resultMapping : resultMappings) {
         if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
           declaresConstructor = true;
           break;
         }
       }
-      if (declaresConstructor) {
+      if (declaresConstructor) { // 移除
         extendedResultMappings.removeIf(resultMapping -> resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR));
       }
-      resultMappings.addAll(extendedResultMappings);
+      resultMappings.addAll(extendedResultMappings); // 将移除之后的父类配置添加到子类的配置对象中
     }
     ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
         .discriminator(discriminator).build();

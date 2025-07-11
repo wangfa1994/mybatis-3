@@ -31,24 +31,24 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.reflection.ParamNameUtil;
 import org.apache.ibatis.session.Configuration;
 
-/**
- * @author Clinton Begin
+/** 数据库操作结点中使用resultType可以直接映射到java对象，而使用resultMap则更加灵活的来定义输出结果的映射方式
+ * @author Clinton Begin 【支持输出结果的组装，判断，懒加载等】
  */
 public class ResultMap {
-  private Configuration configuration;
+  private Configuration configuration; // 全局配置信息
 
-  private String id;
-  private Class<?> type;
-  private List<ResultMapping> resultMappings;
-  private List<ResultMapping> idResultMappings;
-  private List<ResultMapping> constructorResultMappings;
-  private List<ResultMapping> propertyResultMappings;
-  private Set<String> mappedColumns;
-  private Set<String> mappedProperties;
-  private Discriminator discriminator;
-  private boolean hasNestedResultMaps;
-  private boolean hasNestedQueries;
-  private Boolean autoMapping;
+  private String id;   // xml中映射的id属性
+  private Class<?> type; // 最终输出结果对应的Java类
+  private List<ResultMapping> resultMappings; // result列表 映射为ResultMapping，所有的属性
+  private List<ResultMapping> idResultMappings; // xml中id和idArg的列表
+  private List<ResultMapping> constructorResultMappings; // <constructor>相关的属性列表
+  private List<ResultMapping> propertyResultMappings;  // 非<constructor>相关的属性列表 排除构造器之类的属性
+  private Set<String> mappedColumns; // 所有参与映射的数据库字段的集合
+  private Set<String> mappedProperties; // 所有参与映射的Java对象属性的集合
+  private Discriminator discriminator; // 鉴别器
+  private boolean hasNestedResultMaps; // 是否存在嵌套映射
+  private boolean hasNestedQueries; // 是否存在嵌套查询
+  private Boolean autoMapping; // 是否启动自动映射
 
   private ResultMap() {
   }

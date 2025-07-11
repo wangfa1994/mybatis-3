@@ -24,7 +24,7 @@ class ByteArrayUtils {
     // Prevent Instantiation
   }
 
-  static byte[] convertToPrimitiveArray(Byte[] objects) {
+  static byte[] convertToPrimitiveArray(Byte[] objects) { // 转换为原始数组 包装类型到基本类型
     final byte[] bytes = new byte[objects.length];
     for (int i = 0; i < objects.length; i++) {
       bytes[i] = objects[i];

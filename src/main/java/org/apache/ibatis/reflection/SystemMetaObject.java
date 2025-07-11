@@ -20,7 +20,7 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 
-/**
+/** MetaObject的默认工具类，使用了一些默认值进行处理
  * @author Clinton Begin
  */
 public final class SystemMetaObject {

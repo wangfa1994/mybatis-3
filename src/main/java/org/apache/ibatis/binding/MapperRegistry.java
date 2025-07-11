@@ -26,29 +26,29 @@ import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 
-/**
+/** MapperRegistry将我们的映射的Java接口和MapperProxyFactory进行缓存，MapperProxyFactory代理工厂中又存放了我们的代理接口和接口中方法的缓存
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
  */
 public class MapperRegistry {
 
-  private final Configuration config;
-  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new ConcurrentHashMap<>(); // 存放了我们的mapper接口 和 对应的创建mapper的代理工厂
-
+  private final Configuration config; // 这个是我们总的配置文件，他是怎么设置的呢？
+  private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new ConcurrentHashMap<>(); // 存放了我们的mapper接口 和 对应的创建mapper的代理工厂 ，MapperProxy的调用会转到MapperMethod上
+  // knownMappers 将我们的映射接口和MapperProxy进行了关联
   public MapperRegistry(Configuration config) {
     this.config = config;
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
-    final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
+  public <T> T getMapper(Class<T> type, SqlSession sqlSession) { // getMapper方法可以直接根据类型得到我们的mapperProxyFactory,进而得到我们的mapperProxy
+    final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type); // 得到我们接口对应的代理工厂
     if (mapperProxyFactory == null) {
       throw new BindingException("Type " + type + " is not known to the MapperRegistry.");
     }
     try {
-      return mapperProxyFactory.newInstance(sqlSession);
-    } catch (Exception e) {
+      return mapperProxyFactory.newInstance(sqlSession); // 得到我们的代理类，注意这个只是返回了代理类，但是代理类中的方法执行区分是在哪里？
+    } catch (Exception e) { //
       throw new BindingException("Error getting mapper instance. Cause: " + e, e);
     }
   }

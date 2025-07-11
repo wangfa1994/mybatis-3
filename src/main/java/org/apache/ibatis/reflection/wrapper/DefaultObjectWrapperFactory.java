@@ -18,7 +18,7 @@ package org.apache.ibatis.reflection.wrapper;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ReflectionException;
 
-/**
+/** ObjectWrapperFactory 是对象包装器工厂的接口，产生ObjectWrapper,允许用户通过配置objectWrapperFactory节点来注入新的ObjectWrapperFactory
  * @author Clinton Begin
  */
 public class DefaultObjectWrapperFactory implements ObjectWrapperFactory {

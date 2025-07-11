@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
-/**
+/** 提供一个非常简单的API，用于访问应用服务器中的资源。 使用了内部类的单例模式
  * Provides a very simple API for accessing resources within an application server.
  *
  * @author Ben Gunter
@@ -35,17 +35,17 @@ import org.apache.ibatis.logging.LogFactory;
 public abstract class VFS {
   private static final Log log = LogFactory.getLog(VFS.class);
 
-  /** The built-in implementations. */
+  /** The built-in implementations. 内置实现  */
   private static final Class<?>[] IMPLEMENTATIONS = { JBoss6VFS.class, DefaultVFS.class };
 
-  /**
+  /** 用户自定义的实现，添加起来
    * The list to which implementations are added by {@link #addImplClass(Class)}.
    */
   private static final List<Class<? extends VFS>> USER_IMPLEMENTATIONS = new ArrayList<>();
 
-  /** Singleton instance holder. */
+  /** Singleton instance holder. 一个单例实例的持有器 */
   private static class VFSHolder {
-    static final VFS INSTANCE = createVFS();
+    static final VFS INSTANCE = createVFS(); // 最终的实例对象，利用了单例模式的内部类实现
 
     @SuppressWarnings("unchecked")
     static VFS createVFS() {
@@ -58,7 +58,7 @@ public abstract class VFS {
       for (int i = 0; vfs == null || !vfs.isValid(); i++) {
         Class<? extends VFS> impl = impls.get(i);
         try {
-          vfs = impl.getDeclaredConstructor().newInstance();
+          vfs = impl.getDeclaredConstructor().newInstance(); // 创建对应的实例
           if (!vfs.isValid() && log.isDebugEnabled()) {
             log.debug("VFS implementation " + impl.getName() + " is not valid in this environment.");
           }
@@ -76,11 +76,11 @@ public abstract class VFS {
       return vfs;
     }
 
-    private VFSHolder() {
+    private VFSHolder() { // 内部类私有化
     }
   }
 
-  /**
+  /** 获取对应的单例实例，静态内部类的实现方式，这种天然线程安全，是由jvm保证的
    * Get the singleton {@link VFS} instance. If no {@link VFS} implementation can be found for the current environment,
    * then this method returns null.
    *
@@ -206,9 +206,9 @@ public abstract class VFS {
    */
   public abstract boolean isValid();
 
-  /**
+  /** 列出指定 url下符合条件的资源名称
    * Recursively list the full resource path of all the resources that are children of the resource identified by a URL.
-   *
+   * 递归列出由URL标识的资源的所有子资源的完整资源路径
    * @param url
    *          The URL that identifies the resource to list.
    * @param forPath

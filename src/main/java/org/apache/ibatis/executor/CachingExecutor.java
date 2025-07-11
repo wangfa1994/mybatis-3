@@ -106,7 +106,7 @@ public class CachingExecutor implements Executor {
         }
         return list;
       }
-    }
+    } // 缓存不等于null的情况下使用缓存,否则的话通过delegate进行委派执行
     return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 

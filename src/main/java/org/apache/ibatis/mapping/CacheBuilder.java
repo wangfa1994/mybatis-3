@@ -34,7 +34,7 @@ import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
-/**
+/** 缓存建造者类，负责完成缓存对象的创建
  * @author Clinton Begin
  */
 public class CacheBuilder {

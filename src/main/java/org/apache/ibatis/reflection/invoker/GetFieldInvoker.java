@@ -32,7 +32,7 @@ public class GetFieldInvoker implements Invoker {
   @Override
   public Object invoke(Object target, Object[] args) throws IllegalAccessException {
     try {
-      return field.get(target);
+      return field.get(target); //通过反射直接获取目标对象的属性值
     } catch (IllegalAccessException e) {
       if (Reflector.canControlMemberAccessible()) {
         field.setAccessible(true);

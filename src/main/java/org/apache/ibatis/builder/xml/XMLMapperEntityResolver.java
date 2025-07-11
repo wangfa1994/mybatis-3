@@ -24,7 +24,7 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-/**
+/** MyBatis dtd的脱机实体解析器。  在没有网络的情况下进行得到xml对应的DTD文件
  * Offline entity resolver for the MyBatis DTDs.
  *
  * @author Clinton Begin
@@ -42,7 +42,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
 
   /**
    * Converts a public DTD into a local one.
-   *
+   * 根据 xml文件的头部信息的publicId  和 systemId 进行返回对应的DTD文件流
    * @param publicId
    *          The public id that is what comes after "PUBLIC"
    * @param systemId
@@ -53,16 +53,16 @@ public class XMLMapperEntityResolver implements EntityResolver {
    * @throws org.xml.sax.SAXException
    *           If anything goes wrong
    */
-  @Override
+  @Override // 通过字符串匹配找出了本地的 DTD文档并返回,可以在没有网络的情况下进行校验xml文件
   public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
     try {
       if (systemId != null) {
-        String lowerCaseSystemId = systemId.toLowerCase(Locale.ENGLISH);
+        String lowerCaseSystemId = systemId.toLowerCase(Locale.ENGLISH); // 转小写
         if (lowerCaseSystemId.contains(MYBATIS_CONFIG_SYSTEM) || lowerCaseSystemId.contains(IBATIS_CONFIG_SYSTEM)) {
-          return getInputSource(MYBATIS_CONFIG_DTD, publicId, systemId);
+          return getInputSource(MYBATIS_CONFIG_DTD, publicId, systemId); //判断说明是配置文件，返回本地的配置文件的dtd文件流
         }
         if (lowerCaseSystemId.contains(MYBATIS_MAPPER_SYSTEM) || lowerCaseSystemId.contains(IBATIS_MAPPER_SYSTEM)) {
-          return getInputSource(MYBATIS_MAPPER_DTD, publicId, systemId);
+          return getInputSource(MYBATIS_MAPPER_DTD, publicId, systemId);//判断说明是映射文件，返回本地的映射文件的dtd文件流
         }
       }
       return null;
@@ -85,5 +85,13 @@ public class XMLMapperEntityResolver implements EntityResolver {
     }
     return source;
   }
+
+  /*
+  <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+        XML文件头部   resolveEntity方法
+        publicId 为 -//mybatis.org//DTD Config 3.0//EN
+        systemId为： http://mybatis.org/dtd/mybatis-3-config.dtd
+  * */
 
 }

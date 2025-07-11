@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import org.apache.ibatis.executor.result.ResultMapException;
 import org.apache.ibatis.session.Configuration;
 
-/**
+/** 类型处理器的基本实现接口  实现了 类型处理器的规范，继承了类型参考器
  * The base {@link TypeHandler} for references a generic type.
  * <p>
  * Important: Since 3.5.0, This class never call the {@link ResultSet#wasNull()} and {@link CallableStatement#wasNull()}
@@ -62,7 +62,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
       if (jdbcType == null) {
         throw new TypeException("JDBC requires that the JdbcType must be specified for all nullable parameters.");
       }
-      try {
+      try { // 将指定的参数设置为SQL NULL。
         ps.setNull(i, jdbcType.TYPE_CODE);
       } catch (SQLException e) {
         throw new TypeException("Error setting null for parameter #" + i + " with JdbcType " + jdbcType + " . "
@@ -70,7 +70,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
             + "Cause: " + e, e);
       }
     } else {
-      try {
+      try { // 否则的话，进行参数的设置
         setNonNullParameter(ps, i, parameter, jdbcType);
       } catch (Exception e) {
         throw new TypeException("Error setting non null for parameter #" + i + " with JdbcType " + jdbcType + " . "
@@ -82,7 +82,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
 
   @Override
   public T getResult(ResultSet rs, String columnName) throws SQLException {
-    try {
+    try { // 实现了标准，转嫁给子类进行实现
       return getNullableResult(rs, columnName);
     } catch (Exception e) {
       throw new ResultMapException("Error attempting to get column '" + columnName + "' from result set.  Cause: " + e,
@@ -109,11 +109,11 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
           "Error attempting to get column #" + columnIndex + " from callable statement.  Cause: " + e, e);
     }
   }
-
+  // 向 PreparedStatement对象中的指定变量位置写入一个不为 null的值
   public abstract void setNonNullParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType)
       throws SQLException;
 
-  /**
+  /** 获取可空的结果 一个方法的三种类型，方法的重载  参数不同
    * Gets the nullable result.
    *
    * @param rs

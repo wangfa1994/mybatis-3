@@ -28,13 +28,13 @@ import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/** 配置文件的最基本建造者
+/** 配置文件的最基本建造者 是builder包中建造者的基类
  * @author Clinton Begin
  */
 public abstract class BaseBuilder {
-  protected final Configuration configuration;
-  protected final TypeAliasRegistry typeAliasRegistry;
-  protected final TypeHandlerRegistry typeHandlerRegistry;
+  protected final Configuration configuration; // 全局配置类
+  protected final TypeAliasRegistry typeAliasRegistry; // 类型的别名注册器
+  protected final TypeHandlerRegistry typeHandlerRegistry; //类型注册器
 
   public BaseBuilder(Configuration configuration) {
     this.configuration = configuration; //全局配置信息
@@ -49,7 +49,7 @@ public abstract class BaseBuilder {
   protected Pattern parseExpression(String regex, String defaultValue) {
     return Pattern.compile(regex == null ? defaultValue : regex);
   }
-
+  // *ValueOf系列的方法将输入的参数转换成指定的类型，支持默认值的设置
   protected Boolean booleanValueOf(String value, Boolean defaultValue) {
     return value == null ? defaultValue : Boolean.valueOf(value);
   }
@@ -62,7 +62,7 @@ public abstract class BaseBuilder {
     value = value == null ? defaultValue : value;
     return new HashSet<>(Arrays.asList(value.split(",")));
   }
-
+  // resolve*系列的方法 字符串转枚举类型方法，根据字符串找出指定的枚举类型并返回
   protected JdbcType resolveJdbcType(String alias) {
     try {
       return alias == null ? null : JdbcType.valueOf(alias);
@@ -86,7 +86,7 @@ public abstract class BaseBuilder {
       throw new BuilderException("Error resolving ParameterMode. Cause: " + e, e);
     }
   }
-
+  // 根据类型别名创建类型实例
   protected Object createInstance(String alias) {
     Class<?> clazz = resolveClass(alias);
     try {
@@ -103,7 +103,7 @@ public abstract class BaseBuilder {
       throw new BuilderException("Error resolving class. Cause: " + e, e);
     }
   }
-
+  //根据类型处理器别名返回类型处理器实例
   protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
     if (typeHandlerAlias == null) {
       return null;

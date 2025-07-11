@@ -28,19 +28,19 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
-/** 增删改查sql的语句的包装类
+/** 增删改查sql的语句的包装类 ， 解析实体类
  * @author Clinton Begin
  */
 public final class MappedStatement {
 
   private String resource; //mapped所属那个资源的路径
   private Configuration configuration; // 整体的配置文件
-  private String id;  // 解析出来的命名空间
+  private String id;  // 解析出来的命名空间+方法，唯一定位xml文件中的信息
   private Integer fetchSize; // 增删改查sql中的fetchSize属性
   private Integer timeout; // 增删改查sql中的timeout属性
   private StatementType statementType; // 增删改查sql中的statementType属性
   private ResultSetType resultSetType; // 增删改查sql中的resultType属性
-  private SqlSource sqlSource; // sql片段语句
+  private SqlSource sqlSource; // sql片段语句，标签中的带占位符的sql语句
   private Cache cache; //二级缓存策略 这个是装饰者模式处理
   private ParameterMap parameterMap; //增删改查sql中的parameterMap属性  参数类型
   private List<ResultMap> resultMaps; //

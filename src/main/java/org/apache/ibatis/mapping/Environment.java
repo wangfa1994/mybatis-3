@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 
 import org.apache.ibatis.transaction.TransactionFactory;
 
-/** 这个环境是通过内置的Builder静态类进行创建的
+/** 这个环境是通过内置的Builder静态类进行创建的  对应这environment节点，也是一个解析实体类
  * @author Clinton Begin
  */
 public final class Environment {

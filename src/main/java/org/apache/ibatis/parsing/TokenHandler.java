@@ -15,9 +15,10 @@
  */
 package org.apache.ibatis.parsing;
 
-/**
+/**  解析式的顶级接口，根据表达式，进行解析出来真正的值,不同的表达式，有不同的开闭符号，有不同的解析式实现进行处理
  * @author Clinton Begin
  */
 public interface TokenHandler {
+  /** 根据传入的内容进行匹配对应的值*/
   String handleToken(String content);
 }

@@ -23,13 +23,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.ibatis.binding.MapperProxy.MapperMethodInvoker;
 import org.apache.ibatis.session.SqlSession;
 
-/**
+/** 用来产生我们的 MapperProxy类的工厂
  * @author Lasse Voss
  */
 public class MapperProxyFactory<T> {
 
   private final Class<T> mapperInterface; // mapper代理的接口
-  private final Map<Method, MapperMethodInvoker> methodCache = new ConcurrentHashMap<>();
+  private final Map<Method, MapperMethodInvoker> methodCache = new ConcurrentHashMap<>(); //缓存这个接口中的方法对应的MapperMethodInvoker,其实现中存在了MapperMethod，methodCache是怎么放进去值的
 
   public MapperProxyFactory(Class<T> mapperInterface) {
     this.mapperInterface = mapperInterface;
@@ -50,7 +50,7 @@ public class MapperProxyFactory<T> {
 
   public T newInstance(SqlSession sqlSession) {
     final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface, methodCache);
-    return newInstance(mapperProxy);
+    return newInstance(mapperProxy); // MapperProxy 实现了 InvocationHandler接口，jdk动态代理
   }
 
 }

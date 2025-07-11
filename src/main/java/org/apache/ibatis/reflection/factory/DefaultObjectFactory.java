@@ -48,7 +48,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T create(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
-    Class<?> classToCreate = resolveInterface(type);
+    Class<?> classToCreate = resolveInterface(type); // 先进行判断给定的类型是否是接口类型，如果是的话，则返回一个符合改接口实现的类
     // we know types are assignable
     return (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
   }
@@ -56,19 +56,19 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
   private <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
       Constructor<T> constructor;
-      if (constructorArgTypes == null || constructorArgs == null) {
+      if (constructorArgTypes == null || constructorArgs == null) { // 如果参数类型列表和参数列表为null 直接使用无惨构造器
         constructor = type.getDeclaredConstructor();
         try {
-          return constructor.newInstance();
+          return constructor.newInstance(); // 使用无惨构造器进行创建对象
         } catch (IllegalAccessException e) {
           if (Reflector.canControlMemberAccessible()) {
-            constructor.setAccessible(true);
+            constructor.setAccessible(true); // 创建失败，再进行一次设置创建
             return constructor.newInstance();
           }
           throw e;
         }
       }
-      constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0]));
+      constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0])); // 根据输入参数类型查找指定的构造器
       try {
         return constructor.newInstance(constructorArgs.toArray(new Object[0]));
       } catch (IllegalAccessException e) {
@@ -80,11 +80,11 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
       }
     } catch (Exception e) {
       String argTypes = Optional.ofNullable(constructorArgTypes).orElseGet(Collections::emptyList).stream()
-          .map(Class::getSimpleName).collect(Collectors.joining(","));
+          .map(Class::getSimpleName).collect(Collectors.joining(",")); // 收集所有的参数类型
       String argValues = Optional.ofNullable(constructorArgs).orElseGet(Collections::emptyList).stream()
-          .map(String::valueOf).collect(Collectors.joining(","));
+          .map(String::valueOf).collect(Collectors.joining(",")); // 收集所有的参数
       throw new ReflectionException("Error instantiating " + type + " with invalid types (" + argTypes + ") or values ("
-          + argValues + "). Cause: " + e, e);
+          + argValues + "). Cause: " + e, e);// 抛出异常
     }
   }
 
@@ -99,14 +99,14 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     } else if (type == Set.class) {
       classToCreate = HashSet.class;
     } else {
-      classToCreate = type;
+      classToCreate = type; //如果不是jdk的还原样返回
     }
     return classToCreate;
   }
 
   @Override
   public <T> boolean isCollection(Class<T> type) {
-    return Collection.class.isAssignableFrom(type);
+    return Collection.class.isAssignableFrom(type); // 判断某一个类型是否来自Collection
   }
 
 }

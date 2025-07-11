@@ -89,12 +89,12 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.UnknownTypeHandler;
 
-/**
+/**  注解映射的解析类 用来解析 接口上面对应的@select @Update等注解 @SelectProvider(type = com.wf.mapper.SelectProvider.class,method = "findByIdProvider")
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public class MapperAnnotationBuilder {
-
+  // 直接初始化能处理的注解，直接注解映射   间接注解映射
   private static final Set<Class<? extends Annotation>> statementAnnotationTypes = Stream
       .of(Select.class, Update.class, Insert.class, Delete.class, SelectProvider.class, UpdateProvider.class,
           InsertProvider.class, DeleteProvider.class)
@@ -102,7 +102,7 @@ public class MapperAnnotationBuilder {
 
   private final Configuration configuration;
   private final MapperBuilderAssistant assistant;
-  private final Class<?> type;
+  private final Class<?> type; // 类名
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
@@ -110,35 +110,35 @@ public class MapperAnnotationBuilder {
     this.configuration = configuration;
     this.type = type;
   }
-
+/* <mapper class="com.wf.mapper.IUserAnnMapper"/> */
   public void parse() {
-    String resource = type.toString();
-    if (!configuration.isResourceLoaded(resource)) {
-      loadXmlResource();
-      configuration.addLoadedResource(resource);
+    String resource = type.toString(); // 类名
+    if (!configuration.isResourceLoaded(resource)) { //判断是否已经进行处理过了
+      loadXmlResource(); //判断类路径下是否存在xml文件，进行解析处理
+      configuration.addLoadedResource(resource); //记录资源路径，上面额判断的属性就是从这个添加的一部分
       assistant.setCurrentNamespace(type.getName());
       parseCache();
       parseCacheRef();
-      for (Method method : type.getMethods()) {
-        if (!canHaveStatement(method)) {
+      for (Method method : type.getMethods()) { //处理对应的方法，
+        if (!canHaveStatement(method)) { // 排除桥接方法和默认方法
           continue;
         }
         if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
             && method.getAnnotation(ResultMap.class) == null) {
-          parseResultMap(method);
+          parseResultMap(method); // 针对Select方法处理
         }
         try {
-          parseStatement(method);
+          parseStatement(method); // 解析方法 读不懂的表达式处理
         } catch (IncompleteElementException e) {
           configuration.addIncompleteMethod(new MethodResolver(this, method));
         }
       }
     }
-    configuration.parsePendingMethods(false);
+    configuration.parsePendingMethods(false); // 解析异常的再次进行处理
   }
 
   private static boolean canHaveStatement(Method method) {
-    // issue #237
+    // issue #237 什么是桥接方法：桥接方法是为了匹配泛型的类型擦除而由编译器自动引入的，并非用户编写的方法
     return !method.isBridge() && !method.isDefault();
   }
 
@@ -279,13 +279,13 @@ public class MapperAnnotationBuilder {
     return null;
   }
 
-  void parseStatement(Method method) {
-    final Class<?> parameterTypeClass = getParameterType(method);
-    final LanguageDriver languageDriver = getLanguageDriver(method);
+  void parseStatement(Method method) { //解析方法上的注解信息
+    final Class<?> parameterTypeClass = getParameterType(method); //得到参数类型
+    final LanguageDriver languageDriver = getLanguageDriver(method); // 获取方法的脚本语言驱动
 
     getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
       final SqlSource sqlSource = buildSqlSource(statementAnnotation.getAnnotation(), parameterTypeClass,
-          languageDriver, method);
+          languageDriver, method); //根据注解类型获得匹配到对应的方法进行处理得到 sqlSource
       final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
       final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options) x.getAnnotation())
           .orElse(null);
@@ -588,7 +588,7 @@ public class MapperAnnotationBuilder {
   }
 
   private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,
-      LanguageDriver languageDriver) {
+      LanguageDriver languageDriver) { //将对应的sql语句拼接起来交给LanguageDriver进行处理
     return languageDriver.createSqlSource(configuration, String.join(" ", strings).trim(), parameterTypeClass);
   }
 

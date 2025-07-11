@@ -48,28 +48,29 @@ import org.apache.ibatis.util.MapUtil;
 /**
  * This class represents a cached set of class definition information that allows for easy mapping between property
  * names and getter/setter methods.
- *
+ * Reflector 类将一个类反射解析后，会将该类的属性、方法等一一归类放到类中的各个属性中。因此 Reflector类完成了主要的反射解析工作，这也是我们将其称为反射核心类的原因。
+ *reflection包中的其他类则多是在其反射结果的基础上进一步包装的，使整个反射功能更易用。
  * @author Clinton Begin
  */
 public class Reflector {
 
   private static final MethodHandle isRecordMethodHandle = getIsRecordMethodHandle();
-  private final Class<?> type;
-  private final String[] readablePropertyNames;
-  private final String[] writablePropertyNames;
-  private final Map<String, Invoker> setMethods = new HashMap<>();
-  private final Map<String, Invoker> getMethods = new HashMap<>();
-  private final Map<String, Class<?>> setTypes = new HashMap<>();
-  private final Map<String, Class<?>> getTypes = new HashMap<>();
-  private Constructor<?> defaultConstructor;
+  private final Class<?> type; // 要被反射解析的类
+  private final String[] readablePropertyNames; //能够读的属性列表，符合Java Bean规范的get方法属性列表
+  private final String[] writablePropertyNames; //能够写的属性列表
+  private final Map<String, Invoker> setMethods = new HashMap<>(); //set方法映射表， key为属性名，值为对应的封装的可以反射调用的Invoker
+  private final Map<String, Invoker> getMethods = new HashMap<>();//get方法映射表， key为属性名，值为对应的封装的可以反射调用的Invoker
+  private final Map<String, Class<?>> setTypes = new HashMap<>(); // set方法输入类型，key为属性名，值为对应的属性的set方法的第一个参数类型
+  private final Map<String, Class<?>> getTypes = new HashMap<>(); // get方法输出类型，key为属性名，值为对应的属性的get方法的返回值类型
+  private Constructor<?> defaultConstructor; //默认的构造器
 
-  private final Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
+  private final Map<String, String> caseInsensitivePropertyMap = new HashMap<>(); //大小写无关的属性映射表，key为属性名全部大写，值为属性名
 
-  public Reflector(Class<?> clazz) {
+  public Reflector(Class<?> clazz) { // 通过构造器进行一些变量的初始化
     type = clazz;
-    addDefaultConstructor(clazz);
+    addDefaultConstructor(clazz); //解析默认的构造器
     Method[] classMethods = getClassMethods(clazz);
-    if (isRecord(type)) {
+    if (isRecord(type)) { // jdk15
       addRecordGetMethods(classMethods);
     } else {
       addGetMethods(classMethods);
@@ -78,7 +79,7 @@ public class Reflector {
     }
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
-    for (String propName : readablePropertyNames) {
+    for (String propName : readablePropertyNames) { // 放入大小无关的映射表中
       caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
     }
     for (String propName : writablePropertyNames) {
@@ -210,7 +211,7 @@ public class Reflector {
   private void addSetMethod(String name, Method method) {
     MethodInvoker invoker = new MethodInvoker(method);
     setMethods.put(name, invoker);
-    Type[] paramTypes = TypeParameterResolver.resolveParamTypes(method, type);
+    Type[] paramTypes = TypeParameterResolver.resolveParamTypes(method, type); // 用来解析对应的方法和参数类型
     setTypes.put(name, typeToClass(paramTypes[0]));
   }
 
@@ -288,7 +289,7 @@ public class Reflector {
   private Method[] getClassMethods(Class<?> clazz) {
     Map<String, Method> uniqueMethods = new HashMap<>();
     Class<?> currentClass = clazz;
-    while (currentClass != null && currentClass != Object.class) {
+    while (currentClass != null && currentClass != Object.class) { // 使用while循环，递归处理类的方法
       addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
       // we also need to look for interface methods -

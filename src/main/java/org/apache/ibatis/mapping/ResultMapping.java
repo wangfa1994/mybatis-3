@@ -25,20 +25,20 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/**
+/** ResultMapping 用来映射 ResultMap标签中一个个的result标签 <result property="name" column="name"/>
  * @author Clinton Begin
  */
 public class ResultMapping {
 
-  private Configuration configuration;
+  private Configuration configuration; //
   private String property;
   private String column;
   private Class<?> javaType;
   private JdbcType jdbcType;
   private TypeHandler<?> typeHandler;
-  private String nestedResultMapId;
-  private String nestedQueryId;
-  private Set<String> notNullColumns;
+  private String nestedResultMapId; // 嵌套的resultMapid
+  private String nestedQueryId; // 嵌套的查询id
+  private Set<String> notNullColumns; // 不为空的字段
   private String columnPrefix;
   private List<ResultFlag> flags;
   private List<ResultMapping> composites;
@@ -49,7 +49,7 @@ public class ResultMapping {
   ResultMapping() {
   }
 
-  public static class Builder {
+  public static class Builder {  // 使用了内部建造者模式  ，基于内部类的建造者模式提升了类的内聚性
     private final ResultMapping resultMapping = new ResultMapping();
 
     public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {

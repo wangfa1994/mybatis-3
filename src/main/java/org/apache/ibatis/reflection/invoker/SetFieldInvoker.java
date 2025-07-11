@@ -23,7 +23,7 @@ import org.apache.ibatis.reflection.Reflector;
  * @author Clinton Begin
  */
 public class SetFieldInvoker implements Invoker {
-  private final Field field;
+  private final Field field; // 设置属性值操作，需要知道那个属性，通过构造器传入
 
   public SetFieldInvoker(Field field) {
     this.field = field;
@@ -32,7 +32,7 @@ public class SetFieldInvoker implements Invoker {
   @Override
   public Object invoke(Object target, Object[] args) throws IllegalAccessException {
     try {
-      field.set(target, args[0]);
+      field.set(target, args[0]); // 通过反射直接设置目标对象的属性值
     } catch (IllegalAccessException e) {
       if (!Reflector.canControlMemberAccessible()) {
         throw e;

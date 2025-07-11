@@ -17,13 +17,14 @@ package org.apache.ibatis.reflection.wrapper;
 
 import org.apache.ibatis.reflection.MetaObject;
 
-/**
+/** 用来产生对应的ObjectWrapper对象的工厂  【】
  * @author Clinton Begin
  */
 public interface ObjectWrapperFactory {
 
+  // 判断对象是否是被包装的，如果是可以直接调用下面的方法进行得到对应的对象包装类
   boolean hasWrapperFor(Object object);
-
+  //从MetaObject 和 Object 中得到对应的对象包装 MetaObject是控制元信息的
   ObjectWrapper getWrapperFor(MetaObject metaObject, Object object);
 
 }

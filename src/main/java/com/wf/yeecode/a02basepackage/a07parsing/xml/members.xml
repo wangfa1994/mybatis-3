@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?> <!--文档的第一行 xml的声明  版本和编码-->
+<members><!--根元素 每一个xml文件必须有一个根元素节点 -->
+
+    <user type="student"> <!--元素节点-->
+        <id>1</id> <!--元素节点可以包括其他元素节点-->
+        <name>zhangSan</name>
+        <school>Sunny school</school>
+    </user>
+
+    <user> <!--元素节点-->
+        <id>2</id>
+        <name>liSi</name>
+        <school>Sunny school</school>
+    </user>
+
+</members>

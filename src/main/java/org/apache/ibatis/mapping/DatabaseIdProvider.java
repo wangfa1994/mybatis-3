@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-/**
+/** 用来 支持多数据库 规范  两个实现 一个已经废弃
  * Should return an id to identify the type of this database. That id can be used later on to build different queries
  * for each database type This mechanism enables supporting multiple vendors or versions
  *
@@ -29,8 +29,8 @@ import javax.sql.DataSource;
 public interface DatabaseIdProvider {
 
   default void setProperties(Properties p) {
-    // NOP
+    // NOP  将 MyBatis配置文件中设置在databaseIdProvider节点中的信息写入VendorDatabaseIdProvider对象中。 这些信息实际是数据库的别名信息
   }
-
+  // 获得到当前传入的 DataSource 对象对应的 databaseId
   String getDatabaseId(DataSource dataSource) throws SQLException;
 }

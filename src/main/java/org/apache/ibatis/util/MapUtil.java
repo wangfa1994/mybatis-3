@@ -29,7 +29,7 @@ public class MapUtil {
    *      "https://bugs.openjdk.java.net/browse/JDK-8161372">https://bugs.openjdk.java.net/browse/JDK-8161372</a>
    */
   public static <K, V> V computeIfAbsent(Map<K, V> map, K key, Function<K, V> mappingFunction) {
-    V value = map.get(key);
+    V value = map.get(key); //
     if (value != null) {
       return value;
     }

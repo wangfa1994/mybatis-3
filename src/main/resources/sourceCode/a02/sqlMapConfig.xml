@@ -37,6 +37,7 @@
 
     <!--引入映射配置文件-->
     <mappers>
+        <!--<mapper class="com.wf.mapper.IUserMapper"/> -->
         <package name="com.wf.mapper"/> <!--需要保证配置文件的路径和名称和类的名称一致-->
     </mappers>
 

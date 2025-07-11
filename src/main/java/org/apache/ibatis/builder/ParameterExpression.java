@@ -17,7 +17,7 @@ package org.apache.ibatis.builder;
 
 import java.util.HashMap;
 
-/**
+/**  属性解析器，将描述属性的字符串解析为键值对的形式 ，因为继承了Map,本身就是一个map
  * Inline parameter expression parser. Supported grammar (simplified):
  *
  * <pre>
@@ -35,7 +35,7 @@ public class ParameterExpression extends HashMap<String, String> {
 
   private static final long serialVersionUID = -2417552199605158680L;
 
-  public ParameterExpression(String expression) {
+  public ParameterExpression(String expression) { // 通过构造器直接进行解析，创建对象的时候就直接解析出来存在的属性了
     parse(expression);
   }
 

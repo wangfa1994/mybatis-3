@@ -30,9 +30,9 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.util.MapUtil;
 
-/**
+/** 我们的代理对象，通过代理对象的调用，转到我们的MapperMethodInvoker中的MapperMethod中执行我们的sql
  * @author Clinton Begin
- * @author Eduardo Macarron
+ * @author Eduardo Macarron  MapperProxy类对应的是映射文件，通过MapperRegistry将映射接口和映射文件的对应关系建立起来
  */
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
@@ -41,9 +41,9 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       | MethodHandles.Lookup.PACKAGE | MethodHandles.Lookup.PUBLIC;
   private static final Constructor<Lookup> lookupConstructor;
   private static final Method privateLookupInMethod;
-  private final SqlSession sqlSession;
-  private final Class<T> mapperInterface;
-  private final Map<Method, MapperMethodInvoker> methodCache;
+  private final SqlSession sqlSession; // 我们从sqlSessionFactory中得到的sqlSession,可以处理对应的增删改查语句
+  private final Class<T> mapperInterface; // T 我们的接口类型，代理的接口，
+  private final Map<Method, MapperMethodInvoker> methodCache; // 缓存我们的方法和对应的MapperMethod，完成MapperProxy与MapperMethod的绑定，这个Method 和 MapperMethod是怎么绑定的
 
   public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethodInvoker> methodCache) {
     this.sqlSession = sqlSession;
@@ -76,27 +76,27 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
     lookupConstructor = lookup;
   }
-
+  // proxy 代理对象  method 代理方法  args 代理方法参数
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
-      if (Object.class.equals(method.getDeclaringClass())) {
+      if (Object.class.equals(method.getDeclaringClass())) { // 这个方法是来自哪个类，如果来自Object 直接进行调用
         return method.invoke(this, args);
-      }
-      return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
+      } // 进行method的调用，这样的话，就能转到对应的MapperMethod中的execute方法的调用
+      return cachedInvoker(method).invoke(proxy, method, args, sqlSession); // 在cachedInvoker中会进行创建MapperMethod封装成PlainMethodInvoker然后委托调用
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }
   }
 
   private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
-    try {
+    try { // 如果我们的 methodCache中没有key为method的缓存对象，我们需要创建一个MapperMethodInvoker
       return MapUtil.computeIfAbsent(methodCache, method, m -> {
-        if (!m.isDefault()) {
+        if (!m.isDefault()) { // 如果我们的method是默认方法的返回对象 PlainMethodInvoker
           return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
         }
         try {
-          if (privateLookupInMethod == null) {
+          if (privateLookupInMethod == null) { // 返回不同的jdk版本的invoker
             return new DefaultMethodInvoker(getMethodHandleJava8(method));
           }
           return new DefaultMethodInvoker(getMethodHandleJava9(method));
@@ -128,7 +128,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   interface MapperMethodInvoker {
     Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable;
   }
-
+  // 上面是接口定义分为两个 一个是普通方法调用器， 一个是默认方法调用器
   private static class PlainMethodInvoker implements MapperMethodInvoker {
     private final MapperMethod mapperMethod;
 
@@ -138,10 +138,10 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable {
-      return mapperMethod.execute(sqlSession, args);
+      return mapperMethod.execute(sqlSession, args); // 进行委托调用，转到MapperMethod中
     }
   }
-
+  // 默认方法的调用器
   private static class DefaultMethodInvoker implements MapperMethodInvoker {
     private final MethodHandle methodHandle;
 
@@ -151,7 +151,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable {
-      return methodHandle.bindTo(proxy).invokeWithArguments(args);
+      return methodHandle.bindTo(proxy).invokeWithArguments(args);  // 进行委托调用，转到MapperMethod中
     }
   }
 }

@@ -21,17 +21,17 @@ import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 
-/**
+/** 解析器类， 解析ResultMap标签，支持继承，用来解析继承相关属性
  * @author Eduardo Macarron
  */
 public class ResultMapResolver {
-  private final MapperBuilderAssistant assistant;
-  private final String id;
-  private final Class<?> type;
+  private final MapperBuilderAssistant assistant; //解析器
+  private final String id; // ResultMap的id
+  private final Class<?> type; // ResultMap的type属性
   private final String extend;
-  private final Discriminator discriminator;
-  private final List<ResultMapping> resultMappings;
-  private final Boolean autoMapping;
+  private final Discriminator discriminator;  // ResultMap的鉴别器节点 discriminator节点
+  private final List<ResultMapping> resultMappings; // ResultMap标签的属性映射列表
+  private final Boolean autoMapping;  //是否开启了自动映射
 
   public ResultMapResolver(MapperBuilderAssistant assistant, String id, Class<?> type, String extend,
       Discriminator discriminator, List<ResultMapping> resultMappings, Boolean autoMapping) {
@@ -44,7 +44,7 @@ public class ResultMapResolver {
     this.autoMapping = autoMapping;
   }
 
-  public ResultMap resolve() {
+  public ResultMap resolve() { // 通过我们的  MapperBuilderAssistant 助手进行了resultMap的处理
     return assistant.addResultMap(this.id, this.type, this.extend, this.discriminator, this.resultMappings,
         this.autoMapping);
   }

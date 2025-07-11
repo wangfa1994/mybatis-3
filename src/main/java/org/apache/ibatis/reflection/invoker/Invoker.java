@@ -21,7 +21,8 @@ import java.lang.reflect.InvocationTargetException;
  * @author Clinton Begin
  */
 public interface Invoker {
+  // 执行方法，此方法负责完成对象方法的调用和对象属性的读写，三个实现类分别实现不同的业务，读取属性操作，属性赋值操作，方法触发操作
   Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException;
-
+  // 获取类型
   Class<?> getType();
 }

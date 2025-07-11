@@ -30,9 +30,9 @@ public class ExceptionUtil {
   public static Throwable unwrapThrowable(Throwable wrapped) {
     Throwable unwrapped = wrapped;
     while (true) {
-      if (unwrapped instanceof InvocationTargetException) {
+      if (unwrapped instanceof InvocationTargetException) { // 处理反射异常
         unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
-      } else if (unwrapped instanceof UndeclaredThrowableException) {
+      } else if (unwrapped instanceof UndeclaredThrowableException) { // 处理运行时异常 进行将最深层次的异常进行拆包出类，返回真正的异常信息
         unwrapped = ((UndeclaredThrowableException) unwrapped).getUndeclaredThrowable();
       } else {
         return unwrapped;

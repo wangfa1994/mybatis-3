@@ -29,16 +29,16 @@ import org.apache.ibatis.session.Configuration;
  * least the property name of the input object to read the value from).
  * <p>
  * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
- *
+ *  完成参数绑定的SQL语句，可以直接被数据库进行执行的语句 【BoundSql是sql语句中的一个重要的中间产物，既存储了转化结束的sql信息，又包括了实参信息和其他附加的环境信息】
  * @author Clinton Begin
  */
 public class BoundSql {
 
-  private final String sql;  // 解析出来的sql语句
-  private final List<ParameterMapping> parameterMappings;  // 参数类型
-  private final Object parameterObject; // 参数对象
-  private final Map<String, Object> additionalParameters;
-  private final MetaObject metaParameters;
+  private final String sql;  // 解析出来的sql语句，可能含有?
+  private final List<ParameterMapping> parameterMappings;  // 参数映射列表
+  private final Object parameterObject; // 实体对象本身
+  private final Map<String, Object> additionalParameters; // 实参
+  private final MetaObject metaParameters; // additionalParameters的包装对象
 
   public BoundSql(Configuration configuration, String sql, List<ParameterMapping> parameterMappings,
       Object parameterObject) {
@@ -46,7 +46,7 @@ public class BoundSql {
     this.parameterMappings = parameterMappings;
     this.parameterObject = parameterObject;
     this.additionalParameters = new HashMap<>();
-    this.metaParameters = configuration.newMetaObject(additionalParameters);
+    this.metaParameters = configuration.newMetaObject(additionalParameters); // 进行了包装
   }
 
   public String getSql() {

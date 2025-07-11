@@ -17,7 +17,7 @@ package org.apache.ibatis.parsing;
 
 import java.util.Properties;
 
-/**
+/** 属性解析的工具类
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -47,14 +47,14 @@ public class PropertyParser {
 
   private static final String ENABLE_DEFAULT_VALUE = "false";
   private static final String DEFAULT_VALUE_SEPARATOR = ":";
-
+  //属性解析的工具类 私有化，防止变更逻辑，不能解析，这里只能处理
   private PropertyParser() {
     // Prevent Instantiation
   }
 
   public static String parse(String string, Properties variables) {
     VariableTokenHandler handler = new VariableTokenHandler(variables);
-    GenericTokenParser parser = new GenericTokenParser("${", "}", handler);
+    GenericTokenParser parser = new GenericTokenParser("${", "}", handler); //还是转入到了GenericTokenParser中处理，类似于利用了模板,又翻转到这里handler
     return parser.parse(string);
   }
 

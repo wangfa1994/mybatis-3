@@ -22,14 +22,14 @@ import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
-/**
+/** 静态语句，可能含有?的语句，可以直接交给数据库进行执行的  【DynamicSqlSource语句和RawSqlSource都会被处理成StaticSqlSource，然后通过getBoundSql得到BoundSql】
  * @author Clinton Begin
  */
 public class StaticSqlSource implements SqlSource {
 
-  private final String sql; // 移除占位符的sql语句，sql可以直接执行的预编译语句
+  private final String sql; // 移除占位符的sql语句，sql可以直接执行的预编译语句 不存在#{}和${}这种符号的语句，只有?占位符的sql
   private final List<ParameterMapping> parameterMappings; // 参数列表
-  private final Configuration configuration;
+  private final Configuration configuration; // 配置信息
 
   public StaticSqlSource(Configuration configuration, String sql) {
     this(configuration, sql, null);
@@ -42,7 +42,7 @@ public class StaticSqlSource implements SqlSource {
   }
 
   @Override
-  public BoundSql getBoundSql(Object parameterObject) {
+  public BoundSql getBoundSql(Object parameterObject) { // 很重要的功能，给出我们的BoundSql对象
     return new BoundSql(configuration, sql, parameterMappings, parameterObject);
   }
 

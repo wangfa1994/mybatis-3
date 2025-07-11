@@ -25,7 +25,7 @@ import java.util.Set;
  * @author Clinton Begin
  */
 public class SimpleTypeRegistry {
-
+  // 使用 SIMPLE_TYPE_SET 维护java中的基本类型
   private static final Set<Class<?>> SIMPLE_TYPE_SET = new HashSet<>();
 
   static {

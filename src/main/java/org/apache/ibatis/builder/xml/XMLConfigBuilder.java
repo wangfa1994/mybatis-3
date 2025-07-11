@@ -47,14 +47,14 @@ import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 
-/**
+/** 配置文件的解析器类 ，最终会处理成对应的Configuration对象
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
   private boolean parsed;
-  private final XPathParser parser;
+  private final XPathParser parser; // 通过 parser 将我们的配置文件变成节点，我们的流会被封装成Node
   private String environment;
   private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory(); //默认的反射工厂
 
@@ -93,7 +93,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   private XMLConfigBuilder(Class<? extends Configuration> configClass, XPathParser parser, String environment,
-      Properties props) {
+      Properties props) { // 底层构造器被私有化
     super(newConfig(configClass));
     ErrorContext.instance().resource("SQL Mapper Configuration");
     this.configuration.setVariables(props);
@@ -103,18 +103,18 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public Configuration parse() {
-    if (parsed) {
+    if (parsed) { // 只允许一次解析
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
-    parseConfiguration(parser.evalNode("/configuration"));
+    parseConfiguration(parser.evalNode("/configuration")); //通过parser将我们的文件解析出Node节点，从configuration开始解析
     return configuration;
   }
 
   private void parseConfiguration(XNode root) {
-    try {
+    try { // 解析信息放入到Configuration对象中
       // issue #117 read properties first
-      propertiesElement(root.evalNode("properties")); // 先解析properties标签属性，并且放置到configuration类的变量中 XMLConfigBuilder包含了这个配置类configuration，在BaseBuilder父类中
+      propertiesElement(root.evalNode("properties")); // 先解析properties标签属性，先解析用于保证在解析其他节点时就可以生效，并且放置到configuration类的变量中 XMLConfigBuilder包含了这个配置类configuration，在BaseBuilder父类中
       Properties settings = settingsAsProperties(root.evalNode("settings")); // settings标签的解析 主要是处理 logImpl标签和vfsImpl标签
       loadCustomVfsImpl(settings);
       loadCustomLogImpl(settings);
@@ -128,7 +128,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       typeHandlersElement(root.evalNode("typeHandlers"));
-      mappersElement(root.evalNode("mappers")); //真正的解析我们的Mapper配置文件
+      mappersElement(root.evalNode("mappers")); //真正的解析我们的Mapper映射文件
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
     }
@@ -351,7 +351,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
       DataSourceFactory factory = (DataSourceFactory) resolveClass(type).getDeclaredConstructor().newInstance();
-      factory.setProperties(props);
+      factory.setProperties(props); // 设置对应的数据源属性
       return factory;
     }
     throw new BuilderException("Environment declaration requires a DataSourceFactory.");
@@ -384,36 +384,36 @@ public class XMLConfigBuilder extends BaseBuilder {
       }
     }
   }
-
+  // <mappers> <mapper resource="yeecode/UserMapper.xml"/>  <mapper class="com.wf.mapper.IUserMapper"/> <package name="com.wf.mapper"/>    </mappers>
   private void mappersElement(XNode context) throws Exception {
     if (context == null) {
       return;
     }
     for (XNode child : context.getChildren()) { //for循环解析我们的mapper文件，每次都会新创建一个针对此mapper的助手assistant类
-      if ("package".equals(child.getName())) {
-        String mapperPackage = child.getStringAttribute("name");
-        configuration.addMappers(mapperPackage);
-      } else {
+      if ("package".equals(child.getName())) { // 处理mappers的子节点 package
+        String mapperPackage = child.getStringAttribute("name"); //得到包的路径
+        configuration.addMappers(mapperPackage); // 全部加入到对应的mapper中
+      } else {  // 如果不是package的话， resource  url class 只能存在一个
         String resource = child.getStringAttribute("resource");
         String url = child.getStringAttribute("url");
         String mapperClass = child.getStringAttribute("class");
         if (resource != null && url == null && mapperClass == null) {
-          ErrorContext.instance().resource(resource);
+          ErrorContext.instance().resource(resource); // 处理文件流的形式
           try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource,
-                configuration.getSqlFragments()); // 每次都创建出一个助手类
+                configuration.getSqlFragments()); // 每次都创建出一个助手类  XMLMapperBuilder负责解析处理映射文件
             mapperParser.parse();
           }
         } else if (resource == null && url != null && mapperClass == null) {
-          ErrorContext.instance().resource(url);
+          ErrorContext.instance().resource(url); // 从网络上获得输入流
           try (InputStream inputStream = Resources.getUrlAsStream(url)) {
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url,
                 configuration.getSqlFragments());
             mapperParser.parse();
           }
-        } else if (resource == null && url == null && mapperClass != null) {
+        } else if (resource == null && url == null && mapperClass != null) { // 配置的不是映射文件，是映射接口
           Class<?> mapperInterface = Resources.classForName(mapperClass);
-          configuration.addMapper(mapperInterface);
+          configuration.addMapper(mapperInterface); // 直接进行添加
         } else {
           throw new BuilderException(
               "A mapper element may only specify a url, resource or class, but not more than one.");

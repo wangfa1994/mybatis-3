@@ -27,7 +27,7 @@ public final class PropertyNamer {
   private PropertyNamer() {
     // Prevent Instantiation of Static Class
   }
-
+  // 通过java Bean规范，传入对应的方法名，得到对应的属性名
   public static String methodToProperty(String name) {
     if (name.startsWith("is")) {
       name = name.substring(2);
@@ -44,7 +44,7 @@ public final class PropertyNamer {
 
     return name;
   }
-
+  // 根据方法名判断是否是属性
   public static boolean isProperty(String name) {
     return isGetter(name) || isSetter(name);
   }

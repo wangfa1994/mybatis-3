@@ -53,7 +53,7 @@ public class DefaultVFS extends VFS {
     return true;
   }
 
-  @Override
+  @Override // 递归列出由URL标识的资源的所有子资源的完整资源路径
   public List<String> list(URL url, String path) throws IOException {
     InputStream is = null;
     try {
@@ -226,7 +226,7 @@ public class DefaultVFS extends VFS {
    *          The URL of the JAR entry.
    *
    * @return The URL of the JAR file, if one is found. Null if not.
-   *
+   *   尝试解构给定的URL以查找包含该URL引用的资源的JAR文件。也就是说，假设URL引用一个JAR条目，该方法将返回一个引用包含该条目的JAR文件的URL。如果无法找到JAR，则此方法返回null
    * @throws MalformedURLException
    *           the malformed URL exception
    */

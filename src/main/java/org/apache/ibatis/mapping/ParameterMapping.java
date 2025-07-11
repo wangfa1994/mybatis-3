@@ -22,7 +22,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/**
+/**   parameterMap标签中的子标签parameter的映射实体类
  * @author Clinton Begin
  */
 public class ParameterMapping {

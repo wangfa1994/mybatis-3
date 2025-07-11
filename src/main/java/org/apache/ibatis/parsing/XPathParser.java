@@ -40,21 +40,21 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-/** 解析xml的基本类
+/** 解析xml的核心类 因为mybatis的配置文件都是xml格式的，所以，需要使用此进行去解析，核心类包括  XNode 和  XPathParser
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public class XPathParser {
 
-  private final Document document;
-  private boolean validation;
-  private EntityResolver entityResolver;
-  private Properties variables; // 配置文件解析出来的properties标签值
-  private XPath xpath;
+  private final Document document; // 要解析的整个的xml文档
+  private boolean validation; // 是否开启验证
+  private EntityResolver entityResolver; //通过EntityResolver声明寻找DTD文件的方法，通过本地寻找/网络寻找等
+  private Properties variables; // 配置文件解析出来的properties标签值 properties节点会在解析配置文件的最开始就被解析，然后相关信息会被 放入“private Properties variables”属性并在解析后续节点时发 挥作用
+  private XPath xpath; // 解析xml的XPath,通过这个属性XPathParser也就具备了解析XML的功能
 
-  public XPathParser(String xml) {
+  public XPathParser(String xml) { // 初始化的时候，根据传递的xml进行构建出Document
     commonConstructor(false, null, null);
-    this.document = createDocument(new InputSource(new StringReader(xml)));
+    this.document = createDocument(new InputSource(new StringReader(xml))); //解析xml创建出document文档类
   }
 
   public XPathParser(Reader reader) {
@@ -135,7 +135,7 @@ public class XPathParser {
   public void setVariables(Properties variables) {
     this.variables = variables;
   }
-
+  // eval* 方法开始解析对应的文档，最后都归于 evaluate 方法
   public String evalString(String expression) {
     return evalString(document, expression);
   }
@@ -219,7 +219,7 @@ public class XPathParser {
   }
 
   private Object evaluate(String expression, Object root, QName returnType) {
-    try {
+    try { // 对指定节点root运行解析语法expression，获得returnType类型的解析结果
       return xpath.evaluate(expression, root, returnType);
     } catch (Exception e) {
       throw new BuilderException("Error evaluating XPath.  Cause: " + e, e);

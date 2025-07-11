@@ -148,8 +148,8 @@ public class DefaultSqlSession implements SqlSession {
   }
 
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
-    try {
-      MappedStatement ms = configuration.getMappedStatement(statement); // 从我们的mapper中得到我们的mappedStatement
+    try { //每个mappedStatement对象对应了我们设置的一个数据库操作节点，主要定义了数据库操作语句，输入/输出参数等信息
+      MappedStatement ms = configuration.getMappedStatement(statement); // 在配置文件中找到我们的mapper中得到我们的mappedStatement
       dirty |= ms.isDirtySelect();
       return executor.query(ms, wrapCollection(parameter), rowBounds, handler);//委派给我们的Executor进行执行
     } catch (Exception e) {

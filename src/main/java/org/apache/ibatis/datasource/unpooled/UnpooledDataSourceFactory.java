@@ -41,7 +41,7 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
   @Override
   public void setProperties(Properties properties) {
     Properties driverProperties = new Properties();
-    MetaObject metaDataSource = SystemMetaObject.forObject(dataSource);
+    MetaObject metaDataSource = SystemMetaObject.forObject(dataSource); //利用工具类得到我们的dataSource对象的元数据对象，可以从这里进行反射操作
     for (Object key : properties.keySet()) {
       String propertyName = (String) key;
       if (propertyName.startsWith(DRIVER_PROPERTY_PREFIX)) {

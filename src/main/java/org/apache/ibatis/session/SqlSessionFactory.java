@@ -20,6 +20,8 @@ import java.sql.Connection;
 /** 从连接或数据源中创建{@link SqlSession}
  * Creates an {@link SqlSession} out of a connection or a DataSource
  *
+ *  从sqlSessionFactory中得到我们的sqlSession进行执行我们的语句，我们的文件信息都会被封装到Configuration对象中
+ *  所有我们的sqlsessionFactory中要保存住我们的配置文件Configuration
  * @author Clinton Begin
  */
 public interface SqlSessionFactory {

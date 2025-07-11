@@ -23,13 +23,13 @@ import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
-/**
+/** 公共的抽象实现
  * @author Clinton Begin
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
   protected static final Object[] NO_ARGUMENTS = {};
-  protected final MetaObject metaObject;
+  protected final MetaObject metaObject; // 被包装对象的元对象
 
   protected BaseWrapper(MetaObject metaObject) {
     this.metaObject = metaObject;

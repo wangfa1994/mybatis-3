@@ -29,7 +29,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 
-/**
+/** 建造者类，但是不是创建sqlSource类的，而是通过parse方法生产StaticSqlSource这个对象
  * @author Clinton Begin
  */
 public class SqlSourceBuilder extends BaseBuilder {
@@ -39,8 +39,8 @@ public class SqlSourceBuilder extends BaseBuilder {
   public SqlSourceBuilder(Configuration configuration) {
     super(configuration);
   }
-
-  public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
+  // 将DynamicSqlSource 和 RawSqlSource中的#{}符号进行替换掉，从而将他们处理成 StaticSqlSource
+  public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) { //
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType,
         additionalParameters);
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
@@ -50,7 +50,7 @@ public class SqlSourceBuilder extends BaseBuilder {
     } else {
       sql = parser.parse(originalSql); // 这里会处理我们的占位符，变成sql可执行的语句
     }
-    return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
+    return new StaticSqlSource(configuration, sql, handler.getParameterMappings()); // StaticSqlSource是SqlSource的四个子类之一
   }
 
   public static String removeExtraWhitespaces(String original) {

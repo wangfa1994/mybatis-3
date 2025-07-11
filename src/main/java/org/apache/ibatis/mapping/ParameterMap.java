@@ -20,14 +20,14 @@ import java.util.List;
 
 import org.apache.ibatis.session.Configuration;
 
-/**
+/**  映射实体类 主要是映射resultMap 标签
  * @author Clinton Begin
  */
 public class ParameterMap {
 
   private String id;
   private Class<?> type;
-  private List<ParameterMapping> parameterMappings;
+  private List<ParameterMapping> parameterMappings;  // 里面的一个个的属性Parameter
 
   private ParameterMap() {
   }

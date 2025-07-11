@@ -331,13 +331,13 @@ public abstract class BaseExecutor implements Executor {
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
       ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
-    localCache.putObject(key, EXECUTION_PLACEHOLDER); // 一级缓存，先缓存默认值，查询到结果之后，在进行替换，和懒加载有关
+    localCache.putObject(key, EXECUTION_PLACEHOLDER); // 一级缓存，先缓存默认值占位符，查询到结果之后，在进行替换，和懒加载有关
     try {
-      list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
+      list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql); // BaseExecutor类中的抽象方法
     } finally {
       localCache.removeObject(key);
     }
-    localCache.putObject(key, list);
+    localCache.putObject(key, list); // 将默认的占位符替换成我们真正的结果，
     if (ms.getStatementType() == StatementType.CALLABLE) {
       localOutputParameterCache.putObject(key, parameter);
     }

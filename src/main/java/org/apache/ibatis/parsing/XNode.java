@@ -27,17 +27,17 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/**
+/** xml 的结点封装， 封装了w3c的Node节点，并增加了从node中的一些必要属性
  * @author Clinton Begin
  */
 public class XNode {
 
-  private final Node node;
-  private final String name;
-  private final String body;
-  private final Properties attributes;
-  private final Properties variables;
-  private final XPathParser xpathParser;
+  private final Node node; // 这个是w3c的Node
+  private final String name; //节点名 (node中的属性)
+  private final String body; // 节点体 (node中的属性)
+  private final Properties attributes; // 节点的属性 (node中的属性)
+  private final Properties variables; // 从配置文件中解析出来的Properties属性
+  private final XPathParser xpathParser; // 用来解析Xml的解析器
 
   public XNode(XPathParser xpathParser, Node node, Properties variables) {
     this.xpathParser = xpathParser;

@@ -17,12 +17,12 @@ package org.apache.ibatis.builder;
 
 import org.apache.ibatis.cache.Cache;
 
-/**
+/** 类的解析器类， Mybatis 支持多个nameSpace之间共享缓存 <cache-ref/>标签
  * @author Clinton Begin
  */
 public class CacheRefResolver {
-  private final MapperBuilderAssistant assistant;
-  private final String cacheRefNamespace;
+  private final MapperBuilderAssistant assistant; // 解析器
+  private final String cacheRefNamespace;// 被应用的namespace 被解析的类 的相关属性
 
   public CacheRefResolver(MapperBuilderAssistant assistant, String cacheRefNamespace) {
     this.assistant = assistant;
@@ -30,6 +30,6 @@ public class CacheRefResolver {
   }
 
   public Cache resolveCacheRef() {
-    return assistant.useCacheRef(cacheRefNamespace);
+    return assistant.useCacheRef(cacheRefNamespace); // 使用了辅助解析器类的useCacheRef，用来解析缓存共享问题
   }
 }

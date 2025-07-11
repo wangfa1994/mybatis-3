@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.wf.mapper.IUserMapper">  <!-- 由XMLMapperBuilder类进行解析 -->
+
+    <cache-ref namespace=""/> <!-- 对应CacheRefResolver类解析 -->
+    <cache eviction="FIFO" flushInterval="6000"/> <!-- 对应Cache类 -->
+
+    <parameterMap id="userParam01" type="User"> <!-- 对应ParameterMap类 -->
+        <parameter property="name" javaType="String"/> <!-- 对应ParameterMapping 类 -->
+        <parameter property="school" javaType="String"/>  <!-- 对应ParameterMapping 类 -->
+    </parameterMap>
+
+    <resultMap id="userResultFull" type="User" extends="userMap"> <!-- 对应ResultMap类 通过ResultMapResolver处理-->
+        <result property="name" column="name" typeHandler="com.wf.yeecode.a03configparsepackage.a12.MyTypeHandler"/> <!-- 对应ResultMapping类 -->
+        <result property="school" column="id"/> <!-- 对应ResultMapping类 -->
+    </resultMap>
+
+    <resultMap id="userMap" type="com.wf.yeecode.a03configparsepackage.a12.User" autoMapping="false"> <!-- 对应ResultMap类  -->
+        <result property="school" column="id"/> <!-- 对应ResultMapping类 -->
+        <discriminator javaType="int" column="sex"> <!-- 对应discriminator类  -->
+            <case value="0" resultMap="boyUserMap"/>
+            <case value="1" resultMap="girlUserMap"/>
+        </discriminator>
+    </resultMap>
+
+
+    <sql id="selectUser"> select * from user </sql>
+
+
+
+    <!-- 对应MappedStatement对象 由XMLStatementBuilder解析 -->
+    <select id="findById" resultMap="userMap">
+        select * from user /* 对应SqlSource 类 由 SqlSourceBuilder解析 */
+        <include refid="selectUser"/> /*由XMLIncludeTransformet 解析 */
+    </select>
+
+
+    <select id="findByIds" parameterType="list" resultType="user"> /*对应MappedStatement类 由XMLStatementBuilder解析*/
+        <include refid="selectUser"></include>
+        <where>
+            <foreach collection="array" open="id in (" close=")" item="id" separator=",">  /*对应SqlNode类 由自身解析 */
+                #{id}
+            </foreach>
+        </where>
+
+    </select>
+
+
+
+
+
+</mapper>

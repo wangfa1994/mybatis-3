@@ -18,7 +18,7 @@ package org.apache.ibatis.io;
 import java.io.InputStream;
 import java.net.URL;
 
-/**
+/** 一个类，用于包装对多个类加载器的访问，使它们作为一个类工作
  * A class to wrap access to multiple class loaders making them work as one
  *
  * @author Clinton Begin
@@ -131,7 +131,7 @@ public class ClassLoaderWrapper {
    * @return the resource or null
    */
   InputStream getResourceAsStream(String resource, ClassLoader[] classLoader) {
-    for (ClassLoader cl : classLoader) {
+    for (ClassLoader cl : classLoader) { // classLoader是内置的一个列表
       if (null != cl) {
 
         // try to find the resource as passed

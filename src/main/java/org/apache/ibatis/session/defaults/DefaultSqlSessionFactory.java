@@ -36,7 +36,7 @@ import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
-  private final Configuration configuration; // 我们的配置相关信息
+  private final Configuration configuration; // 我们的全局配置相关信息
 
   public DefaultSqlSessionFactory(Configuration configuration) {
     this.configuration = configuration;
@@ -94,7 +94,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
   private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level,
       boolean autoCommit) {
     Transaction tx = null;
-    try {
+    try { // 根据configuration对象中存储的设置信息用来被创建 事务工厂(TransactionFactory)，执行器(Executor)，SqlSession(DefaultSqlSession)等对象。
       final Environment environment = configuration.getEnvironment();
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment); // TransactionFactory事务的工厂，用来创建Transaction,而Transaction接口封装针对jdbc的基本操作
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit); // TransactionFactory创建Transaction， 根据数据源得到我们的Transaction，这个类中封装了针对数据源的操作 ，事务的自动提交标志会被设置到tx中
