@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.ibatis.binding.MapperProxy.MapperMethodInvoker;
 import org.apache.ibatis.session.SqlSession;
 
-/** 用来产生我们的 MapperProxy类的工厂
+/** 用来产生我们的 MapperProxy类的工厂 ,一次mapper方法的调用都会找到对应的MapperProxyFactory,然后产生处代理对象
  * @author Lasse Voss
  */
 public class MapperProxyFactory<T> {

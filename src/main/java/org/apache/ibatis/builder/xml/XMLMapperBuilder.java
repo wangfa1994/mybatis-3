@@ -47,7 +47,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
-/**
+/** 映射xml文件资源的解析类
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -107,7 +107,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   public XNode getSqlFragment(String refid) {
     return sqlFragments.get(refid);
   }
-  // <mapper namespace="user"></mapper>
+  // <mapper namespace="com.wf.singleMapper.IUserMapper"><select parameterType="java.lang.Integer" id="findById" resultType="User">select * from user where id = #{id}</select></mapper>
   private void configurationElement(XNode context) { // context 为mapper文件中的内容，此时已经转换到映射文件中的mapper节点中
     try {
       String namespace = context.getStringAttribute("namespace"); // 获取当前映射文件的命名空间
@@ -136,7 +136,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
     for (XNode context : list) {
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context,
-          requiredDatabaseId);
+          requiredDatabaseId); // 利用xmlStatementBulider进行处理
       try {
         statementParser.parseStatementNode(); // 委派给 XMLStatementBuilder 开始解析我们的增删改查
       } catch (IncompleteElementException e) {

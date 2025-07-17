@@ -1,7 +1,11 @@
 package com.wf.test.sourceCode;
 
 
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
+
+import javax.sql.DataSource;
 import java.sql.*;
+import java.util.Scanner;
 
 public class A00InitJdbcTest {
 
@@ -12,7 +16,8 @@ public class A00InitJdbcTest {
 
     //add();
     //test.select();
-    test.selectPrepareStatement();
+    //test.selectPrepareStatement();
+    test.selectWithDataSource();
 
 /**
      * java 的 JDBC 是一个标准的 API，是一套规范，主要位于java.sql包和javax.sql定义了一系列接口和类，使得 Java 程序可以以统一的方式访问不同的数据库,
@@ -90,6 +95,34 @@ public class A00InitJdbcTest {
 
     // 6. 关闭链接
     connection.close();
+  }
+
+
+  public void selectWithDataSource() throws SQLException {
+    // 1. 建立DataSource对象
+    DataSource dataSource = new PooledDataSource("com.mysql.cj.jdbc.Driver",
+                                                 "jdbc:mysql://127.0.0.1:3306/lagou?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true"
+                                                   , "root", "root");
+    // 2. 获取链接 Connection
+    Connection connection = dataSource.getConnection();
+    // 3.  创建语句 Statement
+    Statement statement = connection.createStatement();
+
+    // 4.  执行语句
+    ResultSet rs = statement.executeQuery("select * from user");
+    // 5. 结果输出
+    while (rs.next()) {
+      System.out.println(rs.getInt(1) + "\t"
+        + rs.getString(2) + "\t"
+        + rs.getString(3) + "\t"
+        + rs.getString(4));
+    }
+    // 6. 关闭链接
+    connection.close();
+    Scanner scanner  = new Scanner(System.in);
+    scanner.nextLine();
+
+
   }
 
 

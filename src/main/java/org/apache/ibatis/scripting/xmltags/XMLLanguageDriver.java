@@ -28,8 +28,8 @@ import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
 
-/**
- * @author Eduardo Macarron
+/** XMLLanguageDriver  xml的语言启动驱动 Mybatis默认的语言驱动，但是我们可以通过配置进行更改掉 【Config对象中的】
+ * @author Eduardo Macarron 用于生成我们的SQLSource
  */
 public class XMLLanguageDriver implements LanguageDriver {
 
@@ -40,13 +40,13 @@ public class XMLLanguageDriver implements LanguageDriver {
   }
 
   @Override
-  public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
-    XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType);
-    return builder.parseScriptNode();
+  public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) { // xml文件模式生成sqlSource
+    XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType); // 委派给我们的 XMLScriptBuilder 进行产生
+    return builder.parseScriptNode(); // 映射文件产生的是 DynamicSqlSource 和  RawSqlSource
   }
 
   @Override
-  public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) {
+  public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) { // 注解模式生成sqlSource
     // issue #3
     if (script.startsWith("<script>")) {
       XPathParser parser = new XPathParser(script, false, configuration.getVariables(), new XMLMapperEntityResolver());

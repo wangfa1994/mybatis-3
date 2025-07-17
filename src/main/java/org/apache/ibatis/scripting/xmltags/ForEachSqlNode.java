@@ -21,22 +21,22 @@ import java.util.Optional;
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.session.Configuration;
 
-/**
+/**  <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
  * @author Clinton Begin
  */
 public class ForEachSqlNode implements SqlNode {
   public static final String ITEM_PREFIX = "__frch_";
 
-  private final ExpressionEvaluator evaluator;
-  private final String collectionExpression;
-  private final Boolean nullable;
-  private final SqlNode contents;
-  private final String open;
-  private final String close;
-  private final String separator;
-  private final String item;
-  private final String index;
-  private final Configuration configuration;
+  private final ExpressionEvaluator evaluator; // 表达式求值器
+  private final String collectionExpression; // collection属性的值
+  private final Boolean nullable; // 是否允许为nll
+  private final SqlNode contents; // 节点内的内容
+  private final String open; // open属性的值 左侧要插入的字符
+  private final String close; // close属性的值 右侧要插入的字符
+  private final String separator; // separator属性的值 元素分隔符
+  private final String item; // item属性的值   元素
+  private final String index; // index属性的值  元素编号
+  private final Configuration configuration; //配置信息
 
   /**
    * @deprecated Since 3.5.9, use the
@@ -67,33 +67,33 @@ public class ForEachSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
-    Map<String, Object> bindings = context.getBindings();
+    Map<String, Object> bindings = context.getBindings(); // 获得上下文环境
     final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings,
-        Optional.ofNullable(nullable).orElseGet(configuration::isNullableOnForEach));
-    if (iterable == null || !iterable.iterator().hasNext()) {
-      return true;
+        Optional.ofNullable(nullable).orElseGet(configuration::isNullableOnForEach)); // 表达式求值器进行求值
+    if (iterable == null || !iterable.iterator().hasNext()) { // 没有可以迭代的元素
+      return true; // 直接返回
     }
     boolean first = true;
-    applyOpen(context);
+    applyOpen(context); // 添加open属性值
     int i = 0;
     for (Object o : iterable) {
       DynamicContext oldContext = context;
-      if (first || separator == null) {
+      if (first || separator == null) { //第一个元素添加
         context = new PrefixedContext(context, "");
-      } else {
+      } else { // 添加间隔符
         context = new PrefixedContext(context, separator);
       }
       int uniqueNumber = context.getUniqueNumber();
       // Issue #709
-      if (o instanceof Map.Entry) {
+      if (o instanceof Map.Entry) { //迭代的帝乡是 Map.Entry
         @SuppressWarnings("unchecked")
         Map.Entry<Object, Object> mapEntry = (Map.Entry<Object, Object>) o;
-        applyIndex(context, mapEntry.getKey(), uniqueNumber);
+        applyIndex(context, mapEntry.getKey(), uniqueNumber); //放入到上下文环境中
         applyItem(context, mapEntry.getValue(), uniqueNumber);
       } else {
         applyIndex(context, i, uniqueNumber);
         applyItem(context, o, uniqueNumber);
-      }
+      } // 构建内容
       contents.apply(new FilteredDynamicContext(configuration, context, index, item, uniqueNumber));
       if (first) {
         first = !((PrefixedContext) context).isPrefixApplied();
@@ -101,8 +101,8 @@ public class ForEachSqlNode implements SqlNode {
       context = oldContext;
       i++;
     }
-    applyClose(context);
-    context.getBindings().remove(item);
+    applyClose(context); //
+    context.getBindings().remove(item); // 清理本次操作对环境的影响
     context.getBindings().remove(index);
     return true;
   }

@@ -29,15 +29,15 @@ import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/**
+/** 用来 解析处理 sql节点树 不同的标签用不同的处理器进行处理
  * @author Clinton Begin
  */
 public class XMLScriptBuilder extends BaseBuilder {
 
-  private final XNode context; //我们的整个select语句
-  private boolean isDynamic;
-  private final Class<?> parameterType; // 我们的参数类型
-  private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>(); // 语句中的一些其他标签，初始化时设定
+  private final XNode context; //我们的整个select语句 当前要处理的XML节点
+  private boolean isDynamic; // 当前节点是否为动态节点
+  private final Class<?> parameterType; // 输入的参数类型
+  private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>(); // 节点类型和对应的处理器组成的map，初始化时设定
 
   public XMLScriptBuilder(Configuration configuration, XNode context) {
     this(configuration, context, null);
@@ -62,33 +62,33 @@ public class XMLScriptBuilder extends BaseBuilder {
     nodeHandlerMap.put("bind", new BindHandler());
   }
 
-  public SqlSource parseScriptNode() {
-    MixedSqlNode rootSqlNode = parseDynamicTags(context); // 解析我们的动态sql， context是我们的sql语句 <select parameterType="java.lang.Integer" id="findById" resultType="User">select * from user where id = #{id}</select>
+  public SqlSource parseScriptNode() { // 解析我们的节点树，传进来的是一个完整的结点语句
+    MixedSqlNode rootSqlNode = parseDynamicTags(context); // 解析xml节点，得到节点树MixedSqlNode， context是我们的sql语句 <select parameterType="java.lang.Integer" id="findById" resultType="User">select * from user where id = #{id}</select>
     SqlSource sqlSource;
-    if (isDynamic) {
+    if (isDynamic) { // 判断当前节点是否是动态节点,则个值在进行parseDynamicTags方法进行解析节点的时候赋值， 动态的SQL节点树将用来创建 DynamicSqlSource对象
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode); // $占位符会被解析成动态sql源
-    } else {
+    } else { // 否则就创建 RawSqlSource对象
       sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType); //#占位符会被解析成原始sql源
     }
     return sqlSource;
   }
-
-  protected MixedSqlNode parseDynamicTags(XNode node) {
-    List<SqlNode> contents = new ArrayList<>();
-    NodeList children = node.getNode().getChildNodes();
-    for (int i = 0; i < children.getLength(); i++) {
+  // parseDynamicTags 会逐级分析 XML 文件中的节点并使用对应的NodeHandler 实现来处理该节点，最终将所有的节点整合到一个MixedSqlNode 对象中。MixedSqlNode对象就是 SQL节点树。
+  protected MixedSqlNode parseDynamicTags(XNode node) { // 解析当前节点的子结点，将node对象解析为我们的节点树
+    List<SqlNode> contents = new ArrayList<>(); // XNode 分出来的结点存储列表
+    NodeList children = node.getNode().getChildNodes(); // 得到当前节点的子节点
+    for (int i = 0; i < children.getLength(); i++) { //循环遍历每一个子节点
       XNode child = node.newXNode(children.item(i));
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
-        String data = child.getStringBody("");
-        TextSqlNode textSqlNode = new TextSqlNode(data);
-        if (textSqlNode.isDynamic()) {
+        String data = child.getStringBody(""); //如果节点的类型是 CDATA_SECTION_NODE 或者是text类型，则获取内容
+        TextSqlNode textSqlNode = new TextSqlNode(data); //封装成我们的TextSqlNode类型的sql节点
+        if (textSqlNode.isDynamic()) { // 判断是否是动态的，如果是动态的就表明这个整体节点就是动态的
           contents.add(textSqlNode);
           isDynamic = true;
         } else {
-          contents.add(new StaticTextSqlNode(data));
+          contents.add(new StaticTextSqlNode(data));// 封装为静态的sqlNode
         }
-      } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
-        String nodeName = child.getNode().getNodeName();
+      } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628 如果子节点仍然是Node类型，那么继续处理
+        String nodeName = child.getNode().getNodeName(); // 得到子节点的名称并获取到对应的节点处理器
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
@@ -97,10 +97,10 @@ public class XMLScriptBuilder extends BaseBuilder {
         isDynamic = true;
       }
     }
-    return new MixedSqlNode(contents);
+    return new MixedSqlNode(contents); // 返回一个混合节点，即为一个SQL节点树
   }
 
-  private interface NodeHandler {
+  private interface NodeHandler { // 节点处理器规范接口 【将节点nodeToHandle拼装到节点树targetContents中】
     void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
   }
 
@@ -187,12 +187,12 @@ public class XMLScriptBuilder extends BaseBuilder {
       // Prevent Synthetic Access
     }
 
-    @Override
+    @Override // 将当前节点 nodeToHandle 拼装到 节点树 targetContents 中 ，不同的标签存在不同的处理器，
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
-      String test = nodeToHandle.getStringAttribute("test");
-      IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
-      targetContents.add(ifSqlNode);
+      MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle); // 解析该节点的下级结点
+      String test = nodeToHandle.getStringAttribute("test"); // 获取该节点的test属性
+      IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test); // 创建ifSqlNode
+      targetContents.add(ifSqlNode); //添加到sql节点树中
     }
   }
 

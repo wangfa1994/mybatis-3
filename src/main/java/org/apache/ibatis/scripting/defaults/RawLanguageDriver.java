@@ -34,14 +34,14 @@ public class RawLanguageDriver extends XMLLanguageDriver {
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
     SqlSource source = super.createSqlSource(configuration, script, parameterType);
-    checkIsNotDynamic(source);
+    checkIsNotDynamic(source); // 对父类功能的一种限定，得到的Source必须是 RawSqlSource类型的
     return source;
   }
 
   @Override
   public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) {
     SqlSource source = super.createSqlSource(configuration, script, parameterType);
-    checkIsNotDynamic(source);
+    checkIsNotDynamic(source);  // 对父类功能的一种限定，得到的Source必须是 RawSqlSource类型的
     return source;
   }
 

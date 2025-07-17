@@ -34,7 +34,7 @@ import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
-/**
+/** 映射文件xml中的 增删改查解析类 Statement
  * @author Clinton Begin
  */
 public class XMLStatementBuilder extends BaseBuilder {
@@ -65,7 +65,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     String nodeName = context.getNode().getNodeName(); // 解析出来结点名称 select
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH)); //得到我们的sql类型
-    boolean isSelect = sqlCommandType == SqlCommandType.SELECT; //判断是否是select语句
+    boolean isSelect = sqlCommandType == SqlCommandType.SELECT; //判断是否是select语句 如果是select
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect); // 获得增删改查的flushCache属性，如果没有设置，select不进行刷新，其他的都进行刷新
     boolean useCache = context.getBooleanAttribute("useCache", isSelect); // 如果我们的sql是select语句，在没有设置的情况下会默认为开启
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);

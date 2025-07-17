@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wf.yeecode.a02basepackage.a02reflection.a02ParamNameResolver.UserMapper">
-    <select id="queryUserBySchoolName" resultType="com.wf.yeecode.a02basepackage.a02reflection.a02ParamNameResolver.User">
+<mapper namespace="com.wf.yeecode.a02basepackage.a06reflection.a02ParamNameResolver.UserMapper">
+    <select id="queryUserBySchoolName" resultType="com.wf.yeecode.a02basepackage.a06reflection.a02ParamNameResolver.User">
         SELECT * FROM `user`
             <where>
                 <if test="emailAddress !=null">

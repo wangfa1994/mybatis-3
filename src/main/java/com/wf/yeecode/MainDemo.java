@@ -109,6 +109,17 @@ public class MainDemo {
     *  输出结果处理功能
     *  输入参数处理功能
     *  多数据库种类处理功能
+    *
+    *  16 scripting包
+    *  解析Mybatis，mapper映射文件中的sql片段，if,foreach,where标签等的解析，完成sql语句的拼装
+    *  主要是处理了映射文件中sql片段，通过OGNL表达式进行解析标签中的表达式，然后不同的结点被封装为不同的sqlNode
+    *
+    *  17 dataSource包
+    *  mybatis 向上连接着 Java 业务应用，向下则连接着数据库
+    * 通过 datasource包，MyBatis将完成数据源的获取、数据连接的建立等工作，为数据库操作语句的执行打好基础
+    *
+    *
+    *
    *
    *
    *

@@ -27,7 +27,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/** xml 的结点封装， 封装了w3c的Node节点，并增加了从node中的一些必要属性
+/** xml 的结点封装， 封装了w3c的Node节点，并增加了从node中的一些必要属性，便于后续的使用，也是封装了jdk的xml解析相关
  * @author Clinton Begin
  */
 public class XNode {
@@ -44,7 +44,7 @@ public class XNode {
     this.node = node;
     this.name = node.getNodeName();
     this.variables = variables;
-    this.attributes = parseAttributes(node);
+    this.attributes = parseAttributes(node); //直接获得到当前节点的属性
     this.body = parseBody(node);
   }
 

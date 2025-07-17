@@ -15,9 +15,10 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-/**
+/**  sql节点，不同的标签结点有不同的实现  SQL 语句中支持许多种类的节点 if、where、foreach 等，它们都是SqlNode的子类  10个实现类
  * @author Clinton Begin
  */
 public interface SqlNode {
+  // 完成该节点自身的解析，并将解析结果合并到参数上下文环境context中，返回是否解析成功
   boolean apply(DynamicContext context);
 }

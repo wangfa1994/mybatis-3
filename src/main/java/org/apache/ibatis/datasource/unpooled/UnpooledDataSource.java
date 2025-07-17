@@ -33,30 +33,30 @@ import javax.sql.DataSource;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.util.MapUtil;
 
-/**
+/**  非池化的数据源对象 每次都会产生新的数据连接 ， 最重要的功能是给出数据库连接对象 Connection。该功能由doGetConnection方法提供
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class UnpooledDataSource implements DataSource {
 
-  private ClassLoader driverClassLoader;
-  private Properties driverProperties;
-  private static final Map<String, Driver> registeredDrivers = new ConcurrentHashMap<>();
+  private ClassLoader driverClassLoader; // 类加载器
+  private Properties driverProperties; // 驱动配置信息
+  private static final Map<String, Driver> registeredDrivers = new ConcurrentHashMap<>(); // 驱动注册map
 
-  private String driver;
-  private String url;
-  private String username;
-  private String password;
+  private String driver; // 数据库驱动
+  private String url; // 数据源地址
+  private String username; // 用户名
+  private String password; // 密码
 
-  private Boolean autoCommit;
-  private Integer defaultTransactionIsolationLevel;
-  private Integer defaultNetworkTimeout;
+  private Boolean autoCommit; // 自动提交标志
+  private Integer defaultTransactionIsolationLevel; // 事务隔离级别
+  private Integer defaultNetworkTimeout; // 最长等待时间，发出请求后，最长等待时间还没有响应的话，认为失败
 
   static {
-    Enumeration<Driver> drivers = DriverManager.getDrivers();
+    Enumeration<Driver> drivers = DriverManager.getDrivers(); // 得到所有的驱动器
     while (drivers.hasMoreElements()) {
       Driver driver = drivers.nextElement();
-      registeredDrivers.put(driver.getClass().getName(), driver);
+      registeredDrivers.put(driver.getClass().getName(), driver); //进行注册
     }
   }
 
@@ -225,24 +225,24 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(Properties properties) throws SQLException {
-    initializeDriver();
-    Connection connection = DriverManager.getConnection(url, properties);
-    configureConnection(connection);
+    initializeDriver(); // 初始化数据库驱动
+    Connection connection = DriverManager.getConnection(url, properties); // 最终都会直接通过DriverManager进行得到新的连接
+    configureConnection(connection); // 配置链接 属性设置
     return connection;
   }
 
   private void initializeDriver() throws SQLException {
-    try {
+    try { // 如果所需要的驱动driver没有添加到registeredDrivers列表中，则进行创建
       MapUtil.computeIfAbsent(registeredDrivers, driver, x -> {
         Class<?> driverType;
         try {
-          if (driverClassLoader != null) {
+          if (driverClassLoader != null) { // 指定了类加载器的话，使用类加载器加载驱动
             driverType = Class.forName(x, true, driverClassLoader);
-          } else {
+          } else { // 通过资源的类加载器列表进行加载
             driverType = Resources.classForName(x);
           }
-          Driver driverInstance = (Driver) driverType.getDeclaredConstructor().newInstance();
-          DriverManager.registerDriver(new DriverProxy(driverInstance));
+          Driver driverInstance = (Driver) driverType.getDeclaredConstructor().newInstance();// 实例化驱动
+          DriverManager.registerDriver(new DriverProxy(driverInstance)); // 注册我们的驱动代理，注意是驱动代理
           return driverInstance;
         } catch (Exception e) {
           throw new RuntimeException("Error setting driver on UnpooledDataSource.", e);

@@ -42,14 +42,14 @@ public class SqlSourceBuilder extends BaseBuilder {
   // 将DynamicSqlSource 和 RawSqlSource中的#{}符号进行替换掉，从而将他们处理成 StaticSqlSource
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) { //
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType,
-        additionalParameters);
-    GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
+        additionalParameters); // 处理器
+    GenericTokenParser parser = new GenericTokenParser("#{", "}", handler); // 解析器
     String sql;
     if (configuration.isShrinkWhitespacesInSql()) {
       sql = parser.parse(removeExtraWhitespaces(originalSql));
     } else {
-      sql = parser.parse(originalSql); // 这里会处理我们的占位符，变成sql可执行的语句
-    }
+      sql = parser.parse(originalSql); // 这里会处理我们的占位符，变成sql可执行的语句 将#{}替换为?的sql语句
+    } // 返回生成新的staticSqlSource
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings()); // StaticSqlSource是SqlSource的四个子类之一
   }
 

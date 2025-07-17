@@ -32,7 +32,7 @@ import java.util.Set;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.io.Resources;
 
-/**
+/** 别名映射关系，维护了mybatis中进行相关的别名和对应的类的关系映射,不仅仅包括类型的别名，还包括了配置文件中日志的别名
  * @author Clinton Begin
  */
 public class TypeAliasRegistry {

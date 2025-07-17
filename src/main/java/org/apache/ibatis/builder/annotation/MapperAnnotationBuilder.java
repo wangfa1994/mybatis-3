@@ -101,7 +101,7 @@ public class MapperAnnotationBuilder {
       .collect(Collectors.toSet());
 
   private final Configuration configuration;
-  private final MapperBuilderAssistant assistant;
+  private final MapperBuilderAssistant assistant; // mapper助手 扫描包的需要找到对应的xml文件
   private final Class<?> type; // 类名
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
@@ -160,7 +160,7 @@ public class MapperAnnotationBuilder {
       }
       if (inputStream != null) {
         XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource,
-            configuration.getSqlFragments(), type.getName());
+            configuration.getSqlFragments(), type.getName()); // 开始进行映射资源配置文件
         xmlParser.parse();
       }
     }

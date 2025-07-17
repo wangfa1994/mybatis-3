@@ -27,14 +27,14 @@ import org.apache.ibatis.session.Configuration;
 
 /** 原生SQL语句。不含有动态节点的，也不含有${}，但是可能含有#{}占位符，
  * Static SqlSource. It is faster than {@link DynamicSqlSource} because mappings are calculated during startup.
- *
+ * 在构造方法中完成了“＃{}”占位符的处理，得到 StaticSqlSource对象并放入自身的 sqlSource属性中。而之后的 getBoundSql操作中，BoundSql对象就直接由 sqlSource属性中持有的 StaticSqlSource对象返回
  * @since 3.2.0
  *
  * @author Eduardo Macarron
  */
 public class RawSqlSource implements SqlSource {
 
-  private final SqlSource sqlSource; //
+  private final SqlSource sqlSource; // StaticSqlSource 对象
 
   public RawSqlSource(Configuration configuration, SqlNode rootSqlNode, Class<?> parameterType) {
     this(configuration, getSql(configuration, rootSqlNode), parameterType);
@@ -43,7 +43,7 @@ public class RawSqlSource implements SqlSource {
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType) {
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> clazz = parameterType == null ? Object.class : parameterType;
-    sqlSource = sqlSourceParser.parse(sql, clazz, new HashMap<>()); // 解析sql
+    sqlSource = sqlSourceParser.parse(sql, clazz, new HashMap<>()); // 解析sql 处理RawSqlSource中的#{}占位符，得到StaticSource
   }
 
   private static String getSql(Configuration configuration, SqlNode rootSqlNode) {
@@ -54,7 +54,7 @@ public class RawSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
-    return sqlSource.getBoundSql(parameterObject);
+    return sqlSource.getBoundSql(parameterObject); // BoundSql对象由sqlSource属性持有的StaticSqlSource对象返回
   }
 
 }

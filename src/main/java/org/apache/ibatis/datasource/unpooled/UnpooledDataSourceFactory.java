@@ -24,7 +24,7 @@ import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
-/**
+/**  非池化的数据源工厂  ， 与只负责从环境中查找指定数据源的 JndiDataSourceFactory不同，UnpooledDataSourceFactory 需要真正创建一个数据源
  * @author Clinton Begin
  */
 public class UnpooledDataSourceFactory implements DataSourceFactory {
@@ -34,20 +34,20 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
 
   protected DataSource dataSource;
 
-  public UnpooledDataSourceFactory() {
+  public UnpooledDataSourceFactory() { // 工厂直接返回产品对象 dataSource
     this.dataSource = new UnpooledDataSource();
   }
 
   @Override
   public void setProperties(Properties properties) {
-    Properties driverProperties = new Properties();
-    MetaObject metaDataSource = SystemMetaObject.forObject(dataSource); //利用工具类得到我们的dataSource对象的元数据对象，可以从这里进行反射操作
+    Properties driverProperties = new Properties(); // 驱动的属性
+    MetaObject metaDataSource = SystemMetaObject.forObject(dataSource); //利用工具类得到我们的dataSource对象的元数据对象，MetaObject可以从这里进行反射操作，其中也包括了我们的原始对象 ，UnpooledDataSource 对象
     for (Object key : properties.keySet()) {
       String propertyName = (String) key;
-      if (propertyName.startsWith(DRIVER_PROPERTY_PREFIX)) {
+      if (propertyName.startsWith(DRIVER_PROPERTY_PREFIX)) { // 如果属性是driver开头的，则表示是给driver进行设置配置的
         String value = properties.getProperty(propertyName);
         driverProperties.setProperty(propertyName.substring(DRIVER_PROPERTY_PREFIX_LENGTH), value);
-      } else if (metaDataSource.hasSetter(propertyName)) {
+      } else if (metaDataSource.hasSetter(propertyName)) { // 给我们的dataSource进行设置属性
         String value = (String) properties.get(propertyName);
         Object convertedValue = convertValue(metaDataSource, propertyName, value);
         metaDataSource.setValue(propertyName, convertedValue);
@@ -61,7 +61,7 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
   }
 
   @Override
-  public DataSource getDataSource() {
+  public DataSource getDataSource() { // 获取数据源
     return dataSource;
   }
 

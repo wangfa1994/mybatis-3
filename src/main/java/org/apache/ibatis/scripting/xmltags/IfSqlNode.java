@@ -19,9 +19,9 @@ package org.apache.ibatis.scripting.xmltags;
  * @author Clinton Begin
  */
 public class IfSqlNode implements SqlNode {
-  private final ExpressionEvaluator evaluator;
-  private final String test;
-  private final SqlNode contents;
+  private final ExpressionEvaluator evaluator; // 表达式求值器，利用了封装的ognl操作工具类
+  private final String test; // if 判断时的测试条件
+  private final SqlNode contents; // 如果if成立，要被拼接的sql片段信息
 
   public IfSqlNode(SqlNode contents, String test) {
     this.test = test;
@@ -32,7 +32,7 @@ public class IfSqlNode implements SqlNode {
   @Override
   public boolean apply(DynamicContext context) {
     if (evaluator.evaluateBoolean(test, context.getBindings())) {
-      contents.apply(context);
+      contents.apply(context); // 将 sql片段追加拼接到对应的环境上下文context上
       return true;
     }
     return false;

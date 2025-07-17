@@ -25,7 +25,7 @@ public class A01OldMybatisTest {
 
   public static void findById() throws IOException {
     InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a01/sqlMapConfig.xml");
-    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);  // 返回的是 DefaultSqlSessionFactory 主要类
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
     SqlSession sqlSession = sqlSessionFactory.openSession(); //DefaultSqlSession 主要类，sql
     // 通过sql
     User user = (User)sqlSession.selectOne("user.findById", 1);
@@ -36,7 +36,7 @@ public class A01OldMybatisTest {
   public static void select() throws IOException {
     //1.Resources工具类，配置文件的加载，把配置文件加载成字节输入流
     InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a01/sqlMapConfig.xml");
-    //2.解析了配置文件，并创建了sqlSessionFactory工厂
+    //2.解析了配置文件，并创建了sqlSessionFactory工厂 // 返回的是 DefaultSqlSessionFactory 主要类
     SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
     //3.生产sqlSession
     SqlSession sqlSession = sqlSessionFactory.openSession();// 默认开启一个事务，但是该事务不会自动提交

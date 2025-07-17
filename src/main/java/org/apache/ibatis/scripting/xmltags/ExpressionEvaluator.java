@@ -23,23 +23,23 @@ import java.util.Map;
 
 import org.apache.ibatis.builder.BuilderException;
 
-/**
- * @author Clinton Begin
+/** 表达式求值器  简易封装了OGNL表达式工具类，
+ * @author Clinton Begin 基于 OGNL 封装的表达式求值器是 SQL 节点树解析的利器，它能够根据上下文环境对表达式的值做出正确的判断，这是将复杂的数据库操作语句解析为纯粹SQL语句的十分重要的一步
  */
 public class ExpressionEvaluator {
-
+  // 对结构为true和false形式的表达式进行求值  针对<if test="name != null"> 节点中的true false判断可以直接进行调用
   public boolean evaluateBoolean(String expression, Object parameterObject) {
-    Object value = OgnlCache.getValue(expression, parameterObject);
+    Object value = OgnlCache.getValue(expression, parameterObject); // 得到表达式的值
     if (value instanceof Boolean) {
       return (Boolean) value;
     }
-    if (value instanceof Number) {
+    if (value instanceof Number) { // 数值型进行一下处理
       return new BigDecimal(String.valueOf(value)).compareTo(BigDecimal.ZERO) != 0;
     }
     return value != null;
   }
 
-  /**
+  /** 对结果为迭代形式的表达式进行求值。这样，“＜foreach item="id" collection="array" open="（" separator="，"close="）"＞＃{id} ＜/foreach＞”节点中的迭代判断便可以直接调用该方法完成
    * @deprecated Since 3.5.9, use the {@link #evaluateIterable(String, Object, boolean)}.
    */
   @Deprecated
@@ -51,17 +51,17 @@ public class ExpressionEvaluator {
    * @since 3.5.9
    */
   public Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable) {
-    Object value = OgnlCache.getValue(expression, parameterObject);
+    Object value = OgnlCache.getValue(expression, parameterObject); // 获取表达式的结果
     if (value == null) {
       if (nullable) {
         return null;
       }
       throw new BuilderException("The expression '" + expression + "' evaluated to a null value.");
     }
-    if (value instanceof Iterable) {
+    if (value instanceof Iterable) { // 列表
       return (Iterable<?>) value;
     }
-    if (value.getClass().isArray()) {
+    if (value.getClass().isArray()) { // 数组
       // the array may be primitive, so Arrays.asList() may throw
       // a ClassCastException (issue 209). Do the work manually
       // Curse primitives! :) (JGB)
@@ -73,7 +73,7 @@ public class ExpressionEvaluator {
       }
       return answer;
     }
-    if (value instanceof Map) {
+    if (value instanceof Map) { // 结果为Map
       return ((Map) value).entrySet();
     }
     throw new BuilderException(

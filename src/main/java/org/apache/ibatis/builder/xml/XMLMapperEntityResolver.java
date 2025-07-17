@@ -24,7 +24,7 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-/** MyBatis dtd的脱机实体解析器。  在没有网络的情况下进行得到xml对应的DTD文件
+/** MyBatis dtd的脱机实体解析器。  在没有网络的情况下进行得到xml对应的DTD文件，jdk的xml解析相关类会通过传递的类进行回调到这个里面进行处理
  * Offline entity resolver for the MyBatis DTDs.
  *
  * @author Clinton Begin

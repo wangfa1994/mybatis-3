@@ -23,7 +23,7 @@ import java.sql.SQLException;
 
 import org.apache.ibatis.reflection.ExceptionUtil;
 
-/**
+/** 被池化包装的链接对象，修改了close行为不再是关闭而是归还到池中
  * @author Clinton Begin
  */
 class PooledConnection implements InvocationHandler {
@@ -32,7 +32,7 @@ class PooledConnection implements InvocationHandler {
   private static final Class<?>[] IFACES = { Connection.class };
 
   private final int hashCode;
-  private final PooledDataSource dataSource;
+  private final PooledDataSource dataSource; // 这个就是链接池，每一个链接都记录了自己所在的池子
   private final Connection realConnection;
   private final Connection proxyConnection;
   private long checkoutTimestamp;
@@ -245,7 +245,7 @@ class PooledConnection implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
-    if (CLOSE.equals(methodName)) {
+    if (CLOSE.equals(methodName)) { // 如果是关闭的话，直接进行归还到池中
       dataSource.pushConnection(this);
       return null;
     }
@@ -253,9 +253,9 @@ class PooledConnection implements InvocationHandler {
       if (!Object.class.equals(method.getDeclaringClass())) {
         // issue #579 toString() should never fail
         // throw an SQLException instead of a Runtime
-        checkConnection();
+        checkConnection(); // 校验链接
       }
-      return method.invoke(realConnection, args);
+      return method.invoke(realConnection, args); //使用真正的链接进行执行操作
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }

@@ -24,15 +24,15 @@ import org.apache.ibatis.util.MapUtil;
  * @author Frank D. Martinez [mnesarco]
  */
 public class LanguageDriverRegistry {
-
+  // 语言驱动器缓存列表
   private final Map<Class<? extends LanguageDriver>, LanguageDriver> LANGUAGE_DRIVER_MAP = new HashMap<>();
 
-  private Class<? extends LanguageDriver> defaultDriverClass;
+  private Class<? extends LanguageDriver> defaultDriverClass; // 默认的是XMLLanguageDriver ，我们可以通过配置进行改动
 
-  public void register(Class<? extends LanguageDriver> cls) {
+  public void register(Class<? extends LanguageDriver> cls) { //注册我们的语言驱动器
     if (cls == null) {
       throw new IllegalArgumentException("null is not a valid Language Driver");
-    }
+    } // 封装的map工具类 存在不进行存储，不存在的话，进行存储
     MapUtil.computeIfAbsent(LANGUAGE_DRIVER_MAP, cls, k -> {
       try {
         return k.getDeclaredConstructor().newInstance();

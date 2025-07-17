@@ -26,7 +26,7 @@ import javax.sql.DataSource;
 import org.apache.ibatis.datasource.DataSourceException;
 import org.apache.ibatis.datasource.DataSourceFactory;
 
-/**
+/**   JNDI数据源工厂 通过JNDI规范进行解析工厂
  * @author Clinton Begin
  */
 public class JndiDataSourceFactory implements DataSourceFactory {
@@ -40,18 +40,18 @@ public class JndiDataSourceFactory implements DataSourceFactory {
   @Override
   public void setProperties(Properties properties) {
     try {
-      InitialContext initCtx;
-      Properties env = getEnvProperties(properties);
+      InitialContext initCtx; //初始上下文环境
+      Properties env = getEnvProperties(properties); // 获取配置信息，根据配置信息初始化环境
       if (env == null) {
         initCtx = new InitialContext();
       } else {
         initCtx = new InitialContext(env);
       }
 
-      if (properties.containsKey(INITIAL_CONTEXT) && properties.containsKey(DATA_SOURCE)) {
-        Context ctx = (Context) initCtx.lookup(properties.getProperty(INITIAL_CONTEXT));
-        dataSource = (DataSource) ctx.lookup(properties.getProperty(DATA_SOURCE));
-      } else if (properties.containsKey(DATA_SOURCE)) {
+      if (properties.containsKey(INITIAL_CONTEXT) && properties.containsKey(DATA_SOURCE)) { // 从配置信息中获取数据源信息
+        Context ctx = (Context) initCtx.lookup(properties.getProperty(INITIAL_CONTEXT)); // 定位到initial_context给出的起始环境
+        dataSource = (DataSource) ctx.lookup(properties.getProperty(DATA_SOURCE));// 从起始环境中寻找指定数据源
+      } else if (properties.containsKey(DATA_SOURCE)) { // 从整个环境中寻找指定数据源
         dataSource = (DataSource) initCtx.lookup(properties.getProperty(DATA_SOURCE));
       }
 

@@ -19,7 +19,7 @@ import ognl.DefaultClassResolver;
 
 import org.apache.ibatis.io.Resources;
 
-/**
+/** OGNL 可以通过该类进行类的读取，即将类名转化为一个类。替换了ognl中的信息，继承了DefaultClassResolver 并且重写了方法
  * Custom ognl {@code ClassResolver} which behaves same like ognl's {@code DefaultClassResolver}. But uses the
  * {@code Resources} utility class to find the target class instead of {@code Class#forName(String)}.
  *
@@ -31,7 +31,7 @@ public class OgnlClassResolver extends DefaultClassResolver {
 
   @Override
   protected Class toClassForName(String className) throws ClassNotFoundException {
-    return Resources.classForName(className);
+    return Resources.classForName(className); // 替换了ognl中的方法 OGNL在工作时可以使用 MyBatis中的 Resources类来完成类的读取
   }
 
 }

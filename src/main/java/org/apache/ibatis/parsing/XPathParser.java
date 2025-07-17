@@ -40,17 +40,17 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-/** 解析xml的核心类 因为mybatis的配置文件都是xml格式的，所以，需要使用此进行去解析，核心类包括  XNode 和  XPathParser
+/** 解析xml的核心类 因为mybatis的配置文件都是xml格式的，所以，需要使用此进行去解析，核心类包括  XNode 和  XPathParser，底层通过jdk相关的xml类进行处理
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public class XPathParser {
 
-  private final Document document; // 要解析的整个的xml文档
+  private final Document document; // 要解析的整个的xml文档 在创建this对象的时候,直接通过流进行解析放到属性中
   private boolean validation; // 是否开启验证
   private EntityResolver entityResolver; //通过EntityResolver声明寻找DTD文件的方法，通过本地寻找/网络寻找等
   private Properties variables; // 配置文件解析出来的properties标签值 properties节点会在解析配置文件的最开始就被解析，然后相关信息会被 放入“private Properties variables”属性并在解析后续节点时发 挥作用
-  private XPath xpath; // 解析xml的XPath,通过这个属性XPathParser也就具备了解析XML的功能
+  private XPath xpath; // 解析xml的XPath,通过这个属性XPathParser也就具备了解析XML的功能，通过jdk的XPathFactory获取
 
   public XPathParser(String xml) { // 初始化的时候，根据传递的xml进行构建出Document
     commonConstructor(false, null, null);
@@ -124,7 +124,7 @@ public class XPathParser {
 
   public XPathParser(InputStream inputStream, boolean validation, Properties variables, EntityResolver entityResolver) {
     commonConstructor(validation, variables, entityResolver);
-    this.document = createDocument(new InputSource(inputStream));
+    this.document = createDocument(new InputSource(inputStream)); // 得到我们mybatis的配置文件
   }
 
   public XPathParser(Document document, boolean validation, Properties variables, EntityResolver entityResolver) {
@@ -207,20 +207,20 @@ public class XPathParser {
   }
 
   public XNode evalNode(String expression) {
-    return evalNode(document, expression);
+    return evalNode(document, expression); // document是我们配置文件的文件流解析出来的信息
   }
-
+  // 从node中，根据表达式找到对应的符合表达式的Node
   public XNode evalNode(Object root, String expression) {
-    Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
+    Node node = (Node) evaluate(expression, root, XPathConstants.NODE); // 通过jdk解析得到jdk对应的Node
     if (node == null) {
       return null;
     }
-    return new XNode(this, node, variables);
+    return new XNode(this, node, variables); //封装成我们自己的XNode
   }
 
   private Object evaluate(String expression, Object root, QName returnType) {
     try { // 对指定节点root运行解析语法expression，获得returnType类型的解析结果
-      return xpath.evaluate(expression, root, returnType);
+      return xpath.evaluate(expression, root, returnType); // jdk中的xml解析
     } catch (Exception e) {
       throw new BuilderException("Error evaluating XPath.  Cause: " + e, e);
     }
@@ -239,8 +239,8 @@ public class XPathParser {
       factory.setCoalescing(false);
       factory.setExpandEntityReferences(false);
 
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      builder.setEntityResolver(entityResolver);
+      DocumentBuilder builder = factory.newDocumentBuilder(); // 通过DocumentBuilder进行解析
+      builder.setEntityResolver(entityResolver); // 将我们的校验文件传递，jdk会通过回调找到对应的文件属性
       builder.setErrorHandler(new ErrorHandler() {
         @Override
         public void error(SAXParseException exception) throws SAXException {
@@ -257,7 +257,7 @@ public class XPathParser {
           // NOP
         }
       });
-      return builder.parse(inputSource);
+      return builder.parse(inputSource); // 进行构建
     } catch (Exception e) {
       throw new BuilderException("Error creating document instance.  Cause: " + e, e);
     }
@@ -267,7 +267,7 @@ public class XPathParser {
     this.validation = validation;
     this.entityResolver = entityResolver;
     this.variables = variables;
-    XPathFactory factory = XPathFactory.newInstance();
+    XPathFactory factory = XPathFactory.newInstance(); // 创建了jdk的XPathFactory进行得到xpath
     this.xpath = factory.newXPath();
   }
 

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
+/** 数据库连接池 使用PoolState来存储所有的数据库连接，就是为了统计连接池运行数据的需要，进行调整我们的数据库配置，防止过大造成资源浪费，过小频繁的创建销毁
  * @author Clinton Begin
  */
 public class PoolState {
@@ -33,16 +33,16 @@ public class PoolState {
 
   protected PooledDataSource dataSource;
 
-  protected final List<PooledConnection> idleConnections = new ArrayList<>();
-  protected final List<PooledConnection> activeConnections = new ArrayList<>();
-  protected long requestCount;
-  protected long accumulatedRequestTime;
-  protected long accumulatedCheckoutTime;
-  protected long claimedOverdueConnectionCount;
-  protected long accumulatedCheckoutTimeOfOverdueConnections;
-  protected long accumulatedWaitTime;
-  protected long hadToWaitCount;
-  protected long badConnectionCount;
+  protected final List<PooledConnection> idleConnections = new ArrayList<>(); // 所有的空闲链接列表
+  protected final List<PooledConnection> activeConnections = new ArrayList<>(); // 所有的活动的链接列表
+  protected long requestCount; // 链接被取出的次数
+  protected long accumulatedRequestTime; // 取出请求花费时间的累计值，从准备取出请求到取出结束的时间为取出请求花费的时间
+  protected long accumulatedCheckoutTime; // 累计被检出的时间
+  protected long claimedOverdueConnectionCount; // 声明的过期连接数
+  protected long accumulatedCheckoutTimeOfOverdueConnections; //过期的连接数的总检出时长
+  protected long accumulatedWaitTime; //总等待时间
+  protected long hadToWaitCount; // 等待的轮次
+  protected long badConnectionCount; // 坏链接的数目
 
   public PoolState(PooledDataSource dataSource) {
     this.dataSource = dataSource;

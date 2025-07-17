@@ -25,9 +25,9 @@ import ognl.PropertyAccessor;
 
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
-
-/**
- * @author Clinton Begin
+// 书写映射文件时既能够直接引用实参，又能直接引用实参的属性就是因为这个类
+/** 动态上下文 两个功能 ：在进行 SQL节点树的解析时，需要不断保存已经解析完成的 SQL片段
+ * @author Clinton Begin  在进行SQL节点树的解析时也需要一些参数和环境信息作为解析的依据
  */
 public class DynamicContext {
 
@@ -37,21 +37,21 @@ public class DynamicContext {
   static {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
-
-  private final ContextMap bindings;
-  private final StringJoiner sqlBuilder = new StringJoiner(" ");
-  private int uniqueNumber;
+  // ContextMap类是内部类继承了map
+  private final ContextMap bindings; // SQL节点树解析时的上下文环境 ，存储了 数据库 id 参数对象 参数对象的元数据
+  private final StringJoiner sqlBuilder = new StringJoiner(" ");  // 存储解析结束的SQL片段
+  private int uniqueNumber; // 解析时的唯一编号，防止解析混乱
 
   public DynamicContext(Configuration configuration, Object parameterObject) {
     if (parameterObject != null && !(parameterObject instanceof Map)) {
-      MetaObject metaObject = configuration.newMetaObject(parameterObject);
-      boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
-      bindings = new ContextMap(metaObject, existsTypeHandler);
+      MetaObject metaObject = configuration.newMetaObject(parameterObject); // 获得当前参数的元对象
+      boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());// 判断参数对象本身是否有对应的类型处理器
+      bindings = new ContextMap(metaObject, existsTypeHandler);// 放入到上下文信息中 【参数对象的元数据:基于参数对象的元数据可以方便地引用参数对象的属性值,因此在编写 SQL语句时可以直接引用参数对象的属性】
     } else {
-      bindings = new ContextMap(null, false);
+      bindings = new ContextMap(null, false); // 上下文信息为空
     }
-    bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
-    bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());
+    bindings.put(PARAMETER_OBJECT_KEY, parameterObject); // 把参数对象放入上下文信息中 【参数对象：在编写 SQL 语句时，我们可以直接使用 PARAMETER_OBJECT_KEY变量来引用整个参数对象】
+    bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());//把数据库id放入上下文信息中 【数据库id：我们可以直接使用 DATABASE_ID_KEY变量引用数据库 id的值】
   }
 
   public Map<String, Object> getBindings() {
@@ -73,7 +73,7 @@ public class DynamicContext {
   public int getUniqueNumber() {
     return uniqueNumber++;
   }
-
+  // 在进行数据查询时，DynamicContext会先从 HashMap中查询，如果查询失败则会从参数对象的属性中查询,基于这一点，我们可以在编写 SQL 语句时直接引用参数对象的属性
   static class ContextMap extends HashMap<String, Object> {
     private static final long serialVersionUID = 2977601501966151582L;
     private final MetaObject parameterMetaObject;
@@ -87,14 +87,14 @@ public class DynamicContext {
     @Override
     public Object get(Object key) {
       String strKey = (String) key;
-      if (super.containsKey(strKey)) {
+      if (super.containsKey(strKey)) { // 如果map中包含对应的键，直接返回
         return super.get(strKey);
       }
 
       if (parameterMetaObject == null) {
         return null;
       }
-
+      // 尝试从参数对象的原对象中进行获取
       if (fallbackParameterObject && !parameterMetaObject.hasGetter(strKey)) {
         return parameterMetaObject.getOriginalObject();
       }

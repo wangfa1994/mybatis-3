@@ -119,7 +119,7 @@ public class Configuration {
   protected boolean argNameBasedConstructorAutoMapping; // settings标签中的子标签
 
   protected String logPrefix; // settings标签中的子标签
-  protected Class<? extends Log> logImpl;
+  protected Class<? extends Log> logImpl; //日志实现
   protected Class<? extends VFS> vfsImpl;
   protected Class<?> defaultSqlProviderType; // settings标签中的子标签
   protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION; // settings标签中的子标签  一级缓存本地默认为session级别的，如果我们修改了为Statement级别的，我们则会进行清空缓存
@@ -152,8 +152,8 @@ public class Configuration {
   protected final MapperRegistry mapperRegistry = new MapperRegistry(this); //configuration标签下的子标签  mapperRegistry注册器， 里面封装了我们对应的MapperProxyFactory,当我们的mapper资源通过package进行引入的话，会进行这个对象的赋值
   protected final InterceptorChain interceptorChain = new InterceptorChain(); // 存放我们的插件链，解析的plugin标签会被封装到这里
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this); // configuration标签下的子标签，类型解析器 ，// settings标签中的子标签的结果会被放置到这个对象中的 defaultEnumTypeHandler
-  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，初始化的时候进行了内部别名的定义， 还有我们自定义通过typeAliases标签进行定义的，用于简化我们的sql片段
-  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); //sql的语言驱动器，用来解析我们的sql
+  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，configuration对象和TypeAliasRegistry对象初始化的时候进行了内部别名的定义， 还有我们自定义通过typeAliases标签进行定义的，用于简化我们的sql片段
+  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); //sql的语言驱动器的注册器，用来管理我们的LanguageDriver，则用来解析我们的sql
   // mappedStatements 用来存放我们的命名空间+id 唯一的值，这个是操作数据库语句的唯一编号,StrictMap,key 不能被覆盖的map
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>(
       "Mapped Statements collection")
@@ -187,7 +187,7 @@ public class Configuration {
     this.environment = environment;
   }
 
-  public Configuration() {
+  public Configuration() { // 在Configuration对象进行实例化的时候，也进行了一些类型的注册 typeAliasRegistry
     typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 
@@ -703,7 +703,7 @@ public class Configuration {
     return getDefaultScriptingLanguageInstance();
   }
 
-  public MetaObject newMetaObject(Object object) {
+  public MetaObject newMetaObject(Object object) { // 获得当前对象的元对象
     return MetaObject.forObject(object, objectFactory, objectWrapperFactory, reflectorFactory);
   }
 

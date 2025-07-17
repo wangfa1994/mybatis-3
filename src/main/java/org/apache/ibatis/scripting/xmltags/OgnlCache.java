@@ -24,7 +24,7 @@ import ognl.OgnlException;
 
 import org.apache.ibatis.builder.BuilderException;
 
-/**
+/** 缓存OGNL解析表达式  因为有预编译的速度更快
  * Caches OGNL parsed expressions.
  *
  * @author Eduardo Macarron
@@ -33,16 +33,16 @@ import org.apache.ibatis.builder.BuilderException;
  */
 public final class OgnlCache {
 
-  private static final OgnlMemberAccess MEMBER_ACCESS = new OgnlMemberAccess();
-  private static final OgnlClassResolver CLASS_RESOLVER = new OgnlClassResolver();
-  private static final Map<String, Object> expressionCache = new ConcurrentHashMap<>();
+  private static final OgnlMemberAccess MEMBER_ACCESS = new OgnlMemberAccess(); // Mybatis提供的OGNL的OgnlMemberAccess对象
+  private static final OgnlClassResolver CLASS_RESOLVER = new OgnlClassResolver(); // Mybatis提供的OGNL的OgnlClassResolver对象
+  private static final Map<String, Object> expressionCache = new ConcurrentHashMap<>(); // 缓存表达式
 
   private OgnlCache() {
     // Prevent Instantiation of Static Class
   }
-
+  // 读取表达式的结果
   public static Object getValue(String expression, Object root) {
-    try {
+    try { // 创建默认的上下文环境，传递了Mybatis提供的 MemberAccess 和 ClassResolver
       OgnlContext context = Ognl.createDefaultContext(root, MEMBER_ACCESS, CLASS_RESOLVER, null);
       return Ognl.getValue(parseExpression(expression), context, root);
     } catch (OgnlException e) {
@@ -51,8 +51,8 @@ public final class OgnlCache {
   }
 
   private static Object parseExpression(String expression) throws OgnlException {
-    Object node = expressionCache.get(expression);
-    if (node == null) {
+    Object node = expressionCache.get(expression); // 先从缓存中取
+    if (node == null) {// 不存在进行解析并缓存
       node = Ognl.parseExpression(expression);
       expressionCache.put(expression, node);
     }

@@ -5,7 +5,9 @@ public class MappingMain {
   /**
    *  1. SQL语句处理功能
    * MappedStatement类：表示数据库的操作节点的内容，select inset update delete四个节点内的所有内容
+   *
    * SqlSource接口：数据库操作标签中包含的sql语句 四个实现类 providerSqlSource DynamicSqlSource RawSqlSource StaticSqlSource
+   *
    * BoundSql类：sqlSource进一步处理的产物
    *
    * MappedStatement

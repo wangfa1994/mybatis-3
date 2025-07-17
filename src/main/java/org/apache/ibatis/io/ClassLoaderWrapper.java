@@ -29,7 +29,7 @@ public class ClassLoaderWrapper {
   ClassLoader systemClassLoader;
 
   ClassLoaderWrapper() {
-    try {
+    try { // 在构造器中进行初始化变量
       systemClassLoader = ClassLoader.getSystemClassLoader();
     } catch (SecurityException ignored) {
       // AccessControlException on Google App Engine
@@ -135,7 +135,7 @@ public class ClassLoaderWrapper {
       if (null != cl) {
 
         // try to find the resource as passed
-        InputStream returnValue = cl.getResourceAsStream(resource);
+        InputStream returnValue = cl.getResourceAsStream(resource); //Jdk中的classLoad方法使用
         // 现在，一些类加载器想要这个 / 开头，所以我们将添加它，如果我们没有找到资源再试一次
         // now, some class loaders want this leading "/", so we'll add it and try again if we didn't find the resource
         if (null == returnValue) {
@@ -227,7 +227,7 @@ public class ClassLoaderWrapper {
 
   }
 
-  ClassLoader[] getClassLoaders(ClassLoader classLoader) {
+  ClassLoader[] getClassLoaders(ClassLoader classLoader) { // 返回一个默认的classLoad列表，通过列表进行循环
     return new ClassLoader[] { classLoader, defaultClassLoader, Thread.currentThread().getContextClassLoader(),
         getClass().getClassLoader(), systemClassLoader };
   }
