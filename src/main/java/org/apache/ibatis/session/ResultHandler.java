@@ -15,11 +15,11 @@
  */
 package org.apache.ibatis.session;
 
-/**
+/** 结果处理器接口，针对数据库结果的处理   三个实现类【ObjectWrapperResultHandler DefaultMapResultHandler DefaultResultHandler 】
  * @author Clinton Begin
  */
 public interface ResultHandler<T> {
-
+  // 处理单条结果的 handleResult 方法 ,从结果上下文参数中得到结果进行处理
   void handleResult(ResultContext<? extends T> resultContext);
 
 }

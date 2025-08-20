@@ -15,7 +15,7 @@
  */
 package org.apache.ibatis.session;
 
-/**
+/** 用来存储一个结果对象，对应数据库中的一条记录
  * @author Clinton Begin
  */
 public interface ResultContext<T> {

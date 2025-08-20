@@ -6,4 +6,7 @@ import java.util.List;
 
 public interface UserMapper {
     List<User> queryUserBySchoolName(@Param("emailAddress")String email,int age ,String schoolName);
+
+  List<User> queryUserBySchoolNameWithParam(String email,int age ,String schoolName);
+
 }

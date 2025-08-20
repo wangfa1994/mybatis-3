@@ -20,13 +20,13 @@ import java.sql.Statement;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 
-/**
+/** 自增主键顶级接口，定义了数据插入前和数据插入后两个规范标准
  * @author Clinton Begin
  */
 public interface KeyGenerator {
-
+  // 数据插入前进行的操作 (执行器、映射文件 Statement对象 sql语句实参对象)
   void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
-
+  // 数据插入后进行的操作 (执行器、映射文件 Statement对象 sql语句实参对象)
   void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
 
 }

@@ -15,14 +15,14 @@
  */
 package org.apache.ibatis.jdbc;
 
-/**
+/** 继承AbstractSQL 得到自己的 SQL  将AbstractSQL作为抽象方法独立出来，使得我们可以继承AbstractSQL实现其他的子类，保证了 AbstractSQL类更容易被扩展
  * @author Clinton Begin
  */
 public class SQL extends AbstractSQL<SQL> {
 
   @Override
   public SQL getSelf() {
-    return this;
+    return this; // 返回SQL自身对象
   }
 
 }

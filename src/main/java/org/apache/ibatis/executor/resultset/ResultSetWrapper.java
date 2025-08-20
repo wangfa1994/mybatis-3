@@ -36,19 +36,19 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.type.UnknownTypeHandler;
 
-/**
+/** 对结果的封装类 【可以看做是装饰器模式，针对ResultSet扩展出了更多的功能】
  * @author Iwao AVE!
  */
 public class ResultSetWrapper {
 
-  private final ResultSet resultSet;
-  private final TypeHandlerRegistry typeHandlerRegistry;
-  private final List<String> columnNames = new ArrayList<>();
-  private final List<String> classNames = new ArrayList<>();
-  private final List<JdbcType> jdbcTypes = new ArrayList<>();
-  private final Map<String, Map<Class<?>, TypeHandler<?>>> typeHandlerMap = new HashMap<>();
-  private final Map<String, Set<String>> mappedColumnNamesMap = new HashMap<>();
-  private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>();
+  private final ResultSet resultSet; //java.sql.ResultSet 数据库返回的原始结果
+  private final TypeHandlerRegistry typeHandlerRegistry; //类型处理器注册表
+  private final List<String> columnNames = new ArrayList<>(); //resultSet中各个列对应的列名列表
+  private final List<String> classNames = new ArrayList<>(); // resultSet中各个列对应的class类型列表
+  private final List<JdbcType> jdbcTypes = new ArrayList<>(); // resultSet中各个列对应的JDBC类型列表
+  private final Map<String, Map<Class<?>, TypeHandler<?>>> typeHandlerMap = new HashMap<>(); // 类型与类型处理器的映射表【Map<列表，Map<java类型，类型处理器>>】
+  private final Map<String, Set<String>> mappedColumnNamesMap = new HashMap<>(); // 记录所有的有映射关系的列 map<resultMap的id,List<对象映射的列名>>
+  private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>(); //记录所有无映射关系的列 map<resultMap的id,List<对象映射的列名>>
 
   public ResultSetWrapper(ResultSet rs, Configuration configuration) throws SQLException {
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();

@@ -29,20 +29,20 @@ import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
-/**
- * @author Larry Meadors
+/** SqlSessionManager 将工厂和产品整合到一起后, 1.SqlSessionManager总能给出一个产品并使用该产品完成相关的操作外部使用者不需要了解细节，因此省略了调用工厂生产产品的过程(从线程 ThreadLocal取出或者新建产品)
+ * @author Larry Meadors 2.提供了产品复用的功能，工厂生产出的产品可以放入线程ThreadLocal保存(startManagedSession)，实现产品的复用。这样既保证了线程安全又提升了效率
  */
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
-  private final SqlSessionFactory sqlSessionFactory;
-  private final SqlSession sqlSessionProxy;
+  private final SqlSessionFactory sqlSessionFactory; // sqlSessionFactory对象
+  private final SqlSession sqlSessionProxy; // SqlSession的代理对象
 
-  private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
+  private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>(); // 线程私有变量，用来存储被代理的sqlSession对象
 
-  private SqlSessionManager(SqlSessionFactory sqlSessionFactory) {
+  private SqlSessionManager(SqlSessionFactory sqlSessionFactory) { // 构造器被私有，只能通过newInstance进行完成
     this.sqlSessionFactory = sqlSessionFactory;
     this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(SqlSessionFactory.class.getClassLoader(),
-        new Class[] { SqlSession.class }, new SqlSessionInterceptor());
+        new Class[] { SqlSession.class }, new SqlSessionInterceptor()); // 创建了SqlSession的代理对象，代理逻辑为SqlSessionInterceptor
   }
 
   public static SqlSessionManager newInstance(Reader reader) {
@@ -340,27 +340,27 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
       // Prevent Synthetic Access
     }
 
-    @Override
+    @Override // 代理方法  [代理对象，代理方法，代理方法的参数]
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-      final SqlSession sqlSession = SqlSessionManager.this.localSqlSession.get();
+      final SqlSession sqlSession = SqlSessionManager.this.localSqlSession.get(); // 尝试从当前线程中取出sqlSession对象
       if (sqlSession != null) {
-        try {
+        try { // 不为空的话，使用线程变量中的sqlSession进行操作
           return method.invoke(sqlSession, args);
         } catch (Throwable t) {
           throw ExceptionUtil.unwrapThrowable(t);
         }
-      }
+      } // 如果线程中没有sqlSession则 使用sqlSessionFactory对象创建一个sqlSession对象
       try (SqlSession autoSqlSession = openSession()) {
         try {
-          final Object result = method.invoke(autoSqlSession, args);
+          final Object result = method.invoke(autoSqlSession, args); // 使用新创建的sqlSession进行操作
           autoSqlSession.commit();
           return result;
         } catch (Throwable t) {
           autoSqlSession.rollback();
           throw ExceptionUtil.unwrapThrowable(t);
         }
-      }
-    }
-  }
+      }//  SqlSession的代理对象拦截到方法时会尝试从当前线程的 ThreadLocal中取出一个 SqlSession对象
+    } // 如果 ThreadLocal中存在 SqlSession对象，代理对象则将操作交给取出的 SqlSession对象进行处理
+  } //如果 ThreadLocal中不存在 SqlSession对象，则使用属性中的 SqlSessionFactory对象创建一个 SqlSession对象，然后代理对象将操作交给新创建的 SqlSession对象进行处理
 
 }

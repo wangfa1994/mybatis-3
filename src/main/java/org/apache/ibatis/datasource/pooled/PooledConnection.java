@@ -33,8 +33,8 @@ class PooledConnection implements InvocationHandler {
 
   private final int hashCode;
   private final PooledDataSource dataSource; // 这个就是链接池，每一个链接都记录了自己所在的池子
-  private final Connection realConnection;
-  private final Connection proxyConnection;
+  private final Connection realConnection; // 代理类被封装的真正对象
+  private final Connection proxyConnection; // 被代理的链接，带InvocationHandler的代理类，是上面realConnection的代理，
   private long checkoutTimestamp;
   private long createdTimestamp;
   private long lastUsedTimestamp;

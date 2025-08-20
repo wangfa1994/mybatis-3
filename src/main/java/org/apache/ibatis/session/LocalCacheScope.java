@@ -15,7 +15,7 @@
  */
 package org.apache.ibatis.session;
 
-/**
+/** 表示本地缓存的作用范围   会话范围  语句范围
  * @author Eduardo Macarron
  */
 public enum LocalCacheScope {

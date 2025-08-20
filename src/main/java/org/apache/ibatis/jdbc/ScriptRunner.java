@@ -27,7 +27,7 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
+/** 这是一个内部测试工具 处理的是 SQL脚本，不涉及变量赋值问题 相比 SqlRunner而言更为简单。ScriptRunner还提供了全脚本执行和逐行执行两种模式
  * This is an internal testing utility.<br>
  * You are welcome to use this class for your own purposes,<br>
  * but if there is some feature/enhancement you need for your own usage,<br>

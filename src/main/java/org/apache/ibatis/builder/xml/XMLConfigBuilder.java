@@ -55,7 +55,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private boolean parsed;
   private final XPathParser parser; //构造器方法赋值 通过 parser将我们的配置文件变成节点，我们的流会被封装成Node
-  private String environment;
+  private String environment; //<environments default="development"> default的属性值
   private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory(); //默认的反射工厂
 
   public XMLConfigBuilder(Reader reader) {
@@ -115,19 +115,19 @@ public class XMLConfigBuilder extends BaseBuilder {
     try { // 解析信息放入到Configuration对象中
       // issue #117 read properties first
       propertiesElement(root.evalNode("properties")); //从根节点中找到properties节点,先解析properties标签属性，先解析用于保证在解析其他节点时就可以生效，并且放置到configuration类的变量中 XMLConfigBuilder包含了这个配置类configuration，在BaseBuilder父类中
-      Properties settings = settingsAsProperties(root.evalNode("settings")); // settings标签的解析 主要是处理 logImpl标签和vfsImpl标签
+      Properties settings = settingsAsProperties(root.evalNode("settings")); // settings标签的解析 处理成我们的keyValue形式的Properties  主要是处理 logImpl标签和vfsImpl标签
       loadCustomVfsImpl(settings);
       loadCustomLogImpl(settings); //加载我们的日志实现，在Config初始化的时候会将别名和默认的实现类进行注册到别名注册器中
       typeAliasesElement(root.evalNode("typeAliases"));//解析我们的别名，用在我们的sql片段中，主要是类型和简称的映射
-      pluginsElement(root.evalNode("plugins"));
+      pluginsElement(root.evalNode("plugins")); //解析我们的插件
       objectFactoryElement(root.evalNode("objectFactory"));
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       settingsElement(settings); //设置我们的settings配置属性，如果没有的，需要进行默认值的设置
       // read it after objectFactory and objectWrapperFactory issue #631
-      environmentsElement(root.evalNode("environments")); //数据源的相关配置处理
-      databaseIdProviderElement(root.evalNode("databaseIdProvider"));
-      typeHandlersElement(root.evalNode("typeHandlers"));
+      environmentsElement(root.evalNode("environments")); //数据源的相关配置处理，所有的都会进行走到这里，环境是必须配置的
+      databaseIdProviderElement(root.evalNode("databaseIdProvider")); //数据库语言配置
+      typeHandlersElement(root.evalNode("typeHandlers")); // 类型转换器
       mappersElement(root.evalNode("mappers")); //真正的解析我们的Mapper映射文件
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -199,11 +199,11 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context != null) {
       for (XNode child : context.getChildren()) {
         String interceptor = child.getStringAttribute("interceptor");
-        Properties properties = child.getChildrenAsProperties();
+        Properties properties = child.getChildrenAsProperties(); //获取到我们的拦截器中的属性配置,直接通过XNode进行了封装，否则的话，我们还要费劲去解析
         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor()
-            .newInstance();
-        interceptorInstance.setProperties(properties);
-        configuration.addInterceptor(interceptorInstance);
+            .newInstance();// 通过反射进行得到我们的拦截器对象实例
+        interceptorInstance.setProperties(properties); // 得到对象之后，直接给我们的对象实例进行回调赋值
+        configuration.addInterceptor(interceptorInstance); // 添加到我们的配置文件中
       }
     }
   }
@@ -246,7 +246,7 @@ public class XMLConfigBuilder extends BaseBuilder {
           "The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
     }
     if (resource != null) {
-      defaults.putAll(Resources.getResourceAsProperties(resource)); // 从资源中解析我们的配置文件
+      defaults.putAll(Resources.getResourceAsProperties(resource)); // 从资源中解析我们的配置文件，使用的是Resources工具类
     } else if (url != null) {
       defaults.putAll(Resources.getUrlAsProperties(url)); // 从url中解析我们的配置文件
     }
@@ -266,10 +266,10 @@ public class XMLConfigBuilder extends BaseBuilder {
     configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true)); // 二级缓存的属性配置，一级缓存sqlSession级别的
     configuration.setProxyFactory((ProxyFactory) createInstance(props.getProperty("proxyFactory"))); // 设置代理工厂？
     configuration.setLazyLoadingEnabled(booleanValueOf(props.getProperty("lazyLoadingEnabled"), false)); // 设置懒加载属性
-    configuration.setAggressiveLazyLoading(booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
+    configuration.setAggressiveLazyLoading(booleanValueOf(props.getProperty("aggressiveLazyLoading"), false)); //设置激进的懒加载设置
     configuration.setUseColumnLabel(booleanValueOf(props.getProperty("useColumnLabel"), true));
-    configuration.setUseGeneratedKeys(booleanValueOf(props.getProperty("useGeneratedKeys"), false));
-    configuration.setDefaultExecutorType(ExecutorType.valueOf(props.getProperty("defaultExecutorType", "SIMPLE")));
+    configuration.setUseGeneratedKeys(booleanValueOf(props.getProperty("useGeneratedKeys"), false)); //关于自增主键的设置
+    configuration.setDefaultExecutorType(ExecutorType.valueOf(props.getProperty("defaultExecutorType", "SIMPLE"))); //默认的执行器类型
     configuration.setDefaultStatementTimeout(integerValueOf(props.getProperty("defaultStatementTimeout"), null));
     configuration.setDefaultFetchSize(integerValueOf(props.getProperty("defaultFetchSize"), null));
     configuration.setDefaultResultSetType(resolveResultSetType(props.getProperty("defaultResultSetType")));
@@ -299,12 +299,12 @@ public class XMLConfigBuilder extends BaseBuilder {
       return;
     }
     if (environment == null) {
-      environment = context.getStringAttribute("default");
+      environment = context.getStringAttribute("default"); // 得到配置的环境的默认值
     }
-    for (XNode child : context.getChildren()) {
+    for (XNode child : context.getChildren()) { // 循环遍历environments标签下的environment子标签
       String id = child.getStringAttribute("id");
       if (isSpecifiedEnvironment(id)) {
-        TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager")); // 处理事务工厂
+        TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager")); //此数据源下的事务处理 处理事务工厂
         DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource")); // 处理数据源工厂
         DataSource dataSource = dsFactory.getDataSource();
         Environment.Builder environmentBuilder = new Environment.Builder(id).transactionFactory(txFactory)
@@ -340,7 +340,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
       TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance(); // 通过反射创建我们的TransactionFactory
-      factory.setProperties(props);
+      factory.setProperties(props); // 通过回调将我们的属性进行设置,skipSetAutoCommitOnClose 和 closeConnection
       return factory;
     }
     throw new BuilderException("Environment declaration requires a TransactionFactory.");

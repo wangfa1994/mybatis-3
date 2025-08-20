@@ -42,7 +42,7 @@ public class ParamNameResolver {
       GENERIC_NAME_CACHE[i] = GENERIC_NAME_PREFIX + (i + 1);
     }
   }
-  // 是否使用了真实参数标签的名称，如果使用了的话，会进行处理@param进行标注的参数的解析
+  // 是否使用了真实参数标签的名称，如果使用了的话，会进行处理没有@param进行标注的参数的解析
   private final boolean useActualParamName;
 
   /**
@@ -67,10 +67,10 @@ public class ParamNameResolver {
     final Class<?>[] paramTypes = method.getParameterTypes();
     final Annotation[][] paramAnnotations = method.getParameterAnnotations(); // 得到方法上的参数所有的注解，是一个二维数组，一个参数上可能有多个注解 ，jdk的方法
     final SortedMap<Integer, String> map = new TreeMap<>();
-    int paramCount = paramAnnotations.length;
+    int paramCount = paramAnnotations.length; // 参数个数
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
-      if (isSpecialParameter(paramTypes[paramIndex])) { // 跳过方法上特殊的注解
+      if (isSpecialParameter(paramTypes[paramIndex])) { // 跳过方法上特殊的参数，包括两个RowBounds，ResultHandler
         // skip special parameters
         continue;
       }
@@ -83,8 +83,8 @@ public class ParamNameResolver {
         }
       }
       if (name == null) {
-        // @Param was not specified.
-        if (useActualParamName) { //没有指定@Param ,进行保留参数的原有名称
+        // @Param was not specified.没有指定@Param。
+        if (useActualParamName) { //没有指定@Param ,根据是否需要进行保留参数的原有名称
           name = getActualParamName(method, paramIndex);
         }
         if (name == null) { // 参数名称获取不到的情况下，按照参数index命名
@@ -126,12 +126,12 @@ public class ParamNameResolver {
    *
    * @return the named params
    */
-  public Object getNamedParams(Object[] args) { // 将我们的实参和形参进行绑定 ,返回的是一个map对象
+  public Object getNamedParams(Object[] args) { // 将我们的实参和形参进行绑定 ,返回的是一个map对象，不仅进行了参数名的对应，还进行了param1.param2.param3...的对应，防止xml中写入了param
     final int paramCount = names.size();
     if (args == null || paramCount == 0) {
       return null;
     }
-    if (!hasParamAnnotation && paramCount == 1) {
+    if (!hasParamAnnotation && paramCount == 1) { // 如果只有一个参数，并且参数上没有进行绑定@Param注解
       Object value = args[names.firstKey()];
       return wrapToMapIfCollection(value, useActualParamName ? names.get(names.firstKey()) : null); //  进行包装实参，此时一定返回的是一个对象
     } else {
@@ -139,7 +139,7 @@ public class ParamNameResolver {
       int i = 0;
       for (Map.Entry<Integer, String> entry : names.entrySet()) {
         param.put(entry.getValue(), args[entry.getKey()]);// 封装成第一个的value为key，得到第二个的key的值
-        // add generic param names (param1, param2, ...)
+        // add generic param names (param1, param2, ...) 添加通用参数名（param1, param2，…）
         final String genericParamName = i < 10 ? GENERIC_NAME_CACHE[i] : GENERIC_NAME_PREFIX + (i + 1); // 缓存了10个大小的param1 param2 param3...
         // ensure not to overwrite parameter named with @Param  确保不要覆盖以@Param命名的参数
         if (!names.containsValue(genericParamName)) {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wf.yeecode.a04corepackage.a24plugin.custPlugin.UserMapper">
+    <select id="queryUserBySchoolName" resultType="com.wf.yeecode.a04corepackage.a24plugin.custPlugin.User">
+        SELECT * FROM `user`
+        <if test="schoolName != null">
+            WHERE schoolName = #{schoolName}
+        </if>
+    </select>
+</mapper>

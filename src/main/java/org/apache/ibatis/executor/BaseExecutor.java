@@ -44,7 +44,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/**
+/** 执行器的基类
  * @author Clinton Begin
  */
 public abstract class BaseExecutor implements Executor {
@@ -55,8 +55,8 @@ public abstract class BaseExecutor implements Executor {
   protected Executor wrapper;
 
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
-  protected PerpetualCache localCache; //SQL级别的缓存？ 一级缓存存放的地方，存放在BaseExecutor中的数据
-  protected PerpetualCache localOutputParameterCache;
+  protected PerpetualCache localCache; //一级缓存 查询操作的结果缓存，直接使用的是 PerpetualCache 而没有进行装饰
+  protected PerpetualCache localOutputParameterCache; //一级缓存 callable查询的输出参数缓存 baseExecutor属于SqlSession.所以一级缓存不能逃离Session级别
   protected Configuration configuration;
 
   protected int queryStack;
@@ -107,14 +107,14 @@ public abstract class BaseExecutor implements Executor {
     return closed;
   }
 
-  @Override
+  @Override // 更新数据库数据 增 改 删 都会调用该方法 [映射语句 参数对象]
   public int update(MappedStatement ms, Object parameter) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing an update").object(ms.getId());
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
     clearLocalCache(); // 更新的时候，会先进行本地缓存的清空
-    return doUpdate(ms, parameter);
+    return doUpdate(ms, parameter); //调用子类的方法进行逻辑处理返回结果 ，类似模板方法,比查询操作简单很多
   }
 
   @Override
@@ -138,35 +138,35 @@ public abstract class BaseExecutor implements Executor {
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  @Override // 查询数据库中的数据 [映射语句，参数对象，翻页限制条件，结果处理器，缓存的键，查询语句] [会先尝试读取一级缓存，在缓存中没有结果的时候，进行数据库查询]
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
       CacheKey key, BoundSql boundSql) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
-    if (closed) {
+    if (closed) { // 执行器如果关闭的话直接抛出异常
       throw new ExecutorException("Executor was closed.");
     }
-    if (queryStack == 0 && ms.isFlushCacheRequired()) {
+    if (queryStack == 0 && ms.isFlushCacheRequired()) { //新的查询栈且要求清除缓存的，进行清除缓存，查询标签中的flushCache属性
       clearLocalCache();
     }
     List<E> list;
     try {
       queryStack++;
-      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null; // localCache本地缓存，这个是一级缓存，
-      if (list != null) { // list不为空，表示从一级缓存中获取到了数据，然后会进行缓存输出的处理
+      list = resultHandler == null ? (List<E>) localCache.getObject(key) : null; //尝试从本地缓存获取结果 localCache本地缓存，这个是一级缓存，
+      if (list != null) { // list不为空，表示从一级缓存中获取到了数据，然后会进行缓存输出的处理，对于CALLABLE语句还需要绑定到IN/INOUT参数上
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
-      } else {
+      } else { // 如果缓存中没有，直接从数据库中查询
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
       }
     } finally {
       queryStack--;
     }
     if (queryStack == 0) {
-      for (DeferredLoad deferredLoad : deferredLoads) {
+      for (DeferredLoad deferredLoad : deferredLoads) { // 懒加载进行处理的逻辑
         deferredLoad.load();
       }
       // issue #601
       deferredLoads.clear();
-      if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) { // 如果我们的缓存为 STATEMENT级别的，则需要进行清空缓存，这个配置是在
+      if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) { // 如果我们的缓存为STATEMENT级别的，则需要进行清空缓存，这个配置是在配置文件中setting标签设置
         // issue #482
         clearLocalCache();
       }
@@ -194,12 +194,12 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
-  @Override
+  @Override // 命令空间，分页参数 sql语句 参数 环境id
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
-    CacheKey cacheKey = new CacheKey();
+    CacheKey cacheKey = new CacheKey();// 创建缓存key，并将所有查询参数依次更新写入，记住每一次的更新写入都会重新计算基础变量
     cacheKey.update(ms.getId()); // 命名空间id
     cacheKey.update(rowBounds.getOffset()); // 偏移量
     cacheKey.update(rowBounds.getLimit()); // limit数据
@@ -224,12 +224,12 @@ public abstract class BaseExecutor implements Executor {
           }
           value = metaObject.getValue(propertyName);
         }
-        cacheKey.update(value);
+        cacheKey.update(value); //参数
       }
     }
     if (configuration.getEnvironment() != null) {
       // issue #176
-      cacheKey.update(configuration.getEnvironment().getId());
+      cacheKey.update(configuration.getEnvironment().getId()); // 环境
     }
     return cacheKey;
   }
@@ -327,17 +327,17 @@ public abstract class BaseExecutor implements Executor {
       }
     }
   }
-
+  // 从数据库中读取数据[映射语句，参数对象，翻页限制条件，结果处理器，缓存的键 ]
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
       ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
-    localCache.putObject(key, EXECUTION_PLACEHOLDER); // 一级缓存，先缓存默认值占位符，查询到结果之后，在进行替换，和懒加载有关
+    localCache.putObject(key, EXECUTION_PLACEHOLDER); //向缓存中增加占位符，表示正在查询 一级缓存，先缓存默认值占位符，查询到结果之后，在进行替换，和懒加载有关
     try {
-      list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql); // BaseExecutor类中的抽象方法
+      list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql); // BaseExecutor类中的抽象方法，交给对应的子类进行实现，类似模板方法
     } finally {
-      localCache.removeObject(key);
+      localCache.removeObject(key);// 删除占位符
     }
-    localCache.putObject(key, list); // 将默认的占位符替换成我们真正的结果，
+    localCache.putObject(key, list); // 将查询结果写入缓存
     if (ms.getStatementType() == StatementType.CALLABLE) {
       localOutputParameterCache.putObject(key, parameter);
     }

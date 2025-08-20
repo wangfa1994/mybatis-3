@@ -69,7 +69,7 @@ public class Reflector {
   public Reflector(Class<?> clazz) { // 通过构造器进行一些变量的初始化
     type = clazz;
     addDefaultConstructor(clazz); //解析默认的构造器
-    Method[] classMethods = getClassMethods(clazz);
+    Method[] classMethods = getClassMethods(clazz); //得到所有的方法，然后进行添加
     if (isRecord(type)) { // jdk15
       addRecordGetMethods(classMethods);
     } else {

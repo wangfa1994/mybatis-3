@@ -18,7 +18,7 @@ package org.apache.ibatis.logging;
 import java.lang.reflect.Constructor;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
+/** 日志类
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

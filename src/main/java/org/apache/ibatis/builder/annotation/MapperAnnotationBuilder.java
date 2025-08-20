@@ -101,12 +101,12 @@ public class MapperAnnotationBuilder {
       .collect(Collectors.toSet());
 
   private final Configuration configuration;
-  private final MapperBuilderAssistant assistant; // mapper助手 扫描包的需要找到对应的xml文件
+  private final MapperBuilderAssistant assistant; // mapper助手 用于处理对应的接口的映射文件
   private final Class<?> type; // 类名
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
-    this.assistant = new MapperBuilderAssistant(configuration, resource);
+    this.assistant = new MapperBuilderAssistant(configuration, resource); //
     this.configuration = configuration;
     this.type = type;
   }

@@ -17,7 +17,7 @@ package org.apache.ibatis.reflection.invoker;
 
 import java.lang.reflect.InvocationTargetException;
 
-/**
+/** 调用程序，主要是通过反射进行调用程序  【策略接口】
  * @author Clinton Begin
  */
 public interface Invoker {

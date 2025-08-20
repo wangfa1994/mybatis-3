@@ -15,7 +15,7 @@
  */
 package org.apache.ibatis.session;
 
-/**
+/** RowBounds类用来表示查询结果分页设置，即表明查询结果的起始位置和条数限
  * @author Clinton Begin
  */
 public class RowBounds {
@@ -24,8 +24,8 @@ public class RowBounds {
   public static final int NO_ROW_LIMIT = Integer.MAX_VALUE;
   public static final RowBounds DEFAULT = new RowBounds();
 
-  private final int offset;
-  private final int limit;
+  private final int offset; // 起始位置 略过前面offset条之后才开始读取结果
+  private final int limit; // 总长度限制 读取的结果总数不能超过limit条
 
   public RowBounds() {
     this.offset = NO_ROW_OFFSET;

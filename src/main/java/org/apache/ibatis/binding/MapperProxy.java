@@ -92,10 +92,10 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
     try { // 如果我们的 methodCache中没有key为method的缓存对象，我们需要创建一个MapperMethodInvoker
       return MapUtil.computeIfAbsent(methodCache, method, m -> {
-        if (!m.isDefault()) { // 如果我们的method是默认方法的返回对象 PlainMethodInvoker
-          return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
+        if (!m.isDefault()) { // 如果我们的method不是默认方法的返回对象 PlainMethodInvoker [默认方法是一个公共的非抽象实例方法，即在接口类型中声明的带有主体的非静态方法]
+          return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration())); //我们mapper代理的一定会走到这里
         }
-        try {
+        try { // 如果我们的method是默认的方法，则根据不同的版本返回不同的
           if (privateLookupInMethod == null) { // 返回不同的jdk版本的invoker
             return new DefaultMethodInvoker(getMethodHandleJava8(method));
           }
@@ -130,7 +130,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   }
   // 上面是接口定义分为两个 一个是普通方法调用器， 一个是默认方法调用器
   private static class PlainMethodInvoker implements MapperMethodInvoker {
-    private final MapperMethod mapperMethod;
+    private final MapperMethod mapperMethod; // 创建对象的时候，直接进行赋值的
 
     public PlainMethodInvoker(MapperMethod mapperMethod) {
       this.mapperMethod = mapperMethod;

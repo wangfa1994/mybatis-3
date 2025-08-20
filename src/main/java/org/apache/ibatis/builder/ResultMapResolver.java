@@ -21,7 +21,7 @@ import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 
-/** 解析器类， 解析ResultMap标签，支持继承，用来解析继承相关属性
+/**  ResultMap解析器类， 解析ResultMap标签，支持继承，用来解析继承相关属性
  * @author Eduardo Macarron
  */
 public class ResultMapResolver {

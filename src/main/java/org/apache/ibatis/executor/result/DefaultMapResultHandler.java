@@ -24,16 +24,16 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
-/**
+/** 负责将ResultContext结果对象聚合成一个Map返回 处理成我们的Map集合对象
  * @author Clinton Begin
  */
 public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
-  private final Map<K, V> mappedResults;
-  private final String mapKey;
-  private final ObjectFactory objectFactory;
-  private final ObjectWrapperFactory objectWrapperFactory;
-  private final ReflectorFactory reflectorFactory;
+  private final Map<K, V> mappedResults; // Map形式的结果映射
+  private final String mapKey; // map的键，由用户指定，是结果对象中的某个属性名
+  private final ObjectFactory objectFactory; // 对象工厂
+  private final ObjectWrapperFactory objectWrapperFactory; //对象包装工程
+  private final ReflectorFactory reflectorFactory; // 反射工厂
 
   @SuppressWarnings("unchecked")
   public DefaultMapResultHandler(String mapKey, ObjectFactory objectFactory, ObjectWrapperFactory objectWrapperFactory,
@@ -45,12 +45,12 @@ public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
     this.mapKey = mapKey;
   }
 
-  @Override
+  @Override // 处理一个结果
   public void handleResult(ResultContext<? extends V> context) {
-    final V value = context.getResultObject();
-    final MetaObject mo = MetaObject.forObject(value, objectFactory, objectWrapperFactory, reflectorFactory);
+    final V value = context.getResultObject(); // 从结果上下文中取出结果对象
+    final MetaObject mo = MetaObject.forObject(value, objectFactory, objectWrapperFactory, reflectorFactory); // 获得结果对象的元对象
     // TODO is that assignment always true?
-    final K key = (K) mo.getValue(mapKey);
+    final K key = (K) mo.getValue(mapKey); // 基于元对象取出key对应的值
     mappedResults.put(key, value);
   }
 

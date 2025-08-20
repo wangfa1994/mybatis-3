@@ -29,7 +29,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
-/**
+/** 一个代理类，能够根据传入的 MappedStatement对象的具体类型选中一个具体的被代理对象，然后将所有实际操作都委托给被代理对象
  * @author Clinton Begin
  */
 public class RoutingStatementHandler implements StatementHandler {

@@ -34,18 +34,18 @@ import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
-/** 缓存建造者类，负责完成缓存对象的创建
+/** 缓存建造者类，负责完成缓存对象的创建  装饰器模式的强大与灵活，进行了多层包装
  * @author Clinton Begin
  */
 public class CacheBuilder {
   private final String id;
-  private Class<? extends Cache> implementation;
-  private final List<Class<? extends Cache>> decorators;
-  private Integer size;
-  private Long clearInterval;
-  private boolean readWrite;
-  private Properties properties;
-  private boolean blocking;
+  private Class<? extends Cache> implementation; // 缓存实现类
+  private final List<Class<? extends Cache>> decorators; // 缓存装饰器列表
+  private Integer size; // 缓存大小
+  private Long clearInterval; // 是否需要 定时清理的缓存装饰器参数
+  private boolean readWrite; // 是否需要SerializedCache装饰器
+  private Properties properties; // 缓存的属性设置
+  private boolean blocking; // 是否需要阻塞装饰器
 
   public CacheBuilder(String id) {
     this.id = id;
@@ -88,52 +88,52 @@ public class CacheBuilder {
     this.properties = properties;
     return this;
   }
-
+  // 组建我们的缓存对象
   public Cache build() {
-    setDefaultImplementations();
-    Cache cache = newBaseCacheInstance(implementation, id);
-    setCacheProperties(cache);
+    setDefaultImplementations(); // 设置缓存的默认实现，默认装饰器，仅设置没有进行装配
+    Cache cache = newBaseCacheInstance(implementation, id); // 创建默认的缓存实现类，传递的id就是缓存id
+    setCacheProperties(cache); // 设置缓存属性
     // issue #352, do not apply decorators to custom caches
-    if (PerpetualCache.class.equals(cache.getClass())) {
-      for (Class<? extends Cache> decorator : decorators) {
-        cache = newCacheDecoratorInstance(decorator, cache);
-        setCacheProperties(cache);
+    if (PerpetualCache.class.equals(cache.getClass())) { // 默认缓存实现类的逻辑
+      for (Class<? extends Cache> decorator : decorators) {//如果我们存在缓存装饰器，进行装饰
+        cache = newCacheDecoratorInstance(decorator, cache); // 生成装饰器实例
+        setCacheProperties(cache); // 为装饰器的缓存继续设置缓存属性
       }
-      cache = setStandardDecorators(cache);
-    } else if (!LoggingCache.class.isAssignableFrom(cache.getClass())) {
+      cache = setStandardDecorators(cache); // 最后增加系统标准的装饰器
+    } else if (!LoggingCache.class.isAssignableFrom(cache.getClass())) { // 如果不是默认的实现的缓存逻辑，并且还不是LoggingCache的话，就用LoggingCache进行包装一下得了，其他的就不需要了
       cache = new LoggingCache(cache);
     }
     return cache;
   }
 
-  private void setDefaultImplementations() {
-    if (implementation == null) {
+  private void setDefaultImplementations() { // 设置我们默认的缓存实现，这里只有缓存实现，没有进行装配
+    if (implementation == null) { // 没有设置实现的时候，默认的就是我们的 PerpetualCache
       implementation = PerpetualCache.class;
       if (decorators.isEmpty()) {
-        decorators.add(LruCache.class);
+        decorators.add(LruCache.class); // 默认的清理器是 LruCache，只是进行放入，并没有进行真正的实例
       }
     }
   }
 
-  private Cache setStandardDecorators(Cache cache) {
+  private Cache setStandardDecorators(Cache cache) { // 设置标准的装饰器
     try {
       MetaObject metaCache = SystemMetaObject.forObject(cache);
       if (size != null && metaCache.hasSetter("size")) {
-        metaCache.setValue("size", size);
+        metaCache.setValue("size", size); // 设置缓存大小
       }
-      if (clearInterval != null) {
+      if (clearInterval != null) { // 如果定义了时间间隔，进行使用定时清理装饰器装饰缓存
         cache = new ScheduledCache(cache);
         ((ScheduledCache) cache).setClearInterval(clearInterval);
       }
-      if (readWrite) {
+      if (readWrite) { // 允许读写，使用序列化装饰器装饰
         cache = new SerializedCache(cache);
       }
-      cache = new LoggingCache(cache);
-      cache = new SynchronizedCache(cache);
-      if (blocking) {
+      cache = new LoggingCache(cache); // 默认的一定存在 日志装饰器装饰缓存LoggingCache
+      cache = new SynchronizedCache(cache); // 默认的一定存在同步装饰器装饰缓存 SynchronizedCache
+      if (blocking) { // 如果启动了阻塞功能，则使用阻塞装饰器装饰缓存
         cache = new BlockingCache(cache);
       }
-      return cache;
+      return cache; // 返回被层层装饰的缓存
     } catch (Exception e) {
       throw new CacheException("Error building standard cache decorators.  Cause: " + e, e);
     }
@@ -141,11 +141,11 @@ public class CacheBuilder {
 
   private void setCacheProperties(Cache cache) {
     if (properties != null) {
-      MetaObject metaCache = SystemMetaObject.forObject(cache);
+      MetaObject metaCache = SystemMetaObject.forObject(cache); // 得到我们的缓存元对象信息
       for (Map.Entry<Object, Object> entry : properties.entrySet()) {
         String name = (String) entry.getKey();
         String value = (String) entry.getValue();
-        if (metaCache.hasSetter(name)) {
+        if (metaCache.hasSetter(name)) { // 如果存在对应的属性名称进行设置
           Class<?> type = metaCache.getSetterType(name);
           if (String.class == type) {
             metaCache.setValue(name, value);

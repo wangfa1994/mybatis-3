@@ -2,6 +2,7 @@ package com.wf.test.sourceCode;
 
 
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
+import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -35,6 +36,7 @@ public class A00InitJdbcTest {
   public  void add() throws SQLException {
     Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lagou?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true",
       "root", "root");
+    DataSource dataSource =new UnpooledDataSource(); dataSource.getConnection();
 
     // 使用prepareStatement进行处理 , preparedStatement 直接进行预编译，利用占位符可以有效防治sql注入
     PreparedStatement preparedStatement = connection.prepareStatement("insert into  user values (?,?,?,?)");

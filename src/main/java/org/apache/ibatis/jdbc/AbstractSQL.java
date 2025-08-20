@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-/**
- * @author Clinton Begin
- * @author Jeff Butler
+/** 存在内部类 ,主要是用来完成sql拼接的，根据sql片段信息，完成完整的sql信息拼装，主要是根据两个内部类完成sql拼接 SQLStatement和 SafeAppendable
+ * @author Clinton Begin   1.使用类似“SELECT（"*"）.FROM（"user"）.WHERE "schoolName=＃{schoolName}"）”的语句设置 SQL 语句片段，这些片段被保存在 AbstractSQL 中SQLStatement内部类的 ArrayList中
+ * @author Jeff Butler   2. 用户调用 toString（）操作时，触发了 SQL片段的拼接工作。在 SQLStatement内部类中按照一定规则拼接成完整的 SQL语句
  * @author Adam Gent
  * @author Kazuki Shimizu
  */
@@ -599,16 +599,16 @@ public abstract class AbstractSQL<T> {
     sql().sql(sb);
     return sb.toString();
   }
-
+  // SafeAppendable是一个拼接器，它的 append方法也能实现串的拼接功能
   private static class SafeAppendable {
-    private final Appendable appendable;
-    private boolean empty = true;
+    private final Appendable appendable;  // 主字符串  , Appendable是jdk的类
+    private boolean empty = true; // 当前主字符串是否为空
 
     public SafeAppendable(Appendable a) {
       this.appendable = a;
     }
 
-    public SafeAppendable append(CharSequence s) {
+    public SafeAppendable append(CharSequence s) { // 追加字符串
       try {
         if (empty && s.length() > 0) {
           empty = false;
@@ -625,7 +625,7 @@ public abstract class AbstractSQL<T> {
     }
 
   }
-
+  // SQLStatement完整地表述出一条 SQL语句，属性能够完整的记录描述一个sql，通过sql方法得到sql语句
   private static class SQLStatement {
 
     public enum StatementType {
@@ -674,10 +674,10 @@ public abstract class AbstractSQL<T> {
 
     }
 
-    StatementType statementType;
-    List<String> sets = new ArrayList<>();
-    List<String> select = new ArrayList<>();
-    List<String> tables = new ArrayList<>();
+    StatementType statementType; // 数据库语句操作类型
+    List<String> sets = new ArrayList<>(); //语句片段信息
+    List<String> select = new ArrayList<>(); //语句片段信息 select语句
+    List<String> tables = new ArrayList<>(); //语句片段信息 表名
     List<String> join = new ArrayList<>();
     List<String> innerJoin = new ArrayList<>();
     List<String> outerJoin = new ArrayList<>();
@@ -689,17 +689,17 @@ public abstract class AbstractSQL<T> {
     List<String> orderBy = new ArrayList<>();
     List<String> lastList = new ArrayList<>();
     List<String> columns = new ArrayList<>();
-    List<List<String>> valuesList = new ArrayList<>();
-    boolean distinct;
-    String offset;
-    String limit;
-    LimitingRowsStrategy limitingRowsStrategy = LimitingRowsStrategy.NOP;
+    List<List<String>> valuesList = new ArrayList<>(); // //语句片段信息
+    boolean distinct;  // 表征是否去重，仅仅对select有效，确定是使用select 还是select distinct
+    String offset; // 结构偏移量
+    String limit; // 结果总数约束
+    LimitingRowsStrategy limitingRowsStrategy = LimitingRowsStrategy.NOP; // 结果约束策略
 
     public SQLStatement() {
       // Prevent Synthetic Access
       valuesList.add(new ArrayList<>());
     }
-
+    // 拼接sql语句
     private void sqlClause(SafeAppendable builder, String keyword, List<String> parts, String open, String close,
         String conjunction) {
       if (!parts.isEmpty()) {
@@ -721,7 +721,7 @@ public abstract class AbstractSQL<T> {
         builder.append(close);
       }
     }
-
+    // 根据SqlStatement 字段信息列表，进行拼接我们的查询sql语句
     private String selectSQL(SafeAppendable builder) {
       if (distinct) {
         sqlClause(builder, "SELECT DISTINCT", select, "", "", ", ");
@@ -771,7 +771,7 @@ public abstract class AbstractSQL<T> {
       limitingRowsStrategy.appendClause(builder, null, limit);
       return builder.toString();
     }
-
+    // 根据Appendable进行拼接我们的sql,不同类型的sql，进行不同的sql处理，最后得到值
     public String sql(Appendable a) {
       SafeAppendable builder = new SafeAppendable(a);
       if (statementType == null) {

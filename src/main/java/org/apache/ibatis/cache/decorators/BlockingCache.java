@@ -23,12 +23,12 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheException;
 
 /**
- * <p>
+ * <p> 简单的阻塞装饰，实现cache，并且持有cache,存放cache的真正的实现
  * Simple blocking decorator
- * <p>
+ * <p> 对于一个 Key 来说，同一时刻，BlockingCache 只会让一个业务线程到数据库中去查找，查找到结果之后，会添加到 BlockingCache 中缓存
  * Simple and inefficient version of EhCache's BlockingCache decorator. It sets a lock over a cache key when the element
  * is not found in cache. This way, other threads will wait until this element is filled instead of hitting the
- * database.
+ * database. 可能存在死锁：第一个线程去获得值之后，没有获得的情况下，没有去数据库查询进行设置值，导致第二个线程在进行获取的时候wait
  * <p>
  * By its nature, this implementation can cause deadlock when used incorrectly.
  *
@@ -37,8 +37,8 @@ import org.apache.ibatis.cache.CacheException;
 public class BlockingCache implements Cache {
 
   private long timeout;
-  private final Cache delegate;
-  private final ConcurrentHashMap<Object, CountDownLatch> locks;
+  private final Cache delegate; // 被装饰者
+  private final ConcurrentHashMap<Object, CountDownLatch> locks; //锁，存的是对应的缓存key和 CountDownLatch
 
   public BlockingCache(Cache delegate) {
     this.delegate = delegate;
@@ -60,16 +60,16 @@ public class BlockingCache implements Cache {
     try {
       delegate.putObject(key, value);
     } finally {
-      releaseLock(key);
+      releaseLock(key); //put 释放锁
     }
   }
 
   @Override
   public Object getObject(Object key) {
-    acquireLock(key);
+    acquireLock(key); // 在获取缓存的时候，需要先获得到锁,只能有一个去查询
     Object value = delegate.getObject(key);
     if (value != null) {
-      releaseLock(key);
+      releaseLock(key); // 不等于null，表名获得了锁，此时需要进行释放
     }
     return value;
   }
@@ -114,7 +114,7 @@ public class BlockingCache implements Cache {
     if (latch == null) {
       throw new IllegalStateException("Detected an attempt at releasing unacquired lock. This should never happen.");
     }
-    latch.countDown();
+    latch.countDown(); //释放锁，会唤醒等待的
   }
 
   public long getTimeout() {

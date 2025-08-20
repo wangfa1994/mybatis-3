@@ -39,7 +39,7 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
   }
 
   @Override
-  public void setProperties(Properties properties) {
+  public void setProperties(Properties properties) { // 工厂调用设置属性，然后通过MetaObject进行反射设置值
     Properties driverProperties = new Properties(); // 驱动的属性
     MetaObject metaDataSource = SystemMetaObject.forObject(dataSource); //利用工具类得到我们的dataSource对象的元数据对象，MetaObject可以从这里进行反射操作，其中也包括了我们的原始对象 ，UnpooledDataSource 对象
     for (Object key : properties.keySet()) {

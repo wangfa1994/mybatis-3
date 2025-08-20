@@ -41,15 +41,15 @@ public final class MappedStatement {
   private StatementType statementType; // 增删改查sql中的statementType属性
   private ResultSetType resultSetType; // 增删改查sql中的resultType属性
   private SqlSource sqlSource; // sql片段语句，标签中的带占位符的sql语句
-  private Cache cache; //二级缓存策略 这个是装饰者模式处理
+  private Cache cache; //二级缓存策略 这个是装饰者模式处理 这个是映射文件中的
   private ParameterMap parameterMap; //增删改查sql中的parameterMap属性  参数类型
   private List<ResultMap> resultMaps; //
-  private boolean flushCacheRequired;
+  private boolean flushCacheRequired; // 查询标签配置的 flushCache 属性 一级缓存 这个是Statement中的，增删改永远为true，查的根据配置，默认为false
   private boolean useCache; //二级缓存默认是开启的
   private boolean resultOrdered;
   private SqlCommandType sqlCommandType; // sql的类型，增删改查
   private KeyGenerator keyGenerator;
-  private String[] keyProperties;
+  private String[] keyProperties; //主键的属性名
   private String[] keyColumns;
   private boolean hasNestedResultMaps;
   private String databaseId;

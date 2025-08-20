@@ -14,7 +14,7 @@ public class A10SingleSelectMapperTest {
 
   public static void main(String[] args) throws IOException {
 
-      InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a10/sqlMapConfig.xml");
+    InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a10/sqlMapConfig.xml");
       SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
       SqlSession sqlSession = sqlSessionFactory.openSession(); //DefaultSqlSession 主要类，sql
       // 通过sql

@@ -22,7 +22,7 @@ import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.session.Configuration;
-// 语言驱动类的接口, 不同的语言存在不同的SqlSource,通过语言驱动类接口进行加载不用的sqlSource 存在四个实现类，但是能用的只有一个XmL
+// 语言驱动类的接口,  主要用于支持不同的语言来编写sql语句(xml,注解等)，提供统一的接口来解析这些sql语句 不同的语言存在不同的SqlSource,通过语言驱动类接口进行加载sqlSource 存在四个实现类，但是能用的只有一个XmL
 public interface LanguageDriver {
 
   /** 创建一个参数处理器，参数处理器能将实际参数传递给 Jdbc statement

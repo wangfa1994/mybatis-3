@@ -24,7 +24,7 @@ import java.sql.SQLException;
  * @author Clinton Begin
  */
 public interface TypeHandler<T> {
-  // 设置一个参数，
+  // 设置一个参数，向ps的索引i中设置参数parameter，并指定对应的jdbc类型
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /** 得到一个结果，这个结果是泛型类型 T 方法名一致，方法参数不一致，这个是属于方法的重载

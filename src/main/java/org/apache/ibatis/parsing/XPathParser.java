@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /** 解析xml的核心类 因为mybatis的配置文件都是xml格式的，所以，需要使用此进行去解析，核心类包括  XNode 和  XPathParser，底层通过jdk相关的xml类进行处理
- * @author Clinton Begin
+ * @author Clinton Begin 包装了jdk针对xml的处理
  * @author Kazuki Shimizu
  */
 public class XPathParser {
@@ -49,7 +49,7 @@ public class XPathParser {
   private final Document document; // 要解析的整个的xml文档 在创建this对象的时候,直接通过流进行解析放到属性中
   private boolean validation; // 是否开启验证
   private EntityResolver entityResolver; //通过EntityResolver声明寻找DTD文件的方法，通过本地寻找/网络寻找等
-  private Properties variables; // 配置文件解析出来的properties标签值 properties节点会在解析配置文件的最开始就被解析，然后相关信息会被 放入“private Properties variables”属性并在解析后续节点时发 挥作用
+  private Properties variables; // 配置文件解析出来的properties标签值 properties节点会在解析配置文件的最开始就被解析，然后相关信息会被 放入“private Properties variables”属性并在解析后续节点时发挥作用
   private XPath xpath; // 解析xml的XPath,通过这个属性XPathParser也就具备了解析XML的功能，通过jdk的XPathFactory获取
 
   public XPathParser(String xml) { // 初始化的时候，根据传递的xml进行构建出Document

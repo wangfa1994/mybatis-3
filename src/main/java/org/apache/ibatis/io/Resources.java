@@ -25,7 +25,7 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
-/**
+/** 一个通过类加载器简化对资源访问的类。
  * A class to simplify access to resources through the classloader.
  *
  * @author Clinton Begin

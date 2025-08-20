@@ -21,6 +21,25 @@ public class ParsingDemo {
 
 
   private static void xPathParser() throws Exception {
+    XPathParser xml = new XPathParser("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" +
+      "<members>\n" +
+      "    <user type=\"student\">\n" +
+      "        <id>1</id>\n" +
+      "        <name>zhangSan</name>\n" +
+      "        <school>Sunny school</school>\n" +
+      "    </user>\n" +
+      "    <user>\n" +
+      "        <id>2</id>\n" +
+      "        <name>liSi</name>\n" +
+      "        <school>Sunny school</school>\n" +
+      "    </user>\n" +
+      "</members>");
+
+    XNode xNode1 = xml.evalNode("/members");
+    System.out.println(xNode1);
+
+
+    // 带校验文件的设置解析XML
     InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a01/sqlMapConfig.xml");
     XPathParser xPathParser = new XPathParser(resourceAsStream, true, null, new XMLMapperEntityResolver());
     XNode xNode = xPathParser.evalNode("/configuration");

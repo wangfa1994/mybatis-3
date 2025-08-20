@@ -26,7 +26,7 @@ public class InterceptorChain {
 
   private final List<Interceptor> interceptors = new ArrayList<>();
 
-  public Object pluginAll(Object target) {
+  public Object pluginAll(Object target) { // 针对我们的目标对象判断是否使用拦截器
     for (Interceptor interceptor : interceptors) {
       target = interceptor.plugin(target);
     }

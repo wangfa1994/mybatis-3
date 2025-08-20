@@ -43,7 +43,7 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.util.MapUtil;
 
-/**
+/** 提供自增主键的回写功能，在数据库主键自增结束后，将数据库中产生的 id值回写给 Java对象本身。processAfter 方法中进行
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -72,17 +72,17 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
   }
 
   public void processBatch(MappedStatement ms, Statement stmt, Object parameter) {
-    final String[] keyProperties = ms.getKeyProperties();
+    final String[] keyProperties = ms.getKeyProperties(); //获得到主键的属性名
     if (keyProperties == null || keyProperties.length == 0) {
       return;
     }
-    try (ResultSet rs = stmt.getGeneratedKeys()) {
-      final ResultSetMetaData rsmd = rs.getMetaData();
+    try (ResultSet rs = stmt.getGeneratedKeys()) { // 调用Statement的getGeneratedKeys方法获取到自动生成的主键值
+      final ResultSetMetaData rsmd = rs.getMetaData(); // 获得到输出结果的描述信息
       final Configuration configuration = ms.getConfiguration();
-      if (rsmd.getColumnCount() < keyProperties.length) {
+      if (rsmd.getColumnCount() < keyProperties.length) {//主键数目比结果的总字段数目还多，发生错误
         // Error?
       } else {
-        assignKeys(configuration, rs, rsmd, keyProperties, parameter);
+        assignKeys(configuration, rs, rsmd, keyProperties, parameter); //将主键赋值给实参
       }
     } catch (Exception e) {
       throw new ExecutorException("Error getting generated key or setting result to parameter object. Cause: " + e, e);

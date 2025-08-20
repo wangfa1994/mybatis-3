@@ -98,7 +98,7 @@ public class PooledDataSource implements DataSource {
   }
 
   @Override
-  public Connection getConnection() throws SQLException {
+  public Connection getConnection() throws SQLException { // 从PooledConnection代理对象中得到代理类
     return popConnection(dataSource.getUsername(), dataSource.getPassword()).getProxyConnection();
   }
 
@@ -451,7 +451,7 @@ public class PooledDataSource implements DataSource {
           }
         } else if (state.activeConnections.size() < poolMaximumActiveConnections) { // 如果池中激活的链接小于最大激活连接数，进行创建新的连接
           // Pool does not have available connection and can create a new connection 池没有可用的连接，可以创建一个新的连接
-          conn = new PooledConnection(dataSource.getConnection(), this); // 通过我们的未池化的DataSource进行得到连接，进行封装
+          conn = new PooledConnection(dataSource.getConnection(), this); // 通过我们的未池化的DataSource进行得到连接，进行代理得到的原始链接
           if (log.isDebugEnabled()) {
             log.debug("Created connection " + conn.getRealHashCode() + ".");
           }

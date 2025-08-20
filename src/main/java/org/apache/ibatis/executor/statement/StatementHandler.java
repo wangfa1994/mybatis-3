@@ -25,7 +25,7 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.session.ResultHandler;
 
-/**
+/** 三种语句类型处理的核心父接口 用于处理Statement对象，【Statement。PreparedStatement CallableStatement】
  * @author Clinton Begin
  */
 public interface StatementHandler {

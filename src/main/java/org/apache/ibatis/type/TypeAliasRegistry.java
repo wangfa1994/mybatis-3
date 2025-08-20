@@ -108,7 +108,7 @@ public class TypeAliasRegistry {
     registerAlias("ResultSet", ResultSet.class);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // 通过传递的参数得到对应的类型，如果没有进行注册，则尝试获得参数的类型
   // throws class cast exception as well if types cannot be assigned
   public <T> Class<T> resolveAlias(String string) {
     try {
@@ -121,7 +121,7 @@ public class TypeAliasRegistry {
       if (typeAliases.containsKey(key)) {
         value = (Class<T>) typeAliases.get(key);
       } else {
-        value = (Class<T>) Resources.classForName(string);
+        value = (Class<T>) Resources.classForName(string);// 没有进行注册的话，利用资源类直接进行原始加载
       }
       return value;
     } catch (ClassNotFoundException e) {

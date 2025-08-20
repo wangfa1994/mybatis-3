@@ -39,11 +39,11 @@ public class TransactionalCache implements Cache {
 
   private static final Log log = LogFactory.getLog(TransactionalCache.class);
 
-  private final Cache delegate; // 二级缓存的真正缓存
-  private boolean clearOnCommit;
-  private final Map<Object, Object> entriesToAddOnCommit;
-  private final Set<Object> entriesMissedInCache;
-
+  private final Cache delegate; // 被装饰的缓存对象
+  private boolean clearOnCommit; //事务提交之后，是否直接清理掉缓存，这个清理的是整个缓存
+  private final Map<Object, Object> entriesToAddOnCommit; // 事务过程中产生的数据暂时保存，在事务提交的时候进行一并提交给缓存，在事务回滚的时候就直接销毁了，为了防止脏读，所以缓存也需要在提价的时候写入
+  private final Set<Object> entriesMissedInCache; // 缓存查询未命中的数据
+  //事务缓存中使用的缓存可能被BlockingCache装饰过，这样的话，如果缓存查询得到的结果为 null，会导致对该数据上锁，从而阻塞后续对该数据的查询,而事务提交或者回滚后，应该对缓存中的这些数据全部解锁。entriesMissedInCache就保存了这些数据的键，在事务结束时低这些数据进行解锁
   public TransactionalCache(Cache delegate) {
     this.delegate = delegate;
     this.clearOnCommit = false;
@@ -62,14 +62,14 @@ public class TransactionalCache implements Cache {
   }
 
   @Override
-  public Object getObject(Object key) {
+  public Object getObject(Object key) { // 从缓存中得到一条记录
     // issue #116
-    Object object = delegate.getObject(key);
-    if (object == null) {
+    Object object = delegate.getObject(key); // 从缓存中读取对应的数据
+    if (object == null) { // 没有没有读到，进行缓存未命中的缓存key
       entriesMissedInCache.add(key);
     }
     // issue #146
-    if (clearOnCommit) {
+    if (clearOnCommit) { // 如果设置了提交立即清除，直接返回null
       return null;
     }
     return object;
@@ -77,8 +77,8 @@ public class TransactionalCache implements Cache {
 
   @Override
   public void putObject(Object key, Object object) {
-    entriesToAddOnCommit.put(key, object);
-  }
+    entriesToAddOnCommit.put(key, object); // 写缓存并没有直接写入到我们对应的包装缓存中，而是先缓存到了事务列表中
+  } // 在事务进行回滚或者提交的时候，会根据设置进行写入真正的缓存或者清除
 
   @Override
   public Object removeObject(Object key) {
@@ -92,16 +92,16 @@ public class TransactionalCache implements Cache {
   }
 
   public void commit() {
-    if (clearOnCommit) {
+    if (clearOnCommit) { // 如果设置了提交事务之后清理缓存，直接清理掉所有的缓存 ，不可能进行缓存更新的
       delegate.clear();
     }
-    flushPendingEntries();
-    reset();
+    flushPendingEntries(); // 将当前事务产生的缓存保存下，未命中的移除下
+    reset(); // 清理环境
   }
 
-  public void rollback() {
-    unlockMissedEntries();
-    reset();
+  public void rollback() { // 回滚
+    unlockMissedEntries(); // 清理一下未命中的数据
+    reset(); // 还原环境
   }
 
   private void reset() {

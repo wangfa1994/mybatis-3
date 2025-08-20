@@ -17,7 +17,7 @@ package org.apache.ibatis.session;
 
 import java.sql.Connection;
 
-/**
+/** 表示事务隔离级别  无隔离、读已提交、读未提交、可重复读和串行化
  * @author Clinton Begin
  */
 public enum TransactionIsolationLevel {

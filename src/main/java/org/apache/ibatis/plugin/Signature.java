@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
+/** 指示方法签名的注释。
  * The annotation that indicate the method signature.
  *
  * @see Intercepts

@@ -21,14 +21,14 @@ import java.util.Map;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheException;
 
-/**
+/** 永久缓存 ，缓存的真正实现类
  * @author Clinton Begin
  */
 public class PerpetualCache implements Cache {
 
-  private final String id;
+  private final String id; // 用来唯一标识一个缓存 一般使用映射文件的 namespace值作为缓存的 id，这样就能保证不同的映射文件的缓存是不同的
 
-  private final Map<Object, Object> cache = new HashMap<>();
+  private final Map<Object, Object> cache = new HashMap<>(); // 采用键值对的形式来存储数据
 
   public PerpetualCache(String id) {
     this.id = id;

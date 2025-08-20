@@ -15,23 +15,23 @@
  */
 package org.apache.ibatis.executor;
 
-/**
+/**  错误上下文 它能够提前将一些背景信息保存下来。这样在真正发生错误时，便能将这些背景信息提供出来，进而给我们的错误排查带来便利
  * @author Clinton Begin
  */
 public class ErrorContext {
 
-  private static final String LINE_SEPARATOR = System.lineSeparator();
-  private static final ThreadLocal<ErrorContext> LOCAL = ThreadLocal.withInitial(ErrorContext::new);
+  private static final String LINE_SEPARATOR = System.lineSeparator(); // 获得当前操作系统的换行符
+  private static final ThreadLocal<ErrorContext> LOCAL = ThreadLocal.withInitial(ErrorContext::new); // 将自己存储在ThreadLocal，进行线程间的隔离
 
-  private ErrorContext stored;
-  private String resource;
+  private ErrorContext stored; // 存储上一个版本的自身，从而组成错误链
+  private String resource; // 错误信息的详细输出
   private String activity;
   private String object;
   private String message;
   private String sql;
   private Throwable cause;
 
-  private ErrorContext() {
+  private ErrorContext() { // 单例模式 单例是绑定到 ThreadLocal上的。这保证了每个线程都有唯一的一个错误上下文 ErrorContext
   }
 
   public static ErrorContext instance() {

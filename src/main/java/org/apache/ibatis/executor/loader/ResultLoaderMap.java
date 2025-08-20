@@ -41,13 +41,13 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
-/**
+/**被代理对象可能会有多个属性可以被懒加载，这些尚未完成加载的属性是在ResultLoaderMap 类的实例中存储的
  * @author Clinton Begin
  * @author Franta Mejta
  */
 public class ResultLoaderMap {
 
-  private final Map<String, LoadPair> loaderMap = new HashMap<>();
+  private final Map<String, LoadPair> loaderMap = new HashMap<>(); // key为属性名大写，value为内部类LoadPair对象
 
   public void addLoader(String property, MetaObject metaResultObject, ResultLoader resultLoader) {
     String upperFirst = getUppercaseFirstProperty(property);
@@ -105,45 +105,45 @@ public class ResultLoaderMap {
     return parts[0].toUpperCase(Locale.ENGLISH);
   }
 
-  /**
+  /** 属性，该属性尚未加载  用于实现对应属性的懒加载操作
    * Property which was not loaded yet.
    */
   public static class LoadPair implements Serializable {
 
     private static final long serialVersionUID = 20130412;
-    /**
+    /** 返回数据库连接的工厂方法的名称。  【用来根据反射得到数据库连接的方法名】
      * Name of factory method which returns database connection.
      */
     private static final String FACTORY_METHOD = "getConfiguration";
-    /**
+    /** 对象来检查是否进行了序列化。 【判断是否经过了序列化的标志位，因为该属性被设置了transient，经过一次序列化和反序列化会变成null】
      * Object to check whether we went through serialization..
      */
     private final transient Object serializationCheck = new Object();
-    /**
+    /** 设置加载属性的元对象 【输出结果对象的封装】
      * Meta object which sets loaded properties.
      */
     private transient MetaObject metaResultObject;
-    /**
+    /** 结果加载器，用于加载未读属性。 【用以加载未加载属性的加载器】
      * Result loader which loads unread properties.
      */
     private transient ResultLoader resultLoader;
     /**
-     * Wow, logger.
+     * Wow, logger. 日志记录器
      */
     private transient Log log;
-    /**
+    /** 工厂类，通过它我们获得数据库连接。 【用于获取数据库链接的工厂】
      * Factory class through which we get database connection.
      */
     private Class<?> configurationFactory;
-    /**
+    /** 未读属性的名称 【该未加载的属性的属性名】
      * Name of the unread property.
      */
     private final String property;
-    /**
+    /** 加载属性的SQL语句的ID。  【能够加载未加载属性的sql语句的编号】
      * ID of SQL statement which loads the property.
      */
     private String mappedStatement;
-    /**
+    /** sql语句的参数。 【能够加载未加载属性的sql语句的参数，这个是接口 Serializable 】
      * Parameter of the sql statement.
      */
     private Serializable mappedParameter;
@@ -173,7 +173,7 @@ public class ResultLoaderMap {
         }
       }
     }
-
+    // 指定属性的加载操作
     public void load() throws SQLException {
       /*
        * These field should not be null unless the loadpair was serialized. Yet in that case this method should not be
@@ -186,30 +186,30 @@ public class ResultLoaderMap {
         throw new IllegalArgumentException("resultLoader is null");
       }
 
-      this.load(null);
+      this.load(null);// userObject 需要被懒加载的对象
     }
 
     public void load(final Object userObject) throws SQLException {
-      if (this.metaResultObject == null || this.resultLoader == null) {
-        if (this.mappedParameter == null) {
+      if (this.metaResultObject == null || this.resultLoader == null) { //输出结果对象的封装不存在或者输出结果加载器不存在
+        if (this.mappedParameter == null) { // 如果用以加载属性的对应的sql存在
           throw new ExecutorException("Property [" + this.property + "] cannot be loaded because "
               + "required parameter of mapped statement [" + this.mappedStatement + "] is not serializable.");
         }
 
-        final Configuration config = this.getConfiguration();
+        final Configuration config = this.getConfiguration(); // 取出用来加载结果的 sql 语句
         final MappedStatement ms = config.getMappedStatement(this.mappedStatement);
         if (ms == null) {
           throw new ExecutorException(
               "Cannot lazy load property [" + this.property + "] of deserialized object [" + userObject.getClass()
                   + "] because configuration does not contain statement [" + this.mappedStatement + "]");
         }
-
+        // 创建结果对象的包装
         this.metaResultObject = config.newMetaObject(userObject);
         this.resultLoader = new ResultLoader(config, new ClosedExecutor(), ms, this.mappedParameter,
-            metaResultObject.getSetterType(this.property), null, null);
+            metaResultObject.getSetterType(this.property), null, null); //创建结果加载器
       }
 
-      /*
+      /* 只要经历过持久化，就可能在别的线程中了，为这次懒加载创建的新线程 ResultLoader
        * We are using a new executor because we may be (and likely are) on a new thread and executors aren't thread
        * safe. (Is this sufficient?) A better approach would be making executors thread safe.
        */

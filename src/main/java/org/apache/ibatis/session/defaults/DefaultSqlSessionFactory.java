@@ -90,16 +90,16 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
   protected SqlSession createSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
     return new DefaultSqlSession(configuration, executor, autoCommit);
   }
-
+  // 从数据源中获取sqlSession对象 [执行器类型，事务隔离级别 是否自动提交事务]
   private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level,
       boolean autoCommit) {
     Transaction tx = null;
     try { // 根据configuration对象中存储的设置信息用来被创建 事务工厂(TransactionFactory)，执行器(Executor)，SqlSession(DefaultSqlSession)等对象。
-      final Environment environment = configuration.getEnvironment();
-      final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment); // TransactionFactory事务的工厂，用来创建Transaction,而Transaction接口封装针对jdbc的基本操作
-      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit); // TransactionFactory创建Transaction， 根据数据源得到我们的Transaction，这个类中封装了针对数据源的操作 ，事务的自动提交标志会被设置到tx中
-      final Executor executor = configuration.newExecutor(tx, execType);
-      return createSqlSession(configuration, executor, autoCommit); // 执行器中存在tx, 创建我们的sqlSession
+      final Environment environment = configuration.getEnvironment(); //找出要使用的指定环境
+      final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment); // 从环境中获取事务工厂 TransactionFactory事务的工厂，用来创建Transaction,而Transaction接口封装针对jdbc的基本操作
+      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit); //从事务工厂中产生事务 TransactionFactory创建Transaction， 根据数据源得到我们的Transaction，这个类中封装了针对数据源的操作 ，事务的自动提交标志会被设置到tx中
+      final Executor executor = configuration.newExecutor(tx, execType); // 创建执行器,在创建执行器的时候，会进行我们的拦截器添加，此时只是获取sqlSession
+      return createSqlSession(configuration, executor, autoCommit); // 创建DefaultSqlSession对象 执行器中存在tx, 创建我们的sqlSession
     } catch (Exception e) {
       closeTransaction(tx); // may have fetched a connection so lets call close()
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);

@@ -38,8 +38,8 @@ public abstract class BaseBuilder {
 
   public BaseBuilder(Configuration configuration) {
     this.configuration = configuration; //全局配置信息
-    this.typeAliasRegistry = this.configuration.getTypeAliasRegistry(); //类型的别名注册器
-    this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry(); //类型解析注册器
+    this.typeAliasRegistry = this.configuration.getTypeAliasRegistry(); //从配置类中获得到，类型的别名注册器
+    this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry(); //从配置类中获得到，类型解析注册器
   }
 
   public Configuration getConfiguration() {

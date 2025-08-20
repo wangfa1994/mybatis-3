@@ -37,8 +37,8 @@ import org.apache.ibatis.type.StringTypeHandler;
 import org.apache.ibatis.type.TimeOnlyTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
 
-/**
- * @author Clinton Begin
+/**  传递的参数如果是Null,会通过此枚举类进行获得到对应的类型处理器 两个属性
+ * @author Clinton Begin 使用Null的枚举类进行参数设置，确保了参数值虽然为null，但是参数的类型是明确的
  * @author Adam Gent
  */
 public enum Null {
@@ -86,8 +86,8 @@ public enum Null {
 
   SQLTIME(new SqlTimeTypeHandler(), JdbcType.TIME);
 
-  private final TypeHandler<?> typeHandler;
-  private final JdbcType jdbcType;
+  private final TypeHandler<?> typeHandler; // 参数的类型处理器
+  private final JdbcType jdbcType;  // 参数的 JDBC 类型
 
   Null(TypeHandler<?> typeHandler, JdbcType jdbcType) {
     this.typeHandler = typeHandler;

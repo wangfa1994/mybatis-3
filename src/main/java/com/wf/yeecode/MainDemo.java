@@ -121,20 +121,40 @@ public class MainDemo {
     *
     *
    *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   *
+   * A04 核心操作包源码解读
+   * 核心操作包是 MyBatis 进行数据库查询和对象关系映射等工作的包
+    * 改包中的类完成参数解析，数据库查询，结果映射等主要功能，再主要功能的执行过程中，还会涉及到缓存，懒加载，鉴别器处理，自增主键，插件支持等众多功能
     *
     *
+    * 18 jdbc包
+    *  比较独立的包，是提供给用户使用的，在不需要ORM的基础时，例如DDL,可以方便我们操作数据库
     *
     *
+    * 19 cache包
+    * MyBatis 每秒可能要处理数万条数据库查询请求，而这些请求可能是重复的。缓存能够显著降低数据库查询次数，提升整个 MyBatis的性能
+    * cache包就是 MyBatis缓存能力的提供者
+    * cache包只是提供了缓存能力，不涉及具体缓存功能的使用
+    *
+    * 20 Transaction包
+    * transaction包是负责进行事务管理的包，该包内包含两个子包：jdbc子包中包含基于JDBC进行事务管理的类，managed子包中包含基于容器进行事务管理的类
+    * 使用的是工厂方法模式
+    * TransactionFactory 是工厂的顶级接口
+    * Transaction 是 事务的顶级接口
+    * 通过工厂进行得到事务，主要是进行了两类实现，
+    * 一个是JdbcTransactionFactory 和 JdbcTransaction
+    * 一类是ManagedTransactionFactory 和 ManagedTransaction
+    *
+    * 21 Cursor包
+    * 游标，主要是针对大数据量的处理，如果数据量太大加载到内存需要太多内存的时候，使用游标进行处理
+    *
+    * 22 executor 包
+    * 执行器包,作为 MyBatis 的核心将其他各个包凝聚在了一起。在该包的工作中，会调用配置解析包解析出的配置信息，会依赖基础包中提供的基础功能。
+    * 最终，executor包将所有的操作串接在了一起，通过 session包向外暴露出一套完整的服务
+    *
+    * 23 session包
     *
     *
+    * 24 plugin包
     *
     *
     *

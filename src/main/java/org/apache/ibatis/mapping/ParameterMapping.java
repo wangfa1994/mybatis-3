@@ -30,7 +30,7 @@ public class ParameterMapping {
   private Configuration configuration;
 
   private String property;
-  private ParameterMode mode;
+  private ParameterMode mode; // 参数类型
   private Class<?> javaType = Object.class;
   private JdbcType jdbcType;
   private Integer numericScale;

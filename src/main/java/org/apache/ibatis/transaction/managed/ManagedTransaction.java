@@ -25,7 +25,7 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 
-/**
+/** 容器事务 ，ManagedTransaction 容器事务什么也不做，会把相关动作转接给我们的容器进行处理
  * {@link Transaction} that lets the container manage the full lifecycle of the transaction. Delays connection retrieval
  * until getConnection() is called. Ignores all commit or rollback requests. By default, it closes the connection but
  * can be configured not to do it.

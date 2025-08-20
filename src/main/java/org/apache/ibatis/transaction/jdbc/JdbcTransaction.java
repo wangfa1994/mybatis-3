@@ -39,8 +39,8 @@ public class JdbcTransaction implements Transaction {
 
   private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
-  protected Connection connection; // 连接器，在原始中，通过Manager.getConnection()获得到我们的链接
-  protected DataSource dataSource; // 从我们的dataSource数据源中进行得到Connection
+  protected Connection connection; // 数据库链接
+  protected DataSource dataSource; // 数据源 从我们的dataSource数据源中进行得到Connection
   protected TransactionIsolationLevel level; // 事务隔离级别
   protected boolean autoCommit; // 是否是自定提交
   protected boolean skipSetAutoCommitOnClose;
@@ -71,11 +71,11 @@ public class JdbcTransaction implements Transaction {
 
   @Override
   public void commit() throws SQLException {
-    if (connection != null && !connection.getAutoCommit()) {
+    if (connection != null && !connection.getAutoCommit()) { // 链接存在，且不存在自动提交
       if (log.isDebugEnabled()) {
         log.debug("Committing JDBC Connection [" + connection + "]");
       }
-      connection.commit();
+      connection.commit(); // 那就进行手动提交
     }
   }
 
@@ -146,7 +146,7 @@ public class JdbcTransaction implements Transaction {
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());
     }
-    setDesiredAutoCommit(autoCommit);
+    setDesiredAutoCommit(autoCommit); // 设置自动提交规则
   }
 
   @Override

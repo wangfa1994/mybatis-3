@@ -11,14 +11,38 @@ import java.io.InputStream;
 
 public class A04CacheTest {
 
+
   public static void main(String[] args) throws IOException {
-    findById();
+    findByIdForFirst();
+   //findByIdForSecond();
   }
 
 
+  public static void findByIdForSecond() throws IOException {
+    InputStream resourceAsStream = null;
 
-  public static void findById() throws IOException {
-    InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a04/sqlMapConfig.xml");
+    String secondCache = "sourceCode/a04/second/SecondSqlMapConfig.xml"; //二级缓存
+    resourceAsStream = Resources.getResourceAsStream(secondCache);
+    SqlSessionFactory  sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);  // 返回的是 DefaultSqlSessionFactory 主要类
+    // 二级缓存新开session
+    SqlSession sqlSessionNew = sqlSessionFactory.openSession();
+    User userNew =  sqlSessionNew.selectOne("user.findById", 1);
+    System.out.println("newUser:"+userNew);
+    sqlSessionNew.commit(); // 事务提交的情况下，才会进行二级缓存的存放 ,close() 也会触发二级缓存的提交
+
+    SqlSession sqlSessionSecond = sqlSessionFactory.openSession();
+    User userSecond =  sqlSessionSecond.selectOne("user.findById", 1);
+    System.out.println("newUser:"+userSecond);
+    System.out.println(userNew ==userSecond);
+  }
+
+  public static void findByIdForFirst() throws IOException {
+
+    InputStream resourceAsStream = null;
+
+    String firstCache = "sourceCode/a04/sqlMapConfig.xml"; //一级缓存
+
+    resourceAsStream = Resources.getResourceAsStream(firstCache);
     SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);  // 返回的是 DefaultSqlSessionFactory 主要类
     SqlSession sqlSession = sqlSessionFactory.openSession(); //DefaultSqlSession 主要类，sql
     // 通过sql
@@ -26,12 +50,10 @@ public class A04CacheTest {
     System.out.println(user);
 
     User user1 = (User)sqlSession.selectOne("user.findById", 1);
+    System.out.println(user1);
 
-    sqlSession.commit(); // 事务提交的情况下，才会进行二级缓存的存放 ,close() 也会触发二级缓存的提交
+    System.out.println(user == user1);
 
-    // 二级缓存新开session
-    SqlSession sqlSessionNew = sqlSessionFactory.openSession();
-    User userNew =  sqlSessionNew.selectOne("user.findById", 1);
 
     /**
      * 缓存的使用：

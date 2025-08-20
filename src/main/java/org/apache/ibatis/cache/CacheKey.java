@@ -22,7 +22,7 @@ import java.util.StringJoiner;
 
 import org.apache.ibatis.reflection.ArrayUtil;
 
-/**
+/** 缓存键，将缓存的键进行了封装，
  * @author Clinton Begin
  */
 public class CacheKey implements Cloneable, Serializable {
@@ -47,13 +47,13 @@ public class CacheKey implements Cloneable, Serializable {
   private static final int DEFAULT_MULTIPLIER = 37;
   private static final int DEFAULT_HASHCODE = 17;
 
-  private final int multiplier;
-  private int hashcode;
-  private long checksum;
-  private int count;
+  private final int multiplier; //乘数，用来计算hashCode时使用
+  private int hashcode; //哈希值，整个CacheKey的哈希值，如果两个CacheKey的值不同，则一定不同
+  private long checksum; // 求和校验值，整个CacheKey的求和校验值，如果两个CacheKey的值不同，则一定不同
+  private int count; //更新次数，整个CacheKey的更新次数
   // 8/21/2017 - Sonarlint flags this as needing to be marked transient. While true if content is not serializable, this
   // is not always true and thus should not be marked transient.
-  private List<Object> updateList;
+  private List<Object> updateList; // 更新历史
 
   public CacheKey() {
     this.hashcode = DEFAULT_HASHCODE;
@@ -70,7 +70,7 @@ public class CacheKey implements Cloneable, Serializable {
   public int getUpdateCount() {
     return updateList.size();
   }
-
+  //每一次的update操作都会引发count,checksum,hashcode值的变化，并把更新值放入updateList
   public void update(Object object) {
     int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);
 
@@ -88,23 +88,23 @@ public class CacheKey implements Cloneable, Serializable {
       update(o);
     }
   }
-
+  // 进行CacheKey的比较
   @Override
   public boolean equals(Object object) {
-    if (this == object) {
+    if (this == object) { //地址相同肯定是一个对象
       return true;
     }
-    if (!(object instanceof CacheKey)) {
+    if (!(object instanceof CacheKey)) { // 如果入参都不是CacheKey，肯定不同
       return false;
     }
 
-    final CacheKey cacheKey = (CacheKey) object;
+    final CacheKey cacheKey = (CacheKey) object; // 转换类型，依次比较 hashcode，checksum，count
 
     if ((hashcode != cacheKey.hashcode) || (checksum != cacheKey.checksum) || (count != cacheKey.count)) {
       return false;
     }
-
-    for (int i = 0; i < updateList.size(); i++) {
+    // 通过 count、checksum、hashcode这三个值实现了快速比较，而通过 updateList值又确保了不会发生碰撞
+    for (int i = 0; i < updateList.size(); i++) { // 再详细比较历史记录中的每一次变更
       Object thisObject = updateList.get(i);
       Object thatObject = cacheKey.updateList.get(i);
       if (!ArrayUtil.equals(thisObject, thatObject)) {

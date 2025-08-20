@@ -32,15 +32,15 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
-/**
+/** 装饰器类
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class CachingExecutor implements Executor {
 
-  private final Executor delegate; // 装饰SimpleExecutor 代理？
-  private final TransactionalCacheManager tcm = new TransactionalCacheManager(); // 二级缓存进行的缓存管理，存储，获取等操作
-
+  private final Executor delegate; // 装饰SimpleExecutor ，通过装饰实际的执行器进行增加二级缓存功能
+  private final TransactionalCacheManager tcm = new TransactionalCacheManager(); //事务缓存管理器
+  // 事务不仅可以代指封装在一起的多条语句，也可以用来代指一条普通的语句,
   public CachingExecutor(Executor delegate) {
     this.delegate = delegate;
     delegate.setExecutorWrapper(this);
@@ -93,20 +93,20 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler,
       CacheKey key, BoundSql boundSql) throws SQLException {
-    Cache cache = ms.getCache(); // MapperedStatement中的缓存策略是否存在，这个是二级缓存的mapper级别的 ，如果我们配置了对应的二级缓存配置，这里则会获取对应的值，策略存在的情况下，才会进行二级缓存逻辑
-    if (cache != null) {// 二级缓存逻辑
-      flushCacheIfRequired(ms);
-      if (ms.isUseCache() && resultHandler == null) {
-        ensureNoOutParams(ms, boundSql);
+    Cache cache = ms.getCache(); // 获得到MappedStatement中的二级缓存，如果我们配置了对应的二级缓存配置，这里则会获取对应的值，策略存在的情况下，才会进行二级缓存逻辑
+    if (cache != null) {// 如果我们的映射文件中没有配置cache标签的话，则不会存在值
+      flushCacheIfRequired(ms); // 执行前，根据配置判断是否需要清除二级缓存，如果需要的话，进行清除
+      if (ms.isUseCache() && resultHandler == null) { // 使用缓存且没有输出结果处理器
+        ensureNoOutParams(ms, boundSql); // 二级缓存不支持含有输出参数CALLABLE语句，在这里进行判断
         @SuppressWarnings("unchecked")
-        List<E> list = (List<E>) tcm.getObject(cache, key); // 一级缓存二级缓存共用同一个缓存，但是会走到不同的分支中
-        if (list == null) {
-          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql); // 二级缓存下，一级缓存也不会失效，查询之后会进行存储的
-          tcm.putObject(cache, key, list); // issue #578 and #116 将我们的二级缓存进行存放
+        List<E> list = (List<E>) tcm.getObject(cache, key); // 从缓存中读取结果
+        if (list == null) { // 缓存中没有结果
+          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql); // 交给被包装的执行器进行执行
+          tcm.putObject(cache, key, list); // issue #578 and #116 将我们的执行器返回的结构进行缓存
         }
         return list;
       }
-    } // 缓存不等于null的情况下使用缓存,否则的话通过delegate进行委派执行
+    } // 缓存不等于null的情况下使用缓存,否则的话通过delegate进行包装的执行器进行执行查询
     return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -167,8 +167,8 @@ public class CachingExecutor implements Executor {
 
   private void flushCacheIfRequired(MappedStatement ms) {
     Cache cache = ms.getCache();
-    if (cache != null && ms.isFlushCacheRequired()) {
-      tcm.clear(cache);
+    if (cache != null && ms.isFlushCacheRequired()) { // 先判断映射文件中是否配置了cache标签，再进行判断sql片段中是否存在flushCache属性
+      tcm.clear(cache);// 如果是需要的话，则通过事务缓存管理器进行清空事务中所有的缓存
     }
   }
 

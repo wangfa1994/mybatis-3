@@ -18,15 +18,15 @@ package org.apache.ibatis.executor.parameter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-/**
+/** 参数赋值接口
  * A parameter handler sets the parameters of the {@code PreparedStatement}.
  *
  * @author Clinton Begin
  */
 public interface ParameterHandler {
 
-  Object getParameterObject();
+  Object getParameterObject(); // 用来获取sql语句对应的实际参数对象 在callableStatementHand中使用
 
-  void setParameters(PreparedStatement ps) throws SQLException;
+  void setParameters(PreparedStatement ps) throws SQLException; // 用来完成sql语句对应的变量赋值
 
 }

@@ -33,7 +33,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/**
+/** BaseStatementHandler 作为三个实现类的父类，提供了实现类的公共方法。并且BaseStatementHandler类使用的模板模式在 prepare方法中定义了整个方法的框架，然后将一些与子类相关的操作交给其三个子类处理
  * @author Clinton Begin
  */
 public abstract class BaseStatementHandler implements StatementHandler {
@@ -67,7 +67,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
     this.boundSql = boundSql;
 
-    this.parameterHandler = configuration.newParameterHandler(mappedStatement, parameterObject, boundSql);
+    this.parameterHandler = configuration.newParameterHandler(mappedStatement, parameterObject, boundSql); // 在创建parameterHandler的时候会添加我们的插件
     this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler,
         resultHandler, boundSql);
   }
@@ -99,7 +99,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
       throw new ExecutorException("Error preparing statement.  Cause: " + e, e);
     }
   }
-   //这个抽象方法为什么定义在了BaseStatementHandler中？
+   //这个抽象方法为什么定义在了BaseStatementHandler中？ 模板方法，子类实现
   protected abstract Statement instantiateStatement(Connection connection) throws SQLException;
 
   protected void setStatementTimeout(Statement stmt, Integer transactionTimeout) throws SQLException {

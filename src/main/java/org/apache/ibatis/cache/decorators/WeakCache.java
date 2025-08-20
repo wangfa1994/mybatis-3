@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ibatis.cache.Cache;
 
-/**
+/** 清理缓存器：针对缓存增加了清理策略,将缓存数据包装成弱引用的数据,从而使得JVM可以清理掉缓存数据
  * Weak Reference cache decorator.
  * <p>
  * Thanks to Dr. Heinz Kabutz for his guidance here.
@@ -31,10 +31,10 @@ import org.apache.ibatis.cache.Cache;
  * @author Clinton Begin
  */
 public class WeakCache implements Cache {
-  private final Deque<Object> hardLinksToAvoidGarbageCollection;
-  private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
-  private final Cache delegate;
-  private int numberOfHardLinks;
+  private final Deque<Object> hardLinksToAvoidGarbageCollection; // 强引用的对象列表
+  private final ReferenceQueue<Object> queueOfGarbageCollectedEntries; // 弱引用的对象列表
+  private final Cache delegate; //被装饰的对象
+  private int numberOfHardLinks; // 强引用的数量限制
   private final ReentrantLock lock = new ReentrantLock();
 
   public WeakCache(Cache delegate) {
@@ -62,7 +62,7 @@ public class WeakCache implements Cache {
   @Override
   public void putObject(Object key, Object value) {
     removeGarbageCollectedItems();
-    delegate.putObject(key, new WeakEntry(key, value, queueOfGarbageCollectedEntries));
+    delegate.putObject(key, new WeakEntry(key, value, queueOfGarbageCollectedEntries)); // 放入的时候，包装成了一个内部类对象
   }
 
   @Override
@@ -70,16 +70,16 @@ public class WeakCache implements Cache {
     Object result = null;
     @SuppressWarnings("unchecked") // assumed delegate cache is totally managed by this cache
     WeakReference<Object> weakReference = (WeakReference<Object>) delegate.getObject(key);
-    if (weakReference != null) {
+    if (weakReference != null) { // 得到弱引用
       result = weakReference.get();
-      if (result == null) {
+      if (result == null) { // 弱引用中的值为空，直接移除掉
         delegate.removeObject(key);
       } else {
-        lock.lock();
+        lock.lock(); // 进行加锁，将弱引用的对象加入到强引用列表中
         try {
           hardLinksToAvoidGarbageCollection.addFirst(result);
-          if (hardLinksToAvoidGarbageCollection.size() > numberOfHardLinks) {
-            hardLinksToAvoidGarbageCollection.removeLast();
+          if (hardLinksToAvoidGarbageCollection.size() > numberOfHardLinks) {// 如果强引用的对象数目超出了限制
+            hardLinksToAvoidGarbageCollection.removeLast();// 从强引用的列表中删除该数据
           }
         } finally {
           lock.unlock();
@@ -109,9 +109,9 @@ public class WeakCache implements Cache {
     delegate.clear();
   }
 
-  private void removeGarbageCollectedItems() {
+  private void removeGarbageCollectedItems() { // 清理垃圾回收队列中的元素
     WeakEntry sv;
-    while ((sv = (WeakEntry) queueOfGarbageCollectedEntries.poll()) != null) {
+    while ((sv = (WeakEntry) queueOfGarbageCollectedEntries.poll()) != null) {//处理垃圾回收队列中的数据，从队列中取出来，进行移除
       delegate.removeObject(sv.key);
     }
   }
@@ -120,7 +120,7 @@ public class WeakCache implements Cache {
     private final Object key;
 
     private WeakEntry(Object key, Object value, ReferenceQueue<Object> garbageCollectionQueue) {
-      super(value, garbageCollectionQueue);
+      super(value, garbageCollectionQueue); // 传递进去的garbageCollectionQueue队列，当进行回收的时候，会放入到队列中
       this.key = key;
     }
   }

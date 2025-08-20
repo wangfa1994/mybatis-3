@@ -18,17 +18,17 @@ package org.apache.ibatis.transaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**  包装数据库连接。处理连接生命周期，包括：连接的创建、准备、提交回滚和关闭。
+/**  包装数据库连接。数据库的链接主要是处理连接生命周期，包括：连接的创建、准备、提交回滚和关闭。此接口进行再次包装，形成属于mybatis的事务包装
  * Wraps a database connection. Handles the connection lifecycle that comprises: its creation, preparation,
  * commit/rollback and close.
- *
+ * Transaction 是所有事务的接口
  * @author Clinton Begin
  */
 public interface Transaction {
 
   /**
    * Retrieve inner database connection.
-   *
+   * 获取到 该事务 对应的数据库链接
    * @return DataBase connection
    *
    * @throws SQLException
@@ -36,7 +36,7 @@ public interface Transaction {
    */
   Connection getConnection() throws SQLException;
 
-  /**
+  /** 事务的提交
    * Commit inner database connection.
    *
    * @throws SQLException

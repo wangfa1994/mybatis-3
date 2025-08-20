@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 package org.apache.ibatis.reflection;
-// 创建Reflector对象的工厂， 传递一个Class ,获得此Class对象的Reflect对象，
+// 创建Reflector对象的工厂， 传递一个Class ,获得此Class对象的Reflector对象，
 public interface ReflectorFactory {
   // 是否允许缓存
   boolean isClassCacheEnabled();

@@ -17,17 +17,17 @@ package org.apache.ibatis.plugin;
 
 import java.util.Properties;
 
-/**
+/** 拦截器接口规范
  * @author Clinton Begin
  */
 public interface Interceptor {
-
+  //拦截器类必须实现该方法。拦截器拦截到目标方法时，会将操作转接到该 intercept 方法上，其中的参数 Invocation 为拦截到的目标方法
   Object intercept(Invocation invocation) throws Throwable;
-
+  // 输出一个对象来替换输入参数传入的目标对象
   default Object plugin(Object target) {
     return Plugin.wrap(target, this);
   }
-
+  // 为拦截器设置属性，在进行解析的时候，通过反射得到对象之后就直接进行回调赋值了
   default void setProperties(Properties properties) {
     // NOP
   }

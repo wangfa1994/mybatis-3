@@ -19,15 +19,15 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
-/**
+/** 为缓存增加日志统计的功能，而需要统计的数据主要是缓存命中率。所谓缓存命中率是指在多次访问缓存的过程中能够在缓存中查询到数据的比率
  * @author Clinton Begin
  */
 public class LoggingCache implements Cache {
 
   private final Log log;
   private final Cache delegate;
-  protected int requests;
-  protected int hits;
+  protected int requests; // 请求缓存
+  protected int hits; // 命中次数
 
   public LoggingCache(Cache delegate) {
     this.delegate = delegate;

@@ -32,16 +32,17 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/**
+/** SqlRunner类是 MyBatis提供的可以直接执行 SQL语句的工具类。
+ * SqlRunner类能接受 SQL语句和参数，然后执行数据库操作。不过，SqlRunner并不能完成对象和 SQL参数的映射、SQL结果和对象的映射等复杂的操作
  * @author Clinton Begin
  */
 public class SqlRunner {
 
   public static final int NO_GENERATED_KEY = Integer.MIN_VALUE + 1001;
 
-  private final Connection connection;
-  private final TypeHandlerRegistry typeHandlerRegistry;
-  private boolean useGeneratedKeySupport;
+  private final Connection connection; // 链接
+  private final TypeHandlerRegistry typeHandlerRegistry; //类型注册器
+  private boolean useGeneratedKeySupport; // 是否支持自增键
 
   public SqlRunner(Connection connection) {
     this.connection = connection;
@@ -88,9 +89,9 @@ public class SqlRunner {
    */
   public List<Map<String, Object>> selectAll(String sql, Object... args) throws SQLException {
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
-      setParameters(ps, args);
-      try (ResultSet rs = ps.executeQuery()) {
-        return getResults(rs);
+      setParameters(ps, args); // 进行参数设置
+      try (ResultSet rs = ps.executeQuery()) { // 得到结果
+        return getResults(rs); //进行结果处理， 这个还是处理的基本类型，并没有进行映射到我们的自定义的包装对象上
       }
     }
   }
@@ -211,21 +212,21 @@ public class SqlRunner {
       // ignore
     }
   }
-
+  // 参数设置
   private void setParameters(PreparedStatement ps, Object... args) throws SQLException {
-    for (int i = 0, n = args.length; i < n; i++) {
-      if (args[i] == null) {
+    for (int i = 0, n = args.length; i < n; i++) { // 循环参数列表进行设置
+      if (args[i] == null) { // 如果参数设置了null，直接抛出异常
         throw new SQLException(
             "SqlRunner requires an instance of Null to represent typed null values for JDBC compatibility");
       }
-      if (args[i] instanceof Null) {
-        ((Null) args[i]).getTypeHandler().setParameter(ps, i + 1, null, ((Null) args[i]).getJdbcType());
+      if (args[i] instanceof Null) { //参数是Null 枚举类型
+        ((Null) args[i]).getTypeHandler().setParameter(ps, i + 1, null, ((Null) args[i]).getJdbcType()); // 设置参数为null
       } else {
         TypeHandler typeHandler = typeHandlerRegistry.getTypeHandler(args[i].getClass());
         if (typeHandler == null) {
           throw new SQLException("SqlRunner could not find a TypeHandler instance for " + args[i].getClass());
         } else {
-          typeHandler.setParameter(ps, i + 1, args[i], null);
+          typeHandler.setParameter(ps, i + 1, args[i], null); // 设置参数为正确的值，并且不指定jdbc类型，为什么不指定jdbc类型呢？
         }
       }
     }
@@ -233,25 +234,25 @@ public class SqlRunner {
 
   private List<Map<String, Object>> getResults(ResultSet rs) throws SQLException {
     List<Map<String, Object>> list = new ArrayList<>();
-    List<String> columns = new ArrayList<>();
-    List<TypeHandler<?>> typeHandlers = new ArrayList<>();
-    ResultSetMetaData rsmd = rs.getMetaData();
+    List<String> columns = new ArrayList<>(); // 字段列表集合
+    List<TypeHandler<?>> typeHandlers = new ArrayList<>(); //得到类型处理器列表，开始准备处理
+    ResultSetMetaData rsmd = rs.getMetaData(); // 从ResultSet中得到对应的返回元信息
     for (int i = 0, n = rsmd.getColumnCount(); i < n; i++) {
-      columns.add(rsmd.getColumnLabel(i + 1));
+      columns.add(rsmd.getColumnLabel(i + 1)); // 返回的字段列表集合
       try {
-        Class<?> type = Resources.classForName(rsmd.getColumnClassName(i + 1));
-        TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(type);
+        Class<?> type = Resources.classForName(rsmd.getColumnClassName(i + 1)); // 映射到我们的java类型
+        TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(type); // 得到我们的Java类型处理器
         if (typeHandler == null) {
-          typeHandler = typeHandlerRegistry.getTypeHandler(Object.class);
+          typeHandler = typeHandlerRegistry.getTypeHandler(Object.class); //
         }
         typeHandlers.add(typeHandler);
       } catch (Exception e) {
         typeHandlers.add(typeHandlerRegistry.getTypeHandler(Object.class));
       }
     }
-    while (rs.next()) {
+    while (rs.next()) { // 字段列表，类型处理器都得到之后，开始进行处理
       Map<String, Object> row = new HashMap<>();
-      for (int i = 0, n = columns.size(); i < n; i++) {
+      for (int i = 0, n = columns.size(); i < n; i++) { // 循环字段列表，进行得到Java类型
         String name = columns.get(i);
         TypeHandler<?> handler = typeHandlers.get(i);
         row.put(name.toUpperCase(Locale.ENGLISH), handler.getResult(rs, name));

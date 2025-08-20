@@ -17,7 +17,7 @@ package org.apache.ibatis.cache;
 
 import java.util.concurrent.locks.ReadWriteLock;
 
-/**
+/** 缓存提供程序的SPI。
  * SPI for cache providers.
  * <p>
  * One instance of cache will be created for each namespace.
@@ -41,12 +41,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 
 public interface Cache {
 
-  /**
+  /** 获得缓存的标识符
    * @return The identifier of this cache
    */
   String getId();
 
-  /**
+  /** 向缓存写入一条数据
    * @param key
    *          Can be any object but usually it is a {@link CacheKey}
    * @param value
@@ -54,7 +54,7 @@ public interface Cache {
    */
   void putObject(Object key, Object value);
 
-  /**
+  /** 从缓存中取出一条数据
    * @param key
    *          The key
    *
@@ -62,7 +62,7 @@ public interface Cache {
    */
   Object getObject(Object key);
 
-  /**
+  /** 从缓存中移除一条数据
    * As of 3.3.0 this method is only called during a rollback for any previous value that was missing in the cache. This
    * lets any blocking cache to release the lock that may have previously put on the key. A blocking cache puts a lock
    * when a value is null and releases it when the value is back again. This way other threads will wait for the value

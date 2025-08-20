@@ -11,7 +11,17 @@ package com.wf.yeecode.a02basepackage.a06reflection.a02Decorator;
  *
  * 装饰类还有一个优点，就是可以叠加使用，即一个核心基本类可以被多个装饰类修饰，从而同时具有多个装饰类的功能
  *
+ *
  */
 public class DemoApplication {
+
+
+  public static void main(String[] args) {
+    Phone telephone = new Telephone();
+    System.out.println("正常电话接收语音："+telephone.callIn());
+
+    Phone phone = new PhoneRecordDecorator(telephone);
+    System.out.println("开启录音的接收语音"+phone.callIn());
+  }
 
 }

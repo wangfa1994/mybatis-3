@@ -22,7 +22,7 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
-/**
+/** 负责将ResultContext结果对象聚合成一个List返回 处理成我们的List集合对象
  * @author Clinton Begin
  */
 public class DefaultResultHandler implements ResultHandler<Object> {

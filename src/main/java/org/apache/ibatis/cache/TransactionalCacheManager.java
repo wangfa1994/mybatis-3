@@ -21,12 +21,12 @@ import java.util.Map;
 import org.apache.ibatis.cache.decorators.TransactionalCache;
 import org.apache.ibatis.util.MapUtil;
 
-/**
- * @author Clinton Begin
+/** 多个缓存管理器  在一个事务中，可能会涉及多个缓存，这个类就是用来管理一个事务中的多个缓存的
+ * @author Clinton Begin 会在事务提交和回滚时触发所有相关事务缓存的提交和回滚
  */
 public class TransactionalCacheManager {
 
-  private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>(); // 二级缓存存放属性
+  private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>(); // 保存了多个缓存和对应的经过缓存装饰器装饰后的缓存，管理多个缓存的映射
 
   public void clear(Cache cache) {
     getTransactionalCache(cache).clear();
@@ -42,7 +42,7 @@ public class TransactionalCacheManager {
 
   public void commit() {
     for (TransactionalCache txCache : transactionalCaches.values()) {
-      txCache.commit();
+      txCache.commit(); // 提交所有的缓存机制
     }
   }
 

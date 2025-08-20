@@ -24,7 +24,7 @@ import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 
-/**
+/** 创建{@link JdbcTransaction}实例。
  * Creates {@link JdbcTransaction} instances.
  *
  * @author Clinton Begin

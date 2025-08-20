@@ -19,12 +19,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ibatis.cache.Cache;
 
-/**
+/** 多线程 安全措施的装饰器 【多个线程同时访问一个缓存的情况】
  * @author Clinton Begin
  */
 public class SynchronizedCache implements Cache {
 
-  private final ReentrantLock lock = new ReentrantLock();
+  private final ReentrantLock lock = new ReentrantLock(); //加锁表示同步
   private final Cache delegate;
 
   public SynchronizedCache(Cache delegate) {

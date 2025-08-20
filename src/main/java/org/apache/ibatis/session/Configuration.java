@@ -99,7 +99,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /** mybatis的配置文件会被封装成 此类 Configuration
  * @author Clinton Begin
- */
+ */ //(properties?, settings?, typeAliases?, typeHandlers?, objectFactory?, objectWrapperFactory?, reflectorFactory?, plugins?, environments?, databaseIdProvider?, mappers?)
 public class Configuration {
 
   protected Environment environment; //configuraton标签中的子标签 环境标签environments
@@ -119,8 +119,8 @@ public class Configuration {
   protected boolean argNameBasedConstructorAutoMapping; // settings标签中的子标签
 
   protected String logPrefix; // settings标签中的子标签
-  protected Class<? extends Log> logImpl; //日志实现
-  protected Class<? extends VFS> vfsImpl;
+  protected Class<? extends Log> logImpl; //settings标签中的子标签日志实现类
+  protected Class<? extends VFS> vfsImpl; // settings标签中的子标签
   protected Class<?> defaultSqlProviderType; // settings标签中的子标签
   protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION; // settings标签中的子标签  一级缓存本地默认为session级别的，如果我们修改了为Statement级别的，我们则会进行清空缓存
   protected JdbcType jdbcTypeForNull = JdbcType.OTHER;  // settings标签中的子标签
@@ -133,39 +133,39 @@ public class Configuration {
   protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;  // settings标签中的子标签
   protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE; // settings标签中的子标签
 
-  protected Properties variables = new Properties(); //通过resource或者url解析出来的properties数据存放，jdbc的配置属性 配置文件的properties标签内容存放的变量
-  protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory(); // 解析我们的 reflectorFactory 标签存放值
-  protected ObjectFactory objectFactory = new DefaultObjectFactory(); // 解析出来我们的objectFactory标签存放的值，用来创建我们的对象
-  protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory(); // 解析出来我们的ObjectWrapperFactory标签存放值
+  protected Properties variables = new Properties(); //properties标签节点信息 通过resource或者url解析出来的properties数据存放，jdbc的配置属性 配置文件的properties标签内容存放的变量
+  protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory(); // 解析我们的 reflectorFactory 标签存放值 反射工厂
+  protected ObjectFactory objectFactory = new DefaultObjectFactory(); // 解析出来我们的objectFactory标签存放的值，用来创建我们的对象  对象工厂
+  protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory(); // 解析出来我们的ObjectWrapperFactory标签存放值 对象包装工厂
 
-  protected boolean lazyLoadingEnabled; // settings标签中的子标签
+  protected boolean lazyLoadingEnabled; // settings标签中的子标签 是否启用懒加载
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL  settings标签中的子标签 代理工厂，这个代理工厂在哪里使用了呢？ 这个好像没用
 
-  protected String databaseId; // configuration标签中的子标签
+  protected String databaseId; // configuration标签中的子标签 数据库编号
   /**
    * Configuration factory class. Used to create Configuration for loading deserialized unread properties.
    *
    * @see <a href='https://github.com/mybatis/old-google-code-issues/issues/300'>Issue 300 (google code)</a>
    */
-  protected Class<?> configurationFactory; // settings标签中的子标签
+  protected Class<?> configurationFactory; // settings标签中的子标签 配置工厂，用来创建用于加载反序列的未读属性的配置
 
-  protected final MapperRegistry mapperRegistry = new MapperRegistry(this); //configuration标签下的子标签  mapperRegistry注册器， 里面封装了我们对应的MapperProxyFactory,当我们的mapper资源通过package进行引入的话，会进行这个对象的赋值
-  protected final InterceptorChain interceptorChain = new InterceptorChain(); // 存放我们的插件链，解析的plugin标签会被封装到这里
-  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this); // configuration标签下的子标签，类型解析器 ，// settings标签中的子标签的结果会被放置到这个对象中的 defaultEnumTypeHandler
-  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，configuration对象和TypeAliasRegistry对象初始化的时候进行了内部别名的定义， 还有我们自定义通过typeAliases标签进行定义的，用于简化我们的sql片段
-  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); //sql的语言驱动器的注册器，用来管理我们的LanguageDriver，则用来解析我们的sql
-  // mappedStatements 用来存放我们的命名空间+id 唯一的值，这个是操作数据库语句的唯一编号,StrictMap,key 不能被覆盖的map
+  protected final MapperRegistry mapperRegistry = new MapperRegistry(this); //configuration标签下的子标签  mapperRegistry注册器， 里面封装了我们对应的MapperProxyFactory,当我们的mapper资源通过package进行引入的话，会进行这个对象的赋值 映射注册表
+  protected final InterceptorChain interceptorChain = new InterceptorChain(); // 存放我们的插件链，解析的plugin标签会被封装到这里 连接器链，用来支持插件的插入
+  protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this); // configuration标签下的子标签，类型解析器 ，// settings标签中的子标签的结果会被放置到这个对象中的 defaultEnumTypeHandler //类型处理器注册表
+  protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry(); // 别名注册器，configuration对象和TypeAliasRegistry对象初始化的时候进行了内部别名的定义， 还有我们自定义通过typeAliases标签进行定义的，用于简化我们的sql片段 //类型别名注册表
+  protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); //sql的语言驱动器的注册器，用来管理我们的LanguageDriver，则用来解析我们的sql //语言驱动注册表
+  // mappedStatements 用来存放我们的命名空间+id 唯一的值，这个是操作数据库语句的唯一编号,StrictMap,key 不能被覆盖的map // 映射的数据库操作语句
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>(
       "Mapped Statements collection")
           .conflictMessageProducer((savedValue, targetValue) -> ". please check " + savedValue.getResource() + " and "
               + targetValue.getResource()); // mapper文件中的增删改查标签解析出来的对象存放处
-  protected final Map<String, Cache> caches = new StrictMap<>("Caches collection"); // 解析mapper下中的cache标签  如果开启了二级缓存，各个mapper下的缓存策略
-  protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection"); // mapper文件中的resultMap标签的解析存放值
-  protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection"); // mapper文件中的parameterMap标签的解析存放值,每一个
-  protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection"); //statement类型语句对应的KeyGenerator,在解析增删改查语句的时候会进行放置
+  protected final Map<String, Cache> caches = new StrictMap<>("Caches collection"); // 解析mapper下中的cache标签  如果开启了二级缓存，各个mapper下的缓存策略 //缓存
+  protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection"); // mapper文件中的resultMap标签的解析存放值 //结果映射
+  protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection"); // mapper文件中的parameterMap标签的解析存放值,每一个 //参数映射
+  protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection"); //statement类型语句对应的KeyGenerator,在解析增删改查语句的时候会进行放置 // 主键生成器
 
-  protected final Set<String> loadedResources = new HashSet<>(); // 已经处理过的资源集合
-  protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers"); // mapper文件中标签sql片段的存储，在创建xmlMapperBuilder的时候进行传递
+  protected final Set<String> loadedResources = new HashSet<>(); // 已经处理过的资源集合 //载入的资源 如映射文件资源
+  protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers"); // mapper文件中标签sql片段的存储，在创建xmlMapperBuilder的时候进行传递 sql节点
   protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>(); // 存放暂时性错误的结点
   protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>(); // mapper文件中的标签cache-ref 存放 这个存在异常的时候放值
   protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>(); // 暂时性存放临时性的错误的结点，因为可能存在依赖关系，而依赖关系的结点还没有处理
@@ -180,7 +180,7 @@ public class Configuration {
    * A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and
    * the value is the namespace which the actual cache is bound to.
    */
-  protected final Map<String, String> cacheRefMap = new HashMap<>(); // mapper文件中的标签cache-ref 存放
+  protected final Map<String, String> cacheRefMap = new HashMap<>(); // mapper文件中的标签cache-ref 存放 //用来存储跨namespace的缓存共享设置
 
   public Configuration(Environment environment) {
     this();
@@ -711,7 +711,7 @@ public class Configuration {
       BoundSql boundSql) {
     ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement,
         parameterObject, boundSql);
-    return (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
+    return (ParameterHandler) interceptorChain.pluginAll(parameterHandler); // 在创建ParameterHandler的时候进行拦截器的添加
   }
 
   public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds,
@@ -735,17 +735,17 @@ public class Configuration {
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) { // 创建我们的执行器，最后用于执行我们的sql相关
     executorType = executorType == null ? defaultExecutorType : executorType;
     Executor executor;
-    if (ExecutorType.BATCH == executorType) {
+    if (ExecutorType.BATCH == executorType) { // 根据数据库的操作类型来创建实际的执行器
       executor = new BatchExecutor(this, transaction);
     } else if (ExecutorType.REUSE == executorType) {
       executor = new ReuseExecutor(this, transaction);
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
-    if (cacheEnabled) {
+    if (cacheEnabled) { // 开启二级缓存，进行包装  默认开启二级缓存
       executor = new CachingExecutor(executor);// 如果开启了二级缓存，再进行装饰一下，先用CachingExecutor缓存处理，再用包装的executor处理
     }
-    return (Executor) interceptorChain.pluginAll(executor); // 链结构处理，需要确定是责任链吗
+    return (Executor) interceptorChain.pluginAll(executor); // 为执行器增加拦截器插件，以启用各个拦截器的功能
   }
 
   public void addKeyGenerator(String id, KeyGenerator keyGenerator) {
@@ -1157,12 +1157,12 @@ public class Configuration {
         throw new IllegalArgumentException(name + " already contains key " + key
             + (conflictMessageProducer == null ? "" : conflictMessageProducer.apply(super.get(key), value)));
       }
-      if (key.contains(".")) {
-        final String shortKey = getShortName(key);
+      if (key.contains(".")) { // 如果存在.的话，可能是全路径名称 com.wf.demo.X
+        final String shortKey = getShortName(key); //得到一个较短的名称
         if (super.get(shortKey) == null) {
           super.put(shortKey, value);
         } else {
-          super.put(shortKey, (V) new Ambiguity(shortKey));
+          super.put(shortKey, (V) new Ambiguity(shortKey));// 如果已经存在此短名的话，包装成有歧义的对象进行存储
         }
       }
       return super.put(key, value);

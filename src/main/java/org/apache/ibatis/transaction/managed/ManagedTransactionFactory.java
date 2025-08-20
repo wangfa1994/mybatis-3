@@ -26,7 +26,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
  * Creates {@link ManagedTransaction} instances.
- *
+ * 创建{@link ManagedTransaction}实例  这个会把事务委托给我们的容器，因为我们的事务实例当时候会由我们的容器进行创建托管
  * @author Clinton Begin
  *
  * @see ManagedTransaction

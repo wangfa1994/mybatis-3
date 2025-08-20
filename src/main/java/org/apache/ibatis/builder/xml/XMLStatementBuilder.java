@@ -81,20 +81,20 @@ public class XMLStatementBuilder extends BaseBuilder {
     LanguageDriver langDriver = getLanguageDriver(lang); //获取到我们的语言类型，这个在后面用于解析我们的sql
 
     // Parse selectKey after includes and remove them. 处理我们的selectKey节点，在这里会将KeyGenerator接入到Configuration.keyGenerators中
-    processSelectKeyNodes(id, parameterTypeClass, langDriver);
+    processSelectKeyNodes(id, parameterTypeClass, langDriver); // 处理selectKey节点，和自增主键相关
 
-    // Parse the SQL (pre: <selectKey> and <include> were parsed and removed) 此时的SelectKey 和 include标签都已经被解析掉了，开始进行sql的解析
+    // Parse the SQL (pre: <selectKey> and <include> were parsed and removed) 此时的SelectKey 和 include标签都已经被解析完毕并被删除，开始进行sql的解析
     KeyGenerator keyGenerator;
     String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
     keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
     if (configuration.hasKeyGenerator(keyStatementId)) { // 判断是否已经有解析好的KeyGenerator
       keyGenerator = configuration.getKeyGenerator(keyStatementId);
-    } else { // 全局或者本语句只要启动自动Key生成，则使用Key生成 useGeneratedKeys 是返回我们的主键id？？？
+    } else { // 全局或者本语句只要启动自动Key生成，则使用Key生成 useGeneratedKeys
       keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
-          configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
+          configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))//判断是使用Jdbc3KeyGenerator还是NoKeyGenerator
               ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
-    // 读取各个配置属性
+    // 读取各个配置属性，//通过我们的语言驱动器来解析我们的sql片段为sqlSource，里面会处理成我们sql可执行的语句
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass); //通过我们的语言驱动器来解析我们的sql片段为sqlSource，里面会处理成我们sql可执行的语句
     StatementType statementType = StatementType
         .valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString())); //如果没有设置的话，默认为预编译模式 prapared
@@ -121,14 +121,14 @@ public class XMLStatementBuilder extends BaseBuilder {
         parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
         keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect);
   }
-
+  // 处理selectKey节点，在这里会将KeyGenerator加到Configuration.keyGenerators中
   private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
     List<XNode> selectKeyNodes = context.evalNodes("selectKey"); // 得到我们的selectKey节点
     if (configuration.getDatabaseId() != null) {
       parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, configuration.getDatabaseId());
     }
-    parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, null);
-    removeSelectKeyNodes(selectKeyNodes);
+    parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, null);//解析
+    removeSelectKeyNodes(selectKeyNodes);//解析完成之后移除selectKey节点
   }
 
   private void parseSelectKeyNodes(String parentId, List<XNode> list, Class<?> parameterTypeClass,

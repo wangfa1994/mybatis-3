@@ -20,7 +20,7 @@ import java.sql.Statement;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 
-/**
+/** 不提供任何主键自增功能
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */

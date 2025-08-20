@@ -39,7 +39,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
-/**
+/** DefaultSqlSession 包含一个Executor属性，此类将主要的操作都交给Executor对象进行处理
  * The default implementation for {@link SqlSession}. Note that this class is not Thread-Safe.
  *
  * @author Clinton Begin
@@ -49,9 +49,9 @@ public class DefaultSqlSession implements SqlSession {
   private final Configuration configuration; //整体的配置文件
   private final Executor executor; // 方法执行器接口规范,里面放置了一个Transaction接口，这个接口里面包装了数据库操作
 
-  private final boolean autoCommit;
-  private boolean dirty;
-  private List<Cursor<?>> cursorList;
+  private final boolean autoCommit; //是否自动提交
+  private boolean dirty; // 缓存是否已经被污染
+  private List<Cursor<?>> cursorList; // 游标列表
 
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
     this.configuration = configuration;
@@ -142,14 +142,14 @@ public class DefaultSqlSession implements SqlSession {
     return this.selectList(statement, parameter, RowBounds.DEFAULT);
   }
 
-  @Override
+  @Override // 查询结果列表 [sql语句，参数对象，翻页限制条件]
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
   }
 
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
     try { //每个mappedStatement对象对应了我们设置的一个数据库操作节点，主要定义了数据库操作语句，输入/输出参数等信息
-      MappedStatement ms = configuration.getMappedStatement(statement); // 在配置文件中找到我们的mapper中得到我们的mappedStatement
+      MappedStatement ms = configuration.getMappedStatement(statement); //获得查询语句 在配置文件中找到我们的mapper中得到我们的mappedStatement
       dirty |= ms.isDirtySelect();
       return executor.query(ms, wrapCollection(parameter), rowBounds, handler);//委派给我们的Executor进行执行
     } catch (Exception e) {

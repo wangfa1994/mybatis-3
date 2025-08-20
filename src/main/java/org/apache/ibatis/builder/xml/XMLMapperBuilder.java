@@ -118,7 +118,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       cacheRefElement(context.evalNode("cache-ref"));
       cacheElement(context.evalNode("cache")); // 处理我们的二级缓存，利用了装饰者模式，如果既配置了cache-ref 又配置了cache 会怎样呢？
       parameterMapElement(context.evalNodes("/mapper/parameterMap")); //解析通用的parameterMap
-      resultMapElements(context.evalNodes("/mapper/resultMap")); // 解析
+      resultMapElements(context.evalNodes("/mapper/resultMap")); // 解析resultMap
       sqlElement(context.evalNodes("/mapper/sql")); // 这个没有放置到Configuration对象中?
       buildStatementFromContext(context.evalNodes("select|insert|update|delete")); //解析Statement语句，这个是转给XMLStatementBuilder进行解析的
     } catch (Exception e) {
