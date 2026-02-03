@@ -16,7 +16,7 @@ public class A03MappedPlaceHolderTest {
   public static void main(String[] args) throws IOException {
     findById();
 
-    //sqlInjectError();
+    sqlInjectError();
   }
 
 

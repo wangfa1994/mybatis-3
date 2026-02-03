@@ -17,7 +17,7 @@ package org.apache.ibatis.reflection.property;
 
 import java.util.Iterator;
 
-/** 属性分词器user[idx].name;
+/** 属性分词器user[idx].name;  Tokenizer分词器
  * @author Clinton Begin
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {

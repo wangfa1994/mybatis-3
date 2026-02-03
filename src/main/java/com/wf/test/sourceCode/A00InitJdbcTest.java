@@ -34,7 +34,7 @@ public class A00InitJdbcTest {
 
 
   public  void add() throws SQLException {
-    Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lagou?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true",
+    Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/mybatis3?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true",
       "root", "root");
     DataSource dataSource =new UnpooledDataSource(); dataSource.getConnection();
 
@@ -55,7 +55,7 @@ public class A00InitJdbcTest {
     // 1. 加载驱动 Driver
     //Class.forName("com.mysql.cj.jdbc.Driver");
     // 2. 获取链接 Connection
-    Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lagou?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true",
+    Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/mybatis3?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true",
       "root", "root");
 
     // 3.  创建语句 Statement
@@ -78,7 +78,7 @@ public class A00InitJdbcTest {
     // 1. 加载驱动 Driver
     //Class.forName("com.mysql.cj.jdbc.Driver");
     // 2. 获取链接 Connection
-    Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lagou?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true",
+    Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/mybatis3?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true",
       "root", "root");
 
     // 3.  创建语句 Statement
@@ -103,7 +103,7 @@ public class A00InitJdbcTest {
   public void selectWithDataSource() throws SQLException {
     // 1. 建立DataSource对象
     DataSource dataSource = new PooledDataSource("com.mysql.cj.jdbc.Driver",
-                                                 "jdbc:mysql://127.0.0.1:3306/lagou?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true"
+                                                 "jdbc:mysql://127.0.0.1:3306/mybatis3?useSSL=false&serverTimezone=Hongkong&allowPublicKeyRetrieval=true"
                                                    , "root", "root");
     // 2. 获取链接 Connection
     Connection connection = dataSource.getConnection();

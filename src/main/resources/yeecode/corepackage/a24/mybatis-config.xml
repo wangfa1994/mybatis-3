@@ -8,9 +8,9 @@
 
         <plugin interceptor="com.wf.yeecode.a04corepackage.a24plugin.custPlugin.MyPluginParameterHandler"/>
 
-        <!--<plugin interceptor="com.wf.yeecode.a04corepackage.a24plugin.custPlugin.MyPluginResultSetHandler">
-            <property name="preInfo" value="zhangSanPreInfo"/> &lt;!&ndash;可以设置拦截器参数，通过回调进行设置到拦截器类中&ndash;&gt;
-        </plugin>-->
+        <plugin interceptor="com.wf.yeecode.a04corepackage.a24plugin.custPlugin.MyPluginResultSetHandler">
+            <property name="preInfo" value="zhangSanPreInfo"/> <!--可以设置拦截器参数，通过回调进行设置到拦截器类中-->
+        </plugin>
 
     </plugins>
 

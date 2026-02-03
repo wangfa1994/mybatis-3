@@ -1,3 +1,4 @@
+-- 数据库名为  mybatis3;
 -- ----------------------------
 -- Table structure for user
 -- ----------------------------
@@ -10,11 +11,14 @@ CREATE TABLE `user` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
+
 -- ----------------------------
 -- Records of user
 -- ----------------------------
 INSERT INTO `user` VALUES ('1', 'lucy', '123', '2019-12-12');
 INSERT INTO `user` VALUES ('2', 'tom','123', '2019-12-12');
+INSERT INTO `user` VALUES ('3', '王五', '789123', '2027-12-12');
+
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (

@@ -27,7 +27,7 @@ public class A01OldMybatisTest {
     InputStream resourceAsStream = Resources.getResourceAsStream("sourceCode/a01/sqlMapConfig.xml");
     SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
     SqlSession sqlSession = sqlSessionFactory.openSession(); //DefaultSqlSession 主要类，sql
-    // 通过sql
+    // 通过sqlSession 传递statementId,从Configuration中mappedStatements得到语句进行执行
     User user = (User)sqlSession.selectOne("user.findById", 1);
     System.out.println(user);
     sqlSession.close();

@@ -26,6 +26,7 @@ public class A02MapperMybatisTest {
     SqlSession sqlSession = sqlSessionFactory.openSession();
 
     // 在最初的ibatis,我们的查询是通过nameSpace+id进行查询处理的,后来进行迭代升级面向mapper编程之后，将我们的mapper类与namespace相同，进行mapper开发
+    // 都是通过我们的sqlSession进行交互的
     IUserMapper mapper = sqlSession.getMapper(IUserMapper.class);
     User user = mapper.findById(1);
     System.out.println(user);

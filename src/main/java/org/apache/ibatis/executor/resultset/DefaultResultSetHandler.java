@@ -86,8 +86,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private final ResultHandler<?> resultHandler;
   private final BoundSql boundSql;
   private final TypeHandlerRegistry typeHandlerRegistry;
-  private final ObjectFactory objectFactory;
-  private final ReflectorFactory reflectorFactory;
+  private final ObjectFactory objectFactory; // 对象工厂
+  private final ReflectorFactory reflectorFactory; //反射工厂
 
   // nested resultmaps
   private final Map<CacheKey, Object> nestedResultObjects = new HashMap<>();

@@ -14,7 +14,7 @@ public class MyMapperProxyFactory<T> {
 
   @SuppressWarnings("unchecked")
   T createMapperProxy(){
-    T o = (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[]{mapperInterface}, new MyMapperProxy());
+    T o = (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[]{mapperInterface}, new MyMapperProxy()); //在内部进行指定代理逻辑
     return o;
   }
 }

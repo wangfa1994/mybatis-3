@@ -72,7 +72,7 @@ public class CacheKey implements Cloneable, Serializable {
   }
   //每一次的update操作都会引发count,checksum,hashcode值的变化，并把更新值放入updateList
   public void update(Object object) {
-    int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);
+    int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object); //获得hash的时候需要考虑通用的和数组，数组的需要基于内容处理
 
     count++;
     checksum += baseHashCode;

@@ -81,7 +81,7 @@ public class XMLScriptBuilder extends BaseBuilder {
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
         String data = child.getStringBody(""); //如果节点的类型是 CDATA_SECTION_NODE 或者是text类型，则获取内容
         TextSqlNode textSqlNode = new TextSqlNode(data); //封装成我们的TextSqlNode类型的sql节点
-        if (textSqlNode.isDynamic()) { // 判断是否是动态的，如果是动态的就表明这个整体节点就是动态的
+        if (textSqlNode.isDynamic()) { // 判断是否是动态的，如果是动态的就表明这个整体节点就是动态的，包括${}内容
           contents.add(textSqlNode);
           isDynamic = true;
         } else {

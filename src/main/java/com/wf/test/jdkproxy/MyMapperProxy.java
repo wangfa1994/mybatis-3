@@ -9,7 +9,7 @@ public class MyMapperProxy implements InvocationHandler {
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    System.out.println("jinrudaili");
+    System.out.println("进入代理");
     return null;
   }
 }
